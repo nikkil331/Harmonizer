@@ -1,0 +1,88 @@
+%%%%%%%%%%%%%%%%
+% Set options
+
+\newcommand{\settitle}{Senior Design Project Description}
+\newcommand{\student}{Nicole Limtiaco, Rigel Swavely}
+\newcommand{\coursename}{CIS 400}
+\newcommand{\assigndate}{\today~\currenttime}
+\newcommand{\duedate}{Monday, September 8}
+
+%%%%%%%%%%%%%%%%
+
+\documentclass[letterpaper,12pt]{article}
+\usepackage[top=1in, bottom=1in, left=1in, right=1in]{geometry}
+\usepackage{fancyvrb}
+\usepackage[protrusion=true,expansion=auto]{microtype}
+\usepackage{color}
+\usepackage[T1]{fontenc}
+%\usepackage{mathptmx}
+\usepackage{textcomp}
+\usepackage[
+  breaklinks=true,colorlinks=true,linkcolor=black,%
+  citecolor=black,urlcolor=black,bookmarks=false,bookmarksopen=false,%
+  pdfauthor={\student},%
+  pdftitle={\settitle},%
+  pdftex]{hyperref}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{multicol}
+\usepackage[us]{datetime}
+\renewcommand{\ttdefault}{cmtt}
+\def\textsb#1{{\fontseries{sb}\selectfont #1}}
+
+\newcommand{\problemsetdone}{\hfill$\Box{}$}
+
+\newcommand{\htitle}
+{
+    \vbox to 0.25in{}
+    \noindent\parbox{\textwidth}
+    {
+        \student\hfill \assigndate\newline
+        \coursename\hfill 
+        Due: \duedate \vspace*{-.5ex}\newline
+        \mbox{}\hrulefill\mbox{}
+    }
+    \vspace{8pt}
+    \begin{center}{\Large\bf{\settitle}}\end{center}
+}
+\newcommand{\handout}
+{
+    \thispagestyle{empty}
+    \markboth{}{}
+    \pagestyle{plain}
+    \htitle
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\E}{\operatorname{E}}
+\newcommand{\Var}{\operatorname{Var}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+\handout
+\setlength{\parindent}{0pt}
+
+We would like to apply a log-linear model based on those found in machine translation systems to the problem of creating a harmony for a given melody. The log-linear model will consist of two main components: the language model and the translation model. The language model will model the likelihood of a  given harmony line $H = \{h_{0}, h_{1}, ... , h_{l - 1}\}$ where $l = |H|$. We propose it use 3-grams for context and apply a penalty function $d$ to discourage large differences in notes' positions on the staff. More fomrally, the language model can be defined as:\\
+\\
+$p_{LM}(H) = \Pi_{i = 1}^{l} P[h_{i} | h_{i - 1}, h_{i - 2}, h_{i - 3}]*d(h_{i} - h_{i - 1})$\\
+\\
+The second component of our model will be the translation model, which will model the probability that a harmony $H$ is a good translation for a melody $M$. It can be defined as:\\
+\\
+$p_{TM}(M | H) = \Pi_{i = 1}^{l} P[m_{i} | h_{i}]$\\
+\\
+Putting these two components together, given a melody $M$ we would like to find a harmony $H$ s.t.\\
+\\
+$H = argmax_{H}p(H | M) = p_{TM}(M | H)p_{LM}(H)$.\\
+\\
+To simplify computation, we will actually minimize the log of the function above so that\\
+\\
+$H = argmax_{H}\ log(p_{TM}(M | H)) + log(p_{TM}(H))$\\
+$= argmax_{H}\ \sum_{i = 1}^{l} log(P[m_{i} | h_{i}]) + log(P[h_{i} | h_{i - 1}, h_{i - 2}, h_{i - 3}]) + log(d(h_{i} - h_{i - 1}))$
+\\
+The problem of melody to harmony translation is somewhat simpler than the standard problem of translating between two natural languages because there is no concept of reordering in the former problem. Based on how we have chosen to define the problem, a harmony note corresponding to some melody note will always occur in the same position as the melody note. Additionally, our harmonies and melodies will be of the same length, so no reordering or length penalties need be applied.
+
+\vfill
+
+\end{document}
