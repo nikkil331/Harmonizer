@@ -1,0 +1,1 @@
+Code to train harmonizer model that can automatically create harmonies for a given melody.
