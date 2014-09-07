@@ -64,7 +64,7 @@
 \handout
 \setlength{\parindent}{0pt}
 
-We would like to apply a log-linear model based on those found in machine translation systems to the problem of creating a harmony for a given melody. The log-linear model will consist of two main components: the language model and the translation model. The language model will model the likelihood of a  given harmony line $H = \{h_{0}, h_{1}, ... , h_{l - 1}\}$ where $l = |H|$. We propose it use 3-grams for context and apply a penalty function $d$ to discourage large differences in notes' positions on the staff. More fomrally, the language model can be defined as:\\
+We would like to apply a log-linear model based on those found in machine translation systems to the problem of creating a harmony for a given melody. The log-linear model will consist of two main components: the language model and the translation model. The language model will model the likelihood of a  given harmony line $H = \{h_{0}, h_{1}, ... , h_{l - 1}\}$ where $l = |H|$. We propose it use 3-grams for context and apply a penalty function $d$ to discourage large differences in notes' positions on the staff. More formally, the language model can be defined as:\\
 \\
 $p_{LM}(H) = \Pi_{i = 1}^{l} P[h_{i} | h_{i - 1}, h_{i - 2}, h_{i - 3}]*d(h_{i} - h_{i - 1})$\\
 \\
@@ -79,9 +79,11 @@ $H = argmax_{H}p(H | M) = p_{TM}(M | H)p_{LM}(H)$.\\
 To simplify computation, we will actually minimize the log of the function above so that\\
 \\
 $H = argmax_{H}\ log(p_{TM}(M | H)) + log(p_{TM}(H))$\\
-$= argmax_{H}\ \sum_{i = 1}^{l} log(P[m_{i} | h_{i}]) + log(P[h_{i} | h_{i - 1}, h_{i - 2}, h_{i - 3}]) + log(d(h_{i} - h_{i - 1}))$
+$= argmax_{H}\ \sum_{i = 1}^{l} log(P[m_{i} | h_{i}]) + log(P[h_{i} | h_{i - 1}, h_{i - 2}, h_{i - 3}]) + log(d(h_{i} - h_{i - 1}))$\\
 \\
-The problem of melody to harmony translation is somewhat simpler than the standard problem of translating between two natural languages because there is no concept of reordering in the former problem. Based on how we have chosen to define the problem, a harmony note corresponding to some melody note will always occur in the same position as the melody note. Additionally, our harmonies and melodies will be of the same length, so no reordering or length penalties need be applied.
+The problem of melody to harmony translation is somewhat simpler than the standard problem of translating between two natural languages because there is no concept of reordering in the former problem. Based on how we have chosen to define the problem, a harmony note corresponding to some melody note will always occur in the same position as the melody note. Additionally, our harmonies and melodies will be of the same length, so no reordering or length penalties need be applied.\\
+\\
+In order to minimize the function above, we plan to build up the potential translations $H^{j} = \{h_{0}, ... , h_{j}\}$ for $M^{j} = \{m_{0}, ... , m_{j}\}$ where $0 \leq j \leq l$ and prune the potential translations by some threshold value for each increment of $j$.\\
 
 \vfill
 
