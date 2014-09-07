@@ -7,4 +7,6 @@ harmony = stream.Stream()
 for note in vio:
 	harmony.append(note.transpose('M3'))
 
-harmony.show()
+score = stream.Score([harmony,vio])
+
+score.show()
