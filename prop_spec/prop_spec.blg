@@ -1,0 +1,49 @@
+This is BibTeX, Version 0.99d (TeX Live 2013)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: prop_spec.aux
+The style file: plain.bst
+Database file #1: prop_spec.bib
+Warning--empty journal in UAMP
+Warning--empty journal in tsang1991
+You've used 9 entries,
+            2118 wiz_defined-function locations,
+            557 strings with 5769 characters,
+and the built_in function-call counts, 3253 in all, are:
+= -- 315
+> -- 152
+< -- 3
++ -- 59
+- -- 49
+* -- 213
+:= -- 530
+add.period$ -- 31
+call.type$ -- 9
+change.case$ -- 49
+chr.to.int$ -- 0
+cite$ -- 11
+duplicate$ -- 136
+empty$ -- 262
+format.name$ -- 49
+if$ -- 704
+int.to.chr$ -- 0
+int.to.str$ -- 9
+missing$ -- 10
+newline$ -- 49
+num.names$ -- 20
+pop$ -- 64
+preamble$ -- 1
+purify$ -- 41
+quote$ -- 0
+skip$ -- 96
+stack$ -- 0
+substring$ -- 178
+swap$ -- 35
+text.length$ -- 3
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 34
+warning$ -- 2
+while$ -- 29
+width$ -- 10
+write$ -- 100
+(There were 2 warnings)
