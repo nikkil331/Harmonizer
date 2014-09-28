@@ -20,17 +20,20 @@
 % Next we write out our abstract -- generally a two paragraph maximum,
 % executive summary of the motivation and contributions of the work.
 \begin{abstract}
-  \textit{The purpose of this document is three-fold. First, it
-    describes the requirements of the project proposal. Second, it
-    presents this information in a style your proposal should
-    mimic. Third, by viewing the *.tex `code behind', some basic
-    \LaTeX{} technique can be learned. Do not feel compelled to
-    completely follow our style -- but do use it as a guide.}
+  \textit{In the past, approaches to automatic harmonization of a melody
+  have taken two forms: using rules provided by music theory or by predicting
+  the chord that plays under the note and choosing notes from the chord. This
+  attempt approaches the problem from a machine translation perspective, modeling
+  the melody of a song as the source language and each harmony as a target language.
+  By generating the harmony lines explicitly rather that generating them as a
+  consequence of the chord on each beat, we hope that the algorithm will be able to create
+  more cohesive, creative works.}
 
-  \textit{Like this `report', your proposal is expected to have an
-    abstract. An abstract is a two-paragraph maximum executive summary
-    of your work. It should briefly outline your problem statement and
-    its (expected) contributions.}
+  \textit{In order to accomplish this, we will create a translation model to represent the probability
+  of one note harmonizing with another note. Additionally, we will create a language model to represent
+  a note following a phrase of notes in the same line of music. A perplexity model will be used to 
+  evaluate the performance of our algorithm. If there is time, we hope to incorporate human evaluation
+  and data driven rhythmic variation.}
 \end{abstract}
 
 \section{Introduction}
@@ -38,8 +41,8 @@
 Many would consider music composition to be an art form that is accomplished
 primarily through human creativity. Writing music is a process that seems to require
 complex thought which fundamentally cannot be boiled down to a list of straightforward
-processes. Our project aims to answer the question, "Can computers imitate the complex
-and creative process of composing music?" We narrow the question down to the more specific
+processes. Our project aims to answer the question, ``Can computers imitate the complex
+and creative process of composing music?'' We narrow the question down to the more specific
 and well-defined problem of generating harmony lines for a given melody line. Specifically,
 we would like to create 4-part chorale settings given the first part, the melody.
 
@@ -118,57 +121,66 @@ signals as inputs to an SVM classifier, as opposed to training a Markov model.
 
 \section{Project Proposal}
 \label{sec:project_proposal}
-Now is the time to introduce your proposed project in all of its
-glory. Admittedly, this is not the easiest since you probably have not
-done much actual research yet. Even so, setting and realizing
-realistic research goals is an important skill. Begin by summarizing
-what you are going to do and the expected benefit it will bring.
+Like the more recent attempts at automatic harmonization described previously, our attempt at this problem will also
+take a data driven approach. However, instead of trying to predict the chords that fit a certain melody and generating
+the harmony based on these chords, we look at the individual lines themselves and how they have been translated into
+harmonies in the dataset. For each note $m$ in the melody line, we will predict one harmony note $h$ per voice
+based on two characteristics: the probability of $m$ being harmonized by $h$ and the probability of $h$ following the 
+previous notes in the harmony, both according to the training data.
 
 \subsection{Anticipated Approach}
 \label{subsec:approach}
-Having summarized \textit{what} you are going to do, its time to
-describe \textit{how} you plan to do it. Our factorization example
-does not work so well here (it is likely impossible to realize) -- so
-let us suppose you are going to create a service that takes a
-cell-phone picture of a building and returns via text-message, the
-name of that building\footnote{Do not use this idea -- someone did it
-  in a previous year.}.
+In order to predict the best harmony note $h$ to harmonize with a melody note $m$ and follow other notes in the harmony,
+we make an analogy to machine translation techniques. In machine translation, when attempting to translate from some source
+language $S$ to a foreign language $F$, two models are developed - a language model and a translation model.
+A language model determines for each phrase $f_1 .. f_n$ of foreign words how likely it is for some word $f$ to follow this phrase. 
+Generally, this is accomplished by using a Hidden Markov model of length $n$ trained on some foreign language data set. We can apply 
+this technique directly to our harmonizer, determining how likely it is that some note $h$ will follow a sequence of notes $h_1 .. h_n$according to the harmonies that our algorithm has trained on. More formally, our language model is defined as the following:\\
 
-In this case you might want to talk about establishing a server to
-receive pictures via MMS. Once the picture is received, you will run
-an edge extraction algorithm over it. Then, similarity between the
-submitted picture and those stored (and tagged) in a MySQL database
-will be computing using algorithm $XYZ$. Finally, the tag of the most
-similar image will be returned to the user. Do not bore the reader
-with trivial details, but give them an overview; a block-flow diagram
-would prove helpful (and is required).
+$p_{LM}(H) = \Pi_{i = 1}^{l} P[h_{i} | h_{i - 1} .. h_{i - n}]$\\
+
+Additionally, we may apply certain penalties to this model as in the case in machine translation, potentially based on distance dissonant intervals between notes. Representing this penalty as the function $d$, our new translation model becomes:\\
+
+$p_{LM}(H) = \Pi_{i = 1}^{l} P[h_{i} | h_{i - 1} .. h_{i - n}] * d(h_{i}, h_{i-1})$\\
+
+The translation model refers to how likely it is that some foreign word $f$ is
+a translation of a source word $s$. This model is created by training on a data set of alignments from source words to foreign words and cannot be a simple translation dictionary, as one source word may translate to several different foreign words depending on
+context. We again apply this concept directly to harmonization, determining the best harmony note $h$ to match a melody note $m$. Like in natural language translation, there are many possible candidate notes $h$ to match one particular note $m$, and the best one can be chosen based on context. However, harmonization is a simpler problem in that every harmony note is already aligned to its corresponding melody note based on when the notes sound, whereas in natural language, the words must be aligned to each other in a separate preprocessing step. To formalize the translation model, we have:\\
+
+$p_{TM}(M | H) = \Pi_{i = 1}^{l} P[m_{i} | h_{i}]$\\
+
+To put these two models together, given some melody line $M$ we would like to find a harmonly line $H$ such that:\\
+
+$H = argmax_{H}p(H | M) = p_{TM}(M | H)p_{LM}(H)$.\\
+
+To simplify computation, we will maximize the log of the function above so that:\\
+
+$H = argmax_{H}\ log(p_{TM}(M | H)) + log(p_{LM}(H))$\\
+
+$= argmax_{H}\ \sum_{i = 1}^{l} log(P[m_{i} | h_{i}]) + log(P[h_{i} | h_{i - 1} .. h_{i - n}]) + log(d(h_{i}, h_{i-1}))$\\
+
+In order to maximize the function above, we plan to implement a beam search by building up the potential translations $H^{j} = \{h_{0}, ... , h_{j}\}$ for $M^{j} = \{m_{0}, ... , m_{j}\}$ where $0 \leq j \leq l$ and pruning the potential translations by some threshold value for each increment of $j$.\\
 
 \subsection{Technical Challenges}
 \label{subsec:tech_challenges}
-In this subsection note where you anticipate having \underline{novel}
-difficulty. Maybe you have never setup a MySQL database or even used
-SQL before at all -- yes, that is a challenge -- but not one readers
-care about. More novel would be the fact that many buildings on Penn's
-campus look similar and your classifier may be inaccurate in such
-instances. The purpose of this section is two-fold: 1) you will think
-about which parts of your project would require the most time and
-effort and 2) you will convince the reader that this is a project
-worth undertaking.
+One foreseeable problem that we may encounter is the combination of multiple harmony lines. This is because it is possible
+for two harmonies to sound consonant with the same melody, but sound dissonant with each other. For example, given a melody note
+$m = E$, two viable candidates to harmonize might be $h_1 = C$ (both notes are in a C major triad) and $h_2 = B$ (both notes are found in an E major triad). While these both harmonize well with $m$ in some context, $h_1$ and $h_2$ in this case from a minor second interval, which is very dissonant and is less likely to be found in a well formed harmony. In order to mitigate this issue, we may alter the translation model to condition on more than one note. For example, when deciding the assignment to $h_2$, this method would take both $m = E$ and $h_1 = C$ into account, perhaps to decide on $h_2 = G$ to form a C-major triad. However, if one wished to create an $n$ part harmony, this would require $n$ translation models conditioned on $1 .. n-1$ other lines. This poses a problem both in time and space efficiency as well as sparseness of data - as models are conditioned on more and more lines, the number of unique contexts trained on increases greatly, and therefore each context is encountered in the training data less often.
+This means that differentiating between likely and unlikely contexts will become difficult without enough data to train on, and may
+limit the number of parts that can be produced well. Additionally, this means that adding the voices in different orders may affect
+the output of the algorithm, but this can be mitigated by evaluating the output of every possible ordering and choosing the best one.
 
 \subsection{Evaluation Criteria}
 \label{subsec:eval_criteria}
-Suppose you have implemented your approach and it is functioning. Now
-how are you going to convince readers your approach is better than
-what exists? In the factorization example, you could just compare
-run-times between algorithms run on the same input. The image
-recognition example might use a percentage of accurate
-classifications. Other fields may have established testing benchmarks.
+In order to evaluate our model, we will attempt to minimize its perplexity, a common metric used in natural language 
+processing. This metric calculates the probability that our algorithm would predict an existing song in our test set. The perplexity $PP$ \cite{Koehn:2010:SMT:1734086} of a probability distribution $p$ is defined over all songs $s$ in our test set as:\\
 
-No matter the case, you need to prove you have contributed to the
-field. This will be easier for some than others. In particular, those
-with `sensory' projects involving visual or sonic elements need to
-think this point through -- objective measures are always better than
-subjective ones.
+$log_2 PP = - \sum_{s} log_2 p(m_s|h_s)$\\
+
+This measure gives us a real number metric to evaluate different iterations of our algorithm. Additionally, we may have
+human evaluators compare the results of different iterations of our algorithm or compare our algorithm to existing 
+automatic harmonization systems.
+
 
 \section{Research Timeline}
 \label{sec:research_timeline}

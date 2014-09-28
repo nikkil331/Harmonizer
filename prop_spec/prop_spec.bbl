@@ -1,4 +1,4 @@
-\begin{thebibliography}{1}
+\begin{thebibliography}{10}
 
 \bibitem{UAMP}
 David Cerny, Jiten Suthar, and Israel Geselowitz.
@@ -23,6 +23,11 @@ Hermann Hild, Johannes Feulner, and Wolfram Menzel.
 L.A.J. Hiller and L.M. Isaacson.
 \newblock {\em Experimental Music: Composition with an Electronic Computer}.
 \newblock McGraw-Hill, 1959.
+
+\bibitem{Koehn:2010:SMT:1734086}
+Philipp Koehn.
+\newblock {\em Statistical Machine Translation}.
+\newblock Cambridge University Press, New York, NY, USA, 1st edition, 2010.
 
 \bibitem{doi:10.1080/09298215.2013.822000}
 Stanis\l aw~A. Raczy\'{n}ski, Satoru Fukayama, and Emmanuel Vincent.

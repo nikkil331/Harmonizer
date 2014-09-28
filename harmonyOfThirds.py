@@ -3,6 +3,7 @@ from music21 import *
 handelmovement = corpus.parse("handel/hwv56")
 vio = handelmovement[1]
 harmony = stream.Stream()
+
 keySig = vio.getKeySignatures()[0]
 harmony.append(keySig)
 scaleFromKey = scale.MajorScale(keySig.pitchAndMode[0]) 

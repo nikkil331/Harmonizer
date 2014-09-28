@@ -5,45 +5,45 @@ The style file: plain.bst
 Database file #1: prop_spec.bib
 Warning--empty journal in UAMP
 Warning--empty journal in tsang1991
-You've used 9 entries,
+You've used 10 entries,
             2118 wiz_defined-function locations,
-            557 strings with 5769 characters,
-and the built_in function-call counts, 3253 in all, are:
-= -- 315
-> -- 152
+            565 strings with 5908 characters,
+and the built_in function-call counts, 3482 in all, are:
+= -- 337
+> -- 159
 < -- 3
-+ -- 59
-- -- 49
-* -- 213
-:= -- 530
-add.period$ -- 31
-call.type$ -- 9
-change.case$ -- 49
++ -- 62
+- -- 51
+* -- 224
+:= -- 572
+add.period$ -- 34
+call.type$ -- 10
+change.case$ -- 53
 chr.to.int$ -- 0
-cite$ -- 11
-duplicate$ -- 136
-empty$ -- 262
-format.name$ -- 49
-if$ -- 704
+cite$ -- 12
+duplicate$ -- 148
+empty$ -- 284
+format.name$ -- 51
+if$ -- 753
 int.to.chr$ -- 0
-int.to.str$ -- 9
-missing$ -- 10
-newline$ -- 49
-num.names$ -- 20
-pop$ -- 64
+int.to.str$ -- 10
+missing$ -- 12
+newline$ -- 54
+num.names$ -- 22
+pop$ -- 70
 preamble$ -- 1
-purify$ -- 41
+purify$ -- 44
 quote$ -- 0
-skip$ -- 96
+skip$ -- 101
 stack$ -- 0
-substring$ -- 178
-swap$ -- 35
+substring$ -- 183
+swap$ -- 36
 text.length$ -- 3
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 34
+type$ -- 36
 warning$ -- 2
-while$ -- 29
-width$ -- 10
-write$ -- 100
+while$ -- 31
+width$ -- 12
+write$ -- 112
 (There were 2 warnings)
