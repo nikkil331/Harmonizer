@@ -1,13 +1,13 @@
 # Fdb version 3
-["bibtex prop_spec"] 1411965886 "prop_spec.aux" "prop_spec.bbl" "prop_spec" 1412009200
+["bibtex prop_spec"] 1411965886 "prop_spec.aux" "prop_spec.bbl" "prop_spec" 1412009349
   "/usr/local/texlive/2013/texmf-dist/bibtex/bst/base/plain.bst" 1292289607 20613 bd3fbfa9f64872b81ac57a0dd2ed855f ""
-  "prop_spec.aux" 1412009199 1709 5ff15dd38129aad6d55aea98ca30e5dc ""
+  "prop_spec.aux" 1412009349 1709 5ff15dd38129aad6d55aea98ca30e5dc ""
   "prop_spec.bcf" 0 -1 0 ""
   "prop_spec.bib" 1412009079 4230 909ec60a886c7e933acc9b0fc3e32213 ""
   (generated)
   "prop_spec.blg"
   "prop_spec.bbl"
-["pdflatex"] 1412009197 "prop_spec.tex" "prop_spec.pdf" "prop_spec" 1412009200
+["pdflatex"] 1412009348 "prop_spec.tex" "prop_spec.pdf" "prop_spec" 1412009349
   "/usr/local/texlive/2013/texmf-dist/tex/context/base/supp-pdf.mkii" 1337017135 71627 94eb9990bed73c364d7f53f960cc8c5b ""
   "/usr/local/texlive/2013/texmf-dist/tex/generic/oberdiek/etexcmds.sty" 1335995445 7612 c47308d923ec19888707b0f1792b326a ""
   "/usr/local/texlive/2013/texmf-dist/tex/generic/oberdiek/ifluatex.sty" 1303254447 7324 11d14f318d865f420e692d4e6c9c18c3 ""
@@ -44,9 +44,9 @@
   "/usr/local/texlive/2013/texmf-dist/tex/latex/oberdiek/kvoptions.sty" 1335995445 22417 c74ff4af6a1aa2b65d1924020edbbe11 ""
   "/usr/local/texlive/2013/texmf-dist/tex/latex/pdftex-def/pdftex.def" 1306616590 55368 3c8a0d99822330f2dfabc0dfb09ce897 ""
   "/usr/local/texlive/2013/texmf-dist/tex/latex/url/url.sty" 1264379145 21932 e3a9cf32ee9b853b42be14c2f25b873c ""
-  "prop_spec.aux" 1412009199 1709 5ff15dd38129aad6d55aea98ca30e5dc ""
+  "prop_spec.aux" 1412009349 1709 5ff15dd38129aad6d55aea98ca30e5dc ""
   "prop_spec.bbl" 1412009079 2586 afd17800034bf9691413bfa191eb8a8a "bibtex prop_spec"
-  "prop_spec.tex" 1412009190 16581 9d015d49208241d9885f5d420ad54e5e ""
+  "prop_spec.tex" 1412009339 16589 02a111534e988b4d1188e9941ef65eb4 ""
   "sig-alternate.cls" 1411658915 58016 671190e929fd2b32b46dd0fe92041a8b ""
   (generated)
   "prop_spec.aux"

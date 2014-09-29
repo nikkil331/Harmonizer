@@ -133,7 +133,7 @@ we make an analogy to machine translation techniques. In machine translation, wh
 language $S$ to a foreign language $F$, two models are developed - a language model and a translation model.
 A language model determines for each phrase $f_1 \ldots f_n$ of foreign words how likely it is for some word $f$ to follow this phrase. 
 Generally, this is accomplished by using a Markov model of length $n$ trained on some foreign language data set. We can apply 
-this technique directly to our harmonizer, determining how likely it is that some note $h$ will follow a sequence of notes $h_1 .. h_n$ according to the harmonies that our algorithm has trained on. More formally, our language model is defined as the following:\\
+this technique directly to our harmonizer, determining how likely it is that some note $h$ will follow a sequence of notes $h_1 \ldots h_n$ according to the harmonies that our algorithm has trained on. More formally, our language model is defined as the following:\\
 
 $p_{LM}(H) = \Pi_{i = 1}^{l} P[h_{i} | h_{i - 1} \ldots h_{i - n}]$\\
 
@@ -155,9 +155,9 @@ To simplify computation, we will maximize the log of the function above so that:
 
 $H = argmax_{H}\ log(p_{TM}(M | H)) + log(p_{LM}(H))$\\
 
-$= argmax_{H}\ \sum_{i = 1}^{l} log(P[m_{i} | h_{i}]) + log(P[h_{i} | h_{i - 1} .. h_{i - n}]) + log(d(h_{i}, h_{i-1}))$\\
+$= argmax_{H}\ \sum_{i = 1}^{l} log(P[m_{i} | h_{i}]) + log(P[h_{i} | h_{i - 1} \ldots h_{i - n}]) + log(d(h_{i}, h_{i-1}))$\\
 
-In order to maximize the function above, we plan to implement a beam search by building up the potential translations $H^{j} = \{h_{0}, ... , h_{j}\}$ for $M^{j} = \{m_{0}, ... , m_{j}\}$ where $0 \leq j \leq l$ and only maintaining the top $k$ solutions for each increment of $j$.\\
+In order to maximize the function above, we plan to implement a beam search by building up the potential translations $H^{j} = \{h_{0} \ldots h_{j}\}$ for $M^{j} = \{m_{0} \ldots m_{j}\}$ where $0 \leq j \leq l$ and only maintaining the top $k$ solutions for each increment of $j$.\\
 
 \subsection{Technical Challenges}
 \label{subsec:tech_challenges}

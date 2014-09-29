@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.5.30)  29 SEP 2014 12:46
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.5.30)  29 SEP 2014 12:49
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -350,6 +350,15 @@ Underfull \hbox (badness 10000) in paragraph at lines 156--157
  []
 
 
+Overfull \hbox (7.29042pt too wide) in paragraph at lines 158--159
+[]$\OT1/cmr/m/n/9 = \OML/cmm/m/it/9 argmax[]  [][] log\OT1/cmr/m/n/9 (\OML/cmm/
+m/it/9 P\OT1/cmr/m/n/9 [\OML/cmm/m/it/9 m[]\OMS/cmsy/m/n/9 j\OML/cmm/m/it/9 h[]
+\OT1/cmr/m/n/9 ]) + \OML/cmm/m/it/9 log\OT1/cmr/m/n/9 (\OML/cmm/m/it/9 P\OT1/cm
+r/m/n/9 [\OML/cmm/m/it/9 h[]\OMS/cmsy/m/n/9 j\OML/cmm/m/it/9 h[] [] h[]\OT1/cmr
+/m/n/9 ]) +
+ []
+
+
 Underfull \hbox (badness 10000) in paragraph at lines 158--159
 
  []
@@ -394,7 +403,7 @@ s/cm/cmsy9.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/public/amsfonts/
 cm/cmti9.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/urw/helvetic/uhvb8
 a.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb><
 /usr/local/texlive/2013/texmf-dist/fonts/type1/urw/times/utmb8a.pfb>
-Output written on prop_spec.pdf (3 pages, 155335 bytes).
+Output written on prop_spec.pdf (3 pages, 155284 bytes).
 PDF statistics:
  63 PDF objects out of 1000 (max. 8388607)
  45 compressed objects within 1 object stream
