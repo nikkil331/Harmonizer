@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.5.30)  29 SEP 2014 00:34
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.5.30)  29 SEP 2014 12:37
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -363,24 +363,24 @@ Underfull \hbox (badness 10000) in paragraph at lines 160--161
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [2]
-Underfull \hbox (badness 10000) in paragraph at lines 173--175
+Underfull \hbox (badness 10000) in paragraph at lines 177--179
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 176--177
+Underfull \hbox (badness 10000) in paragraph at lines 180--181
 
  []
 
 (./prop_spec.bbl) [3] (./prop_spec.aux) ) 
 Here is how much of TeX's memory you used:
- 2886 strings out of 493315
- 36881 string characters out of 6137904
- 103398 words of memory out of 5000000
- 6265 multiletter control sequences out of 15000+600000
+ 2887 strings out of 493315
+ 36901 string characters out of 6137904
+ 103402 words of memory out of 5000000
+ 6266 multiletter control sequences out of 15000+600000
  48606 words of font info for 64 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
- 41i,10n,28p,978b,246s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 41i,10n,28p,982b,246s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2013/texmf-dist/fo
 nts/enc/dvips/base/8r.enc}</usr/local/texlive/2013/texmf-dist/fonts/type1/publi
 c/amsfonts/cm/cmcsc10.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/publi
@@ -394,7 +394,7 @@ s/cm/cmsy9.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/public/amsfonts/
 cm/cmti9.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/urw/helvetic/uhvb8
 a.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb><
 /usr/local/texlive/2013/texmf-dist/fonts/type1/urw/times/utmb8a.pfb>
-Output written on prop_spec.pdf (3 pages, 154876 bytes).
+Output written on prop_spec.pdf (3 pages, 155307 bytes).
 PDF statistics:
  63 PDF objects out of 1000 (max. 8388607)
  45 compressed objects within 1 object stream

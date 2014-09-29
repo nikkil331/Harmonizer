@@ -5,6 +5,11 @@ David Cerny, Jiten Suthar, and Israel Geselowitz.
 \newblock U-amp: User input based algorithmic music platform.
 \newblock 2014.
 
+\bibitem{Cuthbert_music21:a}
+Michael~Scott Cuthbert and Christopher Ariza.
+\newblock music21: A toolkit for computer-aided musicology and symbolic music
+  data.
+
 \bibitem{Ebci̇oğlu1990145}
 Kemal Ebcio\v{g}lu.
 \newblock An expert system for harmonizing chorales in the style of j.s. bach.

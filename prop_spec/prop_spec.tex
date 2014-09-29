@@ -30,9 +30,9 @@
 
   \textit{In order to accomplish this, we will create a translation model to represent the probability
   of one note harmonizing with another note. Additionally, we will create a language model to represent
-  a note following a phrase of notes in the same line of music. A perplexity model will be used to 
+  a note following a phrase of notes in the same line of music. A perplexity metric will be used to 
   evaluate the performance of our algorithm. If there is time, we hope to incorporate human evaluation
-  and data driven arhythmic variation.}
+  and data driven rhythmic variation.}
 \end{abstract}
 
 \section{Introduction}
@@ -91,7 +91,7 @@ problem in constraint satisfaction, but with a significantly smaller amount ($\s
 The result of these constraint-based works were musically sensible; however,
 crafting the constraints such that the output is musical requires deep, human knowledge about music in general and about the style of music to be produced in particular.
 
-More recent works began to put data-driven methods into use in order to infer the rules that govern music. A simple case-based model implemented by Sabater \textit{et al.} \cite{Sabater98usingrules} was built to generate
+More recent works began to put data-driven methods into use in order to infer the patterns that govern real compositions. A simple case-based model implemented by Sabater \textit{et al.} \cite{Sabater98usingrules} was built to generate
 accompanying chords for a melody line. To a choose a harmony chord for a given context of previous
 harmony chords and the currently sounding melody note, the system would check a case base to see if any
 cases had the same harmony context and melody note and use the corresponding harmony chord if such a 
@@ -104,7 +104,7 @@ As these examples show, the previous harmony context and the melody pitch are im
 what the current harmony phrase should be. Many works have been conducted that model these signals using
 n-gram Markov Models. A Markov model assigns probabilities to some event $C_{t}$ conditioned on a limited history
 of previous events [$C_{t-1}...\\
-C_{t-(n-1)}$], implictly making the assumption that the event $C_{t}$ depends only on a 
+C_{t-n}$], implictly making the assumption that the event $C_{t}$ depends only on a 
 small amount of information about its context. For example, a system called MySong produced by Simon \textit{et al.} \cite{export:64277}
 generates chord accompaniment given a vocalized melody by using a 2-gram Markov model for the harmony
 context and a 2-gram Markov model for the melody context. A similar system implented by Scholz \textit{et al.} \cite{4959518},
@@ -157,13 +157,17 @@ $H = argmax_{H}\ log(p_{TM}(M | H)) + log(p_{LM}(H))$\\
 
 $= argmax_{H}\ \sum_{i = 1}^{l} log(P[m_{i} | h_{i}]) + log(P[h_{i} | h_{i - 1} .. h_{i - n}]) + log(d(h_{i}, h_{i-1}))$\\
 
-In order to maximize the function above, we plan to implement a beam search by building up the potential translations $H^{j} = \{h_{0}, ... , h_{j}\}$ for $M^{j} = \{m_{0}, ... , m_{j}\}$ where $0 \leq j \leq l$ and pruning the potential translations by some threshold value for each increment of $j$.\\
+In order to maximize the function above, we plan to implement a beam search by building up the potential translations $H^{j} = \{h_{0}, ... , h_{j}\}$ for $M^{j} = \{m_{0}, ... , m_{j}\}$ where $0 \leq j \leq l$ and only maintaining the top $k$ solutions for each increment of $j$.\\
 
 \subsection{Technical Challenges}
 \label{subsec:tech_challenges}
-One foreseeable problem that we may encounter is the combination of multiple harmony lines. This is because it is possible
+The initial challenge is to compile a database of music scores and to find a way to interact with
+the scores programmatically. To this end, we propose using a library developed at MIT called music21 \cite{Cuthbert_music21:a}
+which provides a simple interface for querying the library's database of musical scores.
+
+Another problem we may enounter is the combination of multiple harmony lines. This is because it is possible
 for two harmonies to sound consonant with the same melody, but sound dissonant with each other. For example, given a melody note
-$m = E$, two viable candidates to harmonize might be $h_1 = C$ and $h_2 = B$. While these both harmonize well with $m$ in some context, $h_1$ and $h_2$ in this case from a very dissonant interval which is less likely to be found in a well formed harmony. In order to mitigate this issue, we may alter the translation model to condition on more than one note. For example, when deciding the assignment to $h_2$, this method would take both $m = E$ and $h_1 = C$ into account in order to determine a value for $h_2$ which harmonizes with both. However, if one wished to create an $n$ part harmony, this would require $n - 1$ translation models conditioned on $1 .. n-1$ other lines. This poses a problem both in time and space efficiency as well as sparseness of data - as models are conditioned on more and more lines, the number of unique contexts trained on increases greatly, and therefore each context is encountered in the training data less often.
+$m = E$, two viable candidates to harmonize might be $h_1 = C$ and $h_2 = B$. While these both harmonize well with $m$ in some context, $h_1$ and $h_2$ in this case form a very dissonant interval which is less likely to be found in a well formed harmony. In order to mitigate this issue, we may alter the translation model to condition on more than one note. For example, when deciding the assignment to $h_2$, this method would take both $m = E$ and $h_1 = C$ into account in order to determine a value for $h_2$ which harmonizes with both. However, if one wished to create an $n$ part harmony, this would require $n - 1$ translation models conditioned on $1 \ldots n-1$ other lines. This poses a problem both in time and space efficiency as well as sparseness of data - as models are conditioned on more and more lines, the number of unique contexts trained on increases greatly, and therefore each context is encountered in the training data less often.
 This means that differentiating between likely and unlikely contexts will become difficult without enough data to train on, and may
 limit the number of parts that can be produced well. Additionally, this means that adding the voices in different orders may affect
 the output of the algorithm. This can be mitigated by trying every possible ordering of harmony generation and choosing the one that optimizes our performance metric.
@@ -189,8 +193,8 @@ our work along this proposed timeline.
 	\item {\sc already completed}: Preliminary reading. Experimented with musci21 library and corpus by implementing a deterministic harmony of thirds generator. Initial steps taken to train language model and translation models.\vspace{3pt}
 	\item {\sc prior-to thanksgiving} : Finish training language model and translation model. Write beam search to find solution for one harmony voice.\vspace{3pt}
 	\item {\sc prior-to christmas} : Tune beam size and n-gram size. Implement code to generate harmony voices in different orders and determine which order is best.\vspace{3pt}
-	\item {\sc completion tasks} : Verify implementation is bug-free. Complete write-up. Get humans to evaluate output.\vspace{3pt}
-	\item {\sc if there's time} : Investigate incorporating rhythm and timing decisions into the generated harmonies.
+	\item {\sc completion tasks} : Verify implementation is bug-free. Complete write-up.\vspace{3pt}
+	\item {\sc if there's time} : Investigate incorporating rhythm and timing decisions into the generated harmonies. Get humans to evaluate output.
 \end{itemize*}
 
 \bibliographystyle{plain} % Please do not change the bib-style
