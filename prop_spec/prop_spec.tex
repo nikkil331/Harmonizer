@@ -103,7 +103,7 @@ and whether or not the beat was stressed.
 As these examples show, the previous harmony context and the melody pitch are important signals in deciding
 what the current harmony phrase should be. Many works have been conducted that model these signals using
 n-gram Markov Models. A Markov model assigns probabilities to some event $C_{t}$ conditioned on a limited history
-of previous events [$C_{t-1}...\\
+of previous events [$C_{t-1}\ldots\\
 C_{t-n}$], implictly making the assumption that the event $C_{t}$ depends only on a 
 small amount of information about its context. For example, a system called MySong produced by Simon \textit{et al.} \cite{export:64277}
 generates chord accompaniment given a vocalized melody by using a 2-gram Markov model for the harmony
@@ -131,15 +131,15 @@ previous notes in the harmony, both according to the training data.
 In order to predict the best harmony note $h$ to harmonize with a melody note $m$ and follow other notes in the harmony,
 we make an analogy to machine translation techniques. In machine translation, when attempting to translate from some source
 language $S$ to a foreign language $F$, two models are developed - a language model and a translation model.
-A language model determines for each phrase $f_1 .. f_n$ of foreign words how likely it is for some word $f$ to follow this phrase. 
+A language model determines for each phrase $f_1 \ldots f_n$ of foreign words how likely it is for some word $f$ to follow this phrase. 
 Generally, this is accomplished by using a Markov model of length $n$ trained on some foreign language data set. We can apply 
 this technique directly to our harmonizer, determining how likely it is that some note $h$ will follow a sequence of notes $h_1 .. h_n$ according to the harmonies that our algorithm has trained on. More formally, our language model is defined as the following:\\
 
-$p_{LM}(H) = \Pi_{i = 1}^{l} P[h_{i} | h_{i - 1} .. h_{i - n}]$\\
+$p_{LM}(H) = \Pi_{i = 1}^{l} P[h_{i} | h_{i - 1} \ldots h_{i - n}]$\\
 
 Additionally, we may apply certain penalties to this model as in the case in machine translation, potentially based on distance or dissonant intervals between notes. Representing this penalty as the function $d$, our new translation model becomes:\\
 
-$p_{LM}(H) = \Pi_{i = 1}^{l} P[h_{i} | h_{i - 1} .. h_{i - n}] * d(h_{i}, h_{i-1})$\\
+$p_{LM}(H) = \Pi_{i = 1}^{l} P[h_{i} | h_{i - 1} \ldots h_{i - n}] * d(h_{i}, h_{i-1})$\\
 
 The translation model refers to how likely it is that some foreign word $f$ is
 a translation of a source word $s$. This model is created by training on a data set of alignments from source words to foreign words and cannot be a simple translation dictionary, as one source word may translate to several different foreign words depending on

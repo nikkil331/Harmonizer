@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.5.30)  29 SEP 2014 12:37
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.5.30)  29 SEP 2014 12:46
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -294,9 +294,9 @@ Overfull \hbox (5.30817pt too wide) in paragraph at lines 103--115
  []
 
 
-Overfull \hbox (1.5469pt too wide) in paragraph at lines 103--115
+Overfull \hbox (7.71353pt too wide) in paragraph at lines 103--115
 \OML/cmm/m/it/9 C[]$ \T1/aer/m/n/9 con-di-tioned on a lim-ited his-tory of pre-
-vi-ous events [$\OML/cmm/m/it/9 C[]:::[] 
+vi-ous events [$\OML/cmm/m/it/9 C[] [] [] 
  []
 
 
@@ -394,7 +394,7 @@ s/cm/cmsy9.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/public/amsfonts/
 cm/cmti9.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/urw/helvetic/uhvb8
 a.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb><
 /usr/local/texlive/2013/texmf-dist/fonts/type1/urw/times/utmb8a.pfb>
-Output written on prop_spec.pdf (3 pages, 155307 bytes).
+Output written on prop_spec.pdf (3 pages, 155335 bytes).
 PDF statistics:
  63 PDF objects out of 1000 (max. 8388607)
  45 compressed objects within 1 object stream
