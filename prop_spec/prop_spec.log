@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.5.30)  28 SEP 2014 19:23
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.5.30)  29 SEP 2014 00:10
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -280,7 +280,7 @@ LaTeX Font Info:    Try loading font information for U+lasy on input line 18.
 (/usr/local/texlive/2013/texmf-dist/tex/latex/base/ulasy.fd
 File: ulasy.fd 1998/08/17 v2.2e LaTeX symbol font definitions
 )
-Overfull \hbox (7.21434pt too wide) in paragraph at lines 57--66
+Overfull \hbox (7.21434pt too wide) in paragraph at lines 55--64
 \T1/aer/m/n/9 of ma-chine trans-la-tion, where the in-put lan-guage is the melo
 dy
  []
@@ -289,18 +289,23 @@ dy
 
 
 ]
-Overfull \hbox (5.30817pt too wide) in paragraph at lines 105--117
+Overfull \hbox (5.30817pt too wide) in paragraph at lines 103--115
 \T1/aer/m/n/9 been con-ducted that model these sig-nals us-ing n-gram Markov
  []
 
 
-Overfull \hbox (1.5469pt too wide) in paragraph at lines 105--117
+Overfull \hbox (1.5469pt too wide) in paragraph at lines 103--115
 \OML/cmm/m/it/9 C[]$ \T1/aer/m/n/9 con-di-tioned on a lim-ited his-tory of pre-
 vi-ous events [$\OML/cmm/m/it/9 C[]:::[] 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 133--139
+Underfull \hbox (badness 10000) in paragraph at lines 131--137
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 138--139
 
  []
 
@@ -315,12 +320,12 @@ Underfull \hbox (badness 10000) in paragraph at lines 142--143
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 144--145
+Underfull \hbox (badness 10000) in paragraph at lines 144--147
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 146--149
+Underfull \hbox (badness 10000) in paragraph at lines 148--149
 
  []
 
@@ -355,20 +360,15 @@ Underfull \hbox (badness 10000) in paragraph at lines 160--161
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 162--163
-
- []
-
-
-Underfull \vbox (badness 1558) has occurred while \output is active []
+Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [2]
-Underfull \hbox (badness 10000) in paragraph at lines 175--177
+Underfull \hbox (badness 10000) in paragraph at lines 173--175
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 178--179
+Underfull \hbox (badness 10000) in paragraph at lines 176--177
 
  []
 
@@ -376,7 +376,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 178--179
 Here is how much of TeX's memory you used:
  2886 strings out of 493315
  36881 string characters out of 6137904
- 107398 words of memory out of 5000000
+ 103398 words of memory out of 5000000
  6265 multiletter control sequences out of 15000+600000
  48606 words of font info for 64 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
@@ -394,7 +394,7 @@ s/cm/cmsy9.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/public/amsfonts/
 cm/cmti9.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/urw/helvetic/uhvb8
 a.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb><
 /usr/local/texlive/2013/texmf-dist/fonts/type1/urw/times/utmb8a.pfb>
-Output written on prop_spec.pdf (3 pages, 155214 bytes).
+Output written on prop_spec.pdf (3 pages, 155290 bytes).
 PDF statistics:
  63 PDF objects out of 1000 (max. 8388607)
  45 compressed objects within 1 object stream

@@ -42,16 +42,15 @@ primarily through human creativity. Writing music is a process that seems to req
 complex thought which fundamentally cannot be boiled down to a list of straightforward
 processes. Our project aims to answer the question, ``Can computers imitate the complex
 and creative process of composing music?'' We narrow the question down to the more specific
-and well-defined problem of generating harmony lines for a given melody line. Specifically,
-we would like to create 4-part chorale settings given the first part, the melody.
+and well-defined problem of generating a group of harmony lines for a given melody line.
 
 We will define a \textit{melody} as a sequence of input \textit{notes}, where each note contains information
 about pitch and timing. A \textit{harmony} will be a sequence of output notes which are produced with
-the constraint that the sequence of notes support the input melody. We define the term \textit{voice}
+the constraint that the sequence of notes supports the input melody. We define the term \textit{voice}
 to be some sequence of notes, either a melody or one of the harmonies, with a certain set of identifying 
 characteristics. For example, the bass part in rock music is one type of voice and the soprano's part in an 
-opera is another. The end result we wish to generate will be a group of 4 voices--the input melody and 
-three automatically-composed harmonies--that, when played together, sound coherent and pleasant.
+opera is another. The end result we wish to generate will be a group of $n$ voices--the input melody and 
+$n-1$ automatically-composed harmonies--that, when played together, sound coherent and pleasant.
 
 We propose to approach the problem from the view point of machine translation, where the input language
 is the melody and the target language is the specific harmony part you wish to generate. The first analogy
@@ -68,7 +67,9 @@ natural language, only certain strings of tokens (i.e. notes) are sensible in a 
 the statement ``colorless green ideas sleep furiously'' contains all english words but is unlikely to
 be understood by an english speaker because the string of words in not sensible based on the rules of our
 language. Similarly, a very inharmonious sequence of notes may not sound sensible in the context of its
-harmony voice, if the notes are even recognized as music at all.
+harmony voice, if the notes are even recognized as music at all. This analogy shows us that it should be
+possible to generate new content in the harmony voice similar to how machine translation algorithms are 
+able to generate new natural language content.
 
 \section{Related Work}
 \label{sec:related_work}
@@ -82,17 +83,15 @@ kept only those that adhered to a set of music-theory-inspired heuristics.
 
 Staying in line with the use of musical rules, Ebcio\v{g}lu \cite{Ebci̇oğlu1990145} provided a break-through 
 in the specific field of automatic harmonization through his CHORAL system. CHORAL, 
-bolstered by about 350 musical rules expressed in first order logic, performed the task of
-writing four-part harmonies in the style J.S. Bach. With these logical predicates, Ebcio\v{g}lu 
+bolstered by about 350 music-theory and style rules expressed in first order logic, performed the task of
+writing four-part harmonies in the style of J.S. Bach. With these logical predicates, Ebcio\v{g}lu 
 reduced the problem of composing a harmony to a simple constraint satisfaction problem. Similar 
 later works, notably by Tsang \& Aitkin \cite{tsang1991}, also crafted the harmonization problem as a 
 problem in constraint satisfaction, but with a significantly smaller amount ($\sim$20) of musical rules.
-The result of these constraint-based works were pieces of music that were non-offensive
-to the ear in that there were no dissonant musical patterns allowed by the constraints; however,
-creativity and overall similarity to human composition was still lacking.
+The result of these constraint-based works were musically sensible; however,
+crafting the constraints such that the output is musical requires deep, human knowledge about music in general and about the style of music to be produced in particular.
 
-More recent works began to put data-driven methods into use in order to create more human-like
-compositions. A simple case-based model implemented by Sabater \textit{et al.} \cite{Sabater98usingrules} was built to generate
+More recent works began to put data-driven methods into use in order to infer the rules that govern music. A simple case-based model implemented by Sabater \textit{et al.} \cite{Sabater98usingrules} was built to generate
 accompanying chords for a melody line. To a choose a harmony chord for a given context of previous
 harmony chords and the currently sounding melody note, the system would check a case base to see if any
 cases had the same harmony context and melody note and use the corresponding harmony chord if such a 
@@ -110,8 +109,8 @@ small amount of information about its context. For example, a system called MySo
 generates chord accompaniment given a vocalized melody by using a 2-gram Markov model for the harmony
 context and a 2-gram Markov model for the melody context. A similar system implented by Scholz \textit{et al.} \cite{4959518},
 which also generates chord accompanimants, experimented with 3-gram to 5-gram Markov models and incorporated
-smoothing techniques commonly seen in NLP to account for cases in whcih the model has not seen a context
-that is present in the test data. Most recently, Raczy\'{n}ski \textit{et al.} \cite{doi:10.1080/09298215.2013.822000} use discriminative Markov models that
+smoothing techniques commonly seen in NLP to account for cases in which the model has not seen a context
+that is present in the test data. Most recently, Raczy\'{n}ski \textit{et al.} \cite{doi:10.1080/09298215.2013.822000} uses discriminative Markov models that
 model harmony context, melody context, and additionaly the harmony relationship to the tonality.
 
 The recent Senior Design Project by Cerny \textit{et al.} \cite{UAMP} also used melody pitch and previous harmony context
@@ -133,18 +132,18 @@ In order to predict the best harmony note $h$ to harmonize with a melody note $m
 we make an analogy to machine translation techniques. In machine translation, when attempting to translate from some source
 language $S$ to a foreign language $F$, two models are developed - a language model and a translation model.
 A language model determines for each phrase $f_1 .. f_n$ of foreign words how likely it is for some word $f$ to follow this phrase. 
-Generally, this is accomplished by using a Hidden Markov model of length $n$ trained on some foreign language data set. We can apply 
-this technique directly to our harmonizer, determining how likely it is that some note $h$ will follow a sequence of notes $h_1 .. h_n$according to the harmonies that our algorithm has trained on. More formally, our language model is defined as the following:\\
+Generally, this is accomplished by using a Markov model of length $n$ trained on some foreign language data set. We can apply 
+this technique directly to our harmonizer, determining how likely it is that some note $h$ will follow a sequence of notes $h_1 .. h_n$ according to the harmonies that our algorithm has trained on. More formally, our language model is defined as the following:\\
 
 $p_{LM}(H) = \Pi_{i = 1}^{l} P[h_{i} | h_{i - 1} .. h_{i - n}]$\\
 
-Additionally, we may apply certain penalties to this model as in the case in machine translation, potentially based on distance dissonant intervals between notes. Representing this penalty as the function $d$, our new translation model becomes:\\
+Additionally, we may apply certain penalties to this model as in the case in machine translation, potentially based on distance or dissonant intervals between notes. Representing this penalty as the function $d$, our new translation model becomes:\\
 
 $p_{LM}(H) = \Pi_{i = 1}^{l} P[h_{i} | h_{i - 1} .. h_{i - n}] * d(h_{i}, h_{i-1})$\\
 
 The translation model refers to how likely it is that some foreign word $f$ is
 a translation of a source word $s$. This model is created by training on a data set of alignments from source words to foreign words and cannot be a simple translation dictionary, as one source word may translate to several different foreign words depending on
-context. We again apply this concept directly to harmonization, determining the best harmony note $h$ to match a melody note $m$. Like in natural language translation, there are many possible candidate notes $h$ to match one particular note $m$, and the best one can be chosen based on context. However, harmonization is a simpler problem in that every harmony note is already aligned to its corresponding melody note based on when the notes sound, whereas in natural language, the words must be aligned to each other in a separate preprocessing step. To formalize the translation model, we have:\\
+context. We again apply this concept directly to harmonization, determining the best harmony note $h$ to match a melody note $m$. Like in natural language translation, there are many possible candidate notes $h$ to match one particular note $m$, and the best one can be chosen based on context. However, harmonization is a simpler problem in that every harmony note is already aligned to its corresponding melody note based on when the notes sound, whereas in natural language, the words must be aligned to each other in a separate processing step. To formalize the translation model, we have:\\
 
 $p_{TM}(M | H) = \Pi_{i = 1}^{l} P[m_{i} | h_{i}]$\\
 
