@@ -163,19 +163,19 @@ In order to maximize the function above, we plan to implement a beam search by b
 \label{subsec:tech_challenges}
 One foreseeable problem that we may encounter is the combination of multiple harmony lines. This is because it is possible
 for two harmonies to sound consonant with the same melody, but sound dissonant with each other. For example, given a melody note
-$m = E$, two viable candidates to harmonize might be $h_1 = C$ (both notes are in a C major triad) and $h_2 = B$ (both notes are found in an E major triad). While these both harmonize well with $m$ in some context, $h_1$ and $h_2$ in this case from a minor second interval, which is very dissonant and is less likely to be found in a well formed harmony. In order to mitigate this issue, we may alter the translation model to condition on more than one note. For example, when deciding the assignment to $h_2$, this method would take both $m = E$ and $h_1 = C$ into account, perhaps to decide on $h_2 = G$ to form a C-major triad. However, if one wished to create an $n$ part harmony, this would require $n$ translation models conditioned on $1 .. n-1$ other lines. This poses a problem both in time and space efficiency as well as sparseness of data - as models are conditioned on more and more lines, the number of unique contexts trained on increases greatly, and therefore each context is encountered in the training data less often.
+$m = E$, two viable candidates to harmonize might be $h_1 = C$ and $h_2 = B$. While these both harmonize well with $m$ in some context, $h_1$ and $h_2$ in this case from a very dissonant interval which is less likely to be found in a well formed harmony. In order to mitigate this issue, we may alter the translation model to condition on more than one note. For example, when deciding the assignment to $h_2$, this method would take both $m = E$ and $h_1 = C$ into account in order to determine a value for $h_2$ which harmonizes with both. However, if one wished to create an $n$ part harmony, this would require $n - 1$ translation models conditioned on $1 .. n-1$ other lines. This poses a problem both in time and space efficiency as well as sparseness of data - as models are conditioned on more and more lines, the number of unique contexts trained on increases greatly, and therefore each context is encountered in the training data less often.
 This means that differentiating between likely and unlikely contexts will become difficult without enough data to train on, and may
 limit the number of parts that can be produced well. Additionally, this means that adding the voices in different orders may affect
-the output of the algorithm, but this can be mitigated by evaluating the output of every possible ordering and choosing the best one.
+the output of the algorithm. This can be mitigated by trying every possible ordering of harmony generation and choosing the one that optimizes our performance metric.
 
 \subsection{Evaluation Criteria}
 \label{subsec:eval_criteria}
 In order to evaluate our model, we will attempt to minimize its perplexity, a common metric used in natural language 
-processing. This metric calculates the probability that our algorithm would predict an existing song in our test set. The perplexity $PP$ \cite{Koehn:2010:SMT:1734086} of a probability distribution $p$ is defined over all songs $s$ in our test set as:\\
+processing. This metric captures the likelihood that our algorithm would predict an existing song in our test set. The perplexity $PP$ \cite{Koehn:2010:SMT:1734086} of a probability distribution $p$ is defined over all songs $s$ in our test set as:\\
 
 $log_2 PP = - \sum_{s} log_2 p(m_s|h_s)$\\
 
-This measure gives us a real number metric to evaluate different iterations of our algorithm. Additionally, we may have
+This measure gives us a real number metric to evaluate different iterations of our algorithm. If time permits, we may have
 human evaluators compare the results of different iterations of our algorithm or compare our algorithm to existing 
 automatic harmonization systems.
 
