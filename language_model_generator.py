@@ -27,7 +27,7 @@ def transposeToKey(stream, curr_key, new_key):
 			num_halfsteps = num_halfsteps + 1
 	stream.flat.transpose(num_halfsteps, inPlace=True)
 
-for path in bach_paths[:200]:
+for path in bach_paths:
 	print('.')
 	composition = corpus.parse(path)
 	if len(composition.parts) < 2:
