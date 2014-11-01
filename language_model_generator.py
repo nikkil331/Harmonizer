@@ -27,7 +27,7 @@ def transposeToKey(stream, curr_key, new_key):
 			num_halfsteps = num_halfsteps + 1
 	stream.flat.transpose(num_halfsteps, inPlace=True)
 
-for path in bach_paths[:200]:
+for path in bach_paths[:300]:
 	print('.')
 	composition = corpus.parse(path)
 	if len(composition.parts) < 2:
@@ -73,7 +73,7 @@ for context in lm:
 		total_notes_after_context = total_notes_after_context + lm[context][note]
 	for note in lm[context]:
 		prob = lm[context][note] / float(total_notes_after_context)
-		output_line = ''.join([str(context), ' ||| ', str(note), ' ||| ', str(prob), '\n'])
+		output_line = ''.join([' '.join(context), ' ||| ', str(note), ' ||| ', str(prob), '\n'])
 		f.write(output_line)
 
 

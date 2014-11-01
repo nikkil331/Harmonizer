@@ -1,27 +1,56 @@
-from nltk.model.ngram import *
-from nltk.probability import LidstoneProbDist
+from music21 import *
+import sys
 import optparse
+import copy
+import math
+from collections import namedtuple
 
 optparser = optparse.OptionParser()
 optparser.add_option("--training", dest="train", default="data/major_text.txt", help="File to read training data from")
 optparser.add_option("--test", dest="test", default="data/major_test_text.txt", help="File to read test data from")
+optparser.add_option("--tm", dest="tm", default="data/translation_model_major.txt", help="File containing translation model")
 optparser.add_option("--n", dest="n", default='3', help="N-gram size")
 (opts, _) = optparser.parse_args()
 
 train = opts.train
 test = opts.test
+tm_file = opts.tm
 n = int(opts.n)
 
 def get_song_list(file_path):
-    f = open(train, 'r')
+    f = open(file_path, 'r')
     songs = (f.read()).split('\n|||\n')
     return [song.split() for song in songs[:-1]]
 
 def get_language_model():
-    est = lambda fdist, bins: LidstoneProbDist(fdist, 0.2)
+    '''est = lambda fdist, bins: KneserNeyProbDist(fdist)
     songs = get_song_list(train)
-    lm = NgramModel(n, songs, estimator=est)
+    lm = NgramModel(n, songs, est)
+    return lm'''
+    lm = {}
+    f = open('data/language_model_major.txt', 'r')
+    for line in f:
+        (context, note, prob) = line.split("|||")
+        context = tuple(context.strip().split(" "))
+        note = note.strip()
+        prob = float(prob.strip())
+        if note not in lm:
+            lm[note] = {}
+        lm[note][context] = prob
     return lm
+
+def get_translation_model():
+    tm = {}
+    f = open(tm_file, 'r')
+    for line in f:
+        (melody, harmony, prob) = line.split("|||")
+        melody = melody.strip()
+        harmony = harmony.strip()
+        prob = float(prob.strip())
+        if melody not in tm:
+            tm[melody] = {}
+        tm[melody][harmony] = prob
+    return tm
 
 def get_perplexity(lm):
     songs = get_song_list(test)
@@ -31,6 +60,72 @@ def get_perplexity(lm):
     return perplexity
 
 lm = get_language_model()
-print "LM: " + str(lm)
-print "Perplexity: " + str(get_perplexity(lm))
+tm = get_translation_model()
+test_song = corpus.parse("bach/bwv390")
+melody = test_song.parts[0]
+
+missing_in_tm = 0
+for m in melody.flat.notesAndRests:
+    if m.isNote:
+        m_rep = m.nameWithOctave
+    else:
+        m_rep = "R"
+    if m_rep not in tm:
+        tm[m_rep] = {m_rep: 1.0}
+        missing_in_tm = missing_in_tm + 1
+
+print "Missing notes in TM:", missing_in_tm
+
+missing_in_lm = 0
+hypothesis = namedtuple("hypothesis", "notes, context, logprob")
+beam = [hypothesis(["S"], ["S"], 0.0)]
+for m in melody.flat.notesAndRests:
+    beam_copy = beam[:]
+    for hyp in beam_copy:
+        beam.remove(hyp)
+        if m.isNote:
+            m_rep = m.nameWithOctave
+        else:
+            m_rep = "R"
+        for h in tm[m_rep]:
+            p_tm = tm[m_rep][h]
+            #p_lm = lm.prob(h, hyp.context)
+            if h in lm and tuple(hyp.context) in lm[h]:
+                p_lm = lm[h][tuple(hyp.context)]
+            else:
+                p_lm = 0.00001
+                missing_in_lm = missing_in_lm + 1
+            new_notes = hyp.notes[:]
+            new_notes.append(h)
+            new_context = hyp.context[:]
+            if m_rep != "R" or new_context[-1] != "R":
+                new_context.append(h)
+            new_context = new_context[-n:]
+            new_logprob = hyp.logprob + math.log(p_tm) + math.log(p_lm)
+            new_hyp = hypothesis(new_notes, new_context, new_logprob)
+            beam.append(new_hyp)
+    sys.stderr.write (".")
+    beam = sorted(beam, key = lambda hyp: hyp.logprob, reverse=True)[:100]
+
+print "Missing in LM:", missing_in_lm
+winner = beam[0].notes
+harmony = stream.Stream()
+i = 1
+for m in melody.flat.notesAndRests:
+    if winner[i] == "R":
+        h = note.Rest()
+        h.quarterLength = m.quarterLength
+    else:
+        h = copy.deepcopy(m)
+        h.pitches = [pitch.Pitch(winner[i])]
+    harmony.append(h)
+    i = i +1
+
+score = stream.Score([melody, harmony])
+score.show()
+
+
+
+
+
 
