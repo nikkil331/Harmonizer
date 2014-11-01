@@ -28,22 +28,22 @@ def get_language_model():
     lm = NgramModel(n, songs, est)
     return lm'''
     lm = {}
-    f = open('data/language_model_major.txt', 'r')
+    f = open('data/bass_language_model_major.txt', 'r')
     for line in f:
         (context, note, prob) = line.split("|||")
         context = tuple(context.strip().split(" "))
         note = note.strip()
         prob = float(prob.strip())
-        if note not in lm:
-            lm[note] = {}
-        lm[note][context] = prob
+        if context not in lm:
+            lm[context] = {}
+        lm[context][note] = prob
     return lm
 
 def get_translation_model():
     tm = {}
     f = open(tm_file, 'r')
     for line in f:
-        (melody, harmony, prob) = line.split("|||")
+        (harmony, melody, prob) = line.split("|||")
         melody = melody.strip()
         harmony = harmony.strip()
         prob = float(prob.strip())
@@ -87,13 +87,18 @@ for m in melody.flat.notesAndRests:
             m_rep = m.nameWithOctave
         else:
             m_rep = "R"
+        context_seen = tuple(hyp.context) in lm
         for h in tm[m_rep]:
             p_tm = tm[m_rep][h]
             #p_lm = lm.prob(h, hyp.context)
-            if h in lm and tuple(hyp.context) in lm[h]:
-                p_lm = lm[h][tuple(hyp.context)]
+            if context_seen:
+                if h in lm[tuple(hyp.context)]:
+                    p_lm = lm[tuple(hyp.context)][h]
+                else: 
+                    p_lm = lm[tuple(hyp.context)]["<UNK>"]
+                    missing_in_lm += 1
             else:
-                p_lm = 0.00001
+                p_lm = 1e-6
                 missing_in_lm = missing_in_lm + 1
             new_notes = hyp.notes[:]
             new_notes.append(h)

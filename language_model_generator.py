@@ -1,6 +1,7 @@
 from music21 import *
 import optparse
 import re
+import sys
 
 optparser = optparse.OptionParser()
 optparser.add_option("-m", "--mode", dest="mode", default="major", help="Mode of the music to model")
@@ -28,11 +29,11 @@ def transposeToKey(stream, curr_key, new_key):
 	stream.flat.transpose(num_halfsteps, inPlace=True)
 
 for path in bach_paths:
-	print('.')
+	sys.stderr.write('.')
 	composition = corpus.parse(path)
-	if len(composition.parts) < 2:
+	if len(composition.parts) < 4:
 		continue
-	harmony = composition.parts[1]
+	harmony = composition.parts[3]
 	keySig = composition.analyze('key')
 	if keySig.pitchAndMode[1] != mode:
 		continue
@@ -60,7 +61,7 @@ for path in bach_paths:
 		list_window = list(sliding_window)
 		if not (list_window[-1] is 'R' and note_rep is 'R'):
 			list_window.append(note_rep)
-		if len(list_window) > 3:
+		if len(list_window) > 6:
 			list_window.pop(0)
 		sliding_window = tuple(list_window)
 
@@ -72,9 +73,13 @@ for context in lm:
 	for note in lm[context]:
 		total_notes_after_context = total_notes_after_context + lm[context][note]
 	for note in lm[context]:
-		prob = lm[context][note] / float(total_notes_after_context)
+		#approximately 4 octaves in our vocabulary (48 notes)
+		prob = (lm[context][note] + 1e-5) / (float(total_notes_after_context) + 48e-5)
 		output_line = ''.join([' '.join(context), ' ||| ', str(note), ' ||| ', str(prob), '\n'])
 		f.write(output_line)
+	unknown_prob = float(1e-5) / (total_notes_after_context + 48e-5)
+	output_line = ''.join([' '.join(context), ' ||| ', str("<UNK>"), ' ||| ', str(unknown_prob), '\n' ])
+	f.write(output_line)
 
 
 

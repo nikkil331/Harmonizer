@@ -30,7 +30,7 @@ def transposeToKey(stream, curr_key, new_key):
 for path in bach_paths:
 	sys.stderr.write('.')
 	composition = corpus.parse(path)
-	if len(composition.parts) < 2:
+	if len(composition.parts) < 4:
 		continue
 	keySig = composition.analyze('key')
 	if keySig.pitchAndMode[1] != mode:
@@ -42,7 +42,7 @@ for path in bach_paths:
 		scaleFromMode = scale.MinorScale(keySig.pitchAndMode[0])
 		transposeToKey(composition, keySig, 'a')
 	melody = composition.parts[0]
-	harmony = composition.parts[1]
+	harmony = composition.parts[3]
 
 	for harmony_note in harmony.flat.notesAndRests:
 		if not harmony_note.isNote:
