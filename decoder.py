@@ -43,7 +43,7 @@ def get_translation_model():
     tm = {}
     f = open(tm_file, 'r')
     for line in f:
-        (harmony, melody, prob) = line.split("|||")
+        (melody, harmony, prob) = line.split("|||")
         melody = melody.strip()
         harmony = harmony.strip()
         prob = float(prob.strip())

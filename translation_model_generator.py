@@ -13,6 +13,7 @@ output_file = opts.file
 
 tm = {}
 bach_paths = corpus.getComposer('bach')
+bach_paths += corpus.getComposer('handel')
 
 
 def transposeToKey(stream, curr_key, new_key):
@@ -30,8 +31,8 @@ def transposeToKey(stream, curr_key, new_key):
 for path in bach_paths:
 	sys.stderr.write('.')
 	composition = corpus.parse(path)
-	if len(composition.parts) < 4:
-		continue
+	#if len(composition.parts) < 4:
+	#	continue
 	keySig = composition.analyze('key')
 	if keySig.pitchAndMode[1] != mode:
 		continue
@@ -42,7 +43,7 @@ for path in bach_paths:
 		scaleFromMode = scale.MinorScale(keySig.pitchAndMode[0])
 		transposeToKey(composition, keySig, 'a')
 	melody = composition.parts[0]
-	harmony = composition.parts[3]
+	harmony = composition.parts[-1]
 
 	for harmony_note in harmony.flat.notesAndRests:
 		if not harmony_note.isNote:
@@ -79,7 +80,7 @@ for harmony_note in tm:
 		total_notes_harmonized = total_notes_harmonized + tm[harmony_note][melody_note]
 	for melody_note in tm[harmony_note]:
 		prob = tm[harmony_note][melody_note] / float(total_notes_harmonized)
-		output_line = ''.join([str(harmony_note), ' ||| ', str(melody_note), ' ||| ', str(prob), '\n'])
+		output_line = ''.join([str(melody_note), ' ||| ', str(harmony_note), ' ||| ', str(prob), '\n'])
 		f.write(output_line)
 
 

@@ -14,6 +14,7 @@ output_file = opts.file
 num_songs = 0
 lm = {}
 bach_paths = corpus.getComposer('bach')
+bach_paths += corpus.getComposer('handel')
 
 
 def transposeToKey(stream, curr_key, new_key):
@@ -31,9 +32,9 @@ def transposeToKey(stream, curr_key, new_key):
 for path in bach_paths:
 	sys.stderr.write('.')
 	composition = corpus.parse(path)
-	if len(composition.parts) < 4:
-		continue
-	harmony = composition.parts[3]
+	#if len(composition.parts) < 4:
+	#	continue
+	harmony = composition.parts[-1]
 	keySig = composition.analyze('key')
 	if keySig.pitchAndMode[1] != mode:
 		continue
