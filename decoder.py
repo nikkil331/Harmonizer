@@ -110,21 +110,23 @@ for m in melody.flat.notesAndRests:
             new_hyp = hypothesis(new_notes, new_context, new_logprob)
             beam.append(new_hyp)
     sys.stderr.write (".")
-    beam = sorted(beam, key = lambda hyp: hyp.logprob, reverse=True)[:100]
+    beam = sorted(beam, key = lambda hyp: hyp.logprob, reverse=True)[:500]
 
 print "Missing in LM:", missing_in_lm
 winner = beam[0].notes
-harmony = stream.Stream()
+#harmony = stream.Stream()
 i = 1
-for m in melody.flat.notesAndRests:
+
+harmony = copy.deepcopy(melody)
+for h in harmony.flat.notesAndRests:
     if winner[i] == "R":
+        length = h.quarterLength
         h = note.Rest()
-        h.quarterLength = m.quarterLength
+        h.quarterLength = length
     else:
-        h = copy.deepcopy(m)
-        h.pitches = [pitch.Pitch(winner[i])]
-    harmony.append(h)
-    i = i +1
+        #h = copy.deepcopy(m)
+        h.pitch = pitch.Pitch(winner[i])
+    i = i + 1
 
 score = stream.Score([melody, harmony])
 score.show()
