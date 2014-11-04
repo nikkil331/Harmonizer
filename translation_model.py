@@ -21,7 +21,7 @@ class TranslationModel(object):
 		if melody not in self._tm or harmony not in self._tm[melody]:
 			raise Exception('No melody/harmony pair for {0}, {1}'.format(melody, harmony))
 		else:
-			return self._lm[melody][harmony]
+			return self._tm[melody][harmony]
 
 	def get_harmonies(self, melody):
 		if melody not in self._tm:
@@ -29,6 +29,13 @@ class TranslationModel(object):
 		else:
 			return [(k,v) for k,v in self._tm[melody].iteritems()]
 
+	def write_to_file(self,path):
+		f = open(path, 'w')
+		for melody_note in self._tm:
+			for harmony_note in self._tm[melody_note]:
+				output_line = ''.join([str(melody_note), ' ||| ', str(harmony_note), ' ||| ', \
+					str(self.get_probability(melody_note, harmony_note)), '\n'])
+				f.write(output_line)
 
 
 def main():
