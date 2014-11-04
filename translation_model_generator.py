@@ -78,9 +78,10 @@ class TranslationModelGenerator(object):
 				melody = composition.parts[self._melody_part]
 				harmony = composition.parts[self._harmony_part]
 				self._update_counts(melody, harmony)
-				self._update_probs_from_counts()
 			except Exception, e:
 				num_songs_without_part += 1
+
+		self._update_probs_from_counts()
 
 		print "Number of songs: {0}".format(num_songs)
 		print "Number of songs without %{0} : {1}".format(self._part, num_songs_without_part)

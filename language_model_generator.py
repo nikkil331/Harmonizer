@@ -56,11 +56,12 @@ class LanguageModelGenerator(object):
 	def _update_probs_from_counts(self, smoothing):
 		for context in self._lm:
 			total_notes_after_context = len(self._lm[context])
-			for note in self._lm[context]:
+			context_counts = self._lm[context].items()[:]
+			for (note, count) in context_counts:
 				#approximately 4 octaves in our vocabulary (48 notes)
-				prob = (self._lm[context][note] + smoothing) / (float(total_notes_after_context) + 48*smoothing)
+				prob = (count + smoothing) / float(total_notes_after_context + (48*smoothing))
 				self._lm[context][note] = prob
-			self._lm[context]["<UNK>"] = float(smoothing) / (total_notes_after_context + 48*smoothing)
+			self._lm[context]["<UNK>"] = smoothing / float(total_notes_after_context + (48*smoothing))
 
 
 	def generate_lm(self, smoothing=1e-5):
@@ -77,10 +78,9 @@ class LanguageModelGenerator(object):
 					num_songs += 1
 					self.transpose(composition)
 					self._update_counts(harmony)
-					self._update_probs_from_counts(smoothing)
-
 			except Exception, e:
 				num_songs_without_part += 1
+		self._update_probs_from_counts(smoothing)
 
 		print "Number of songs: {0}".format(num_songs)
 		print "Number of songs without {0} : {1}".format(self._part, num_songs_without_part)
