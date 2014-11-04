@@ -12,8 +12,9 @@ class TranslationModelGenerator(object):
 		self._harmony_part = harmony_part
 		self._output_file = output_file
 		self._training_paths = []
-		for composer in training_composers:
-			self._training_paths += corpus.getComposer(composer)
+		#for composer in training_composers:
+		#	self._training_paths += corpus.getComposer(composer)
+		self._training_paths = corpus.getBachChorales()
 		self._tm = None
 
 	def transpose(self, stream):
@@ -84,7 +85,7 @@ class TranslationModelGenerator(object):
 		self._update_probs_from_counts()
 
 		print "Number of songs: {0}".format(num_songs)
-		print "Number of songs without %{0} : {1}".format(self._part, num_songs_without_part)
+		print "Number of songs without {0} : {1}".format(self._harmony_part, num_songs_without_part)
 
 	def write_tm(self):
 		f = open(self._output_file, 'w')
