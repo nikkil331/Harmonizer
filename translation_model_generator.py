@@ -92,7 +92,7 @@ class TranslationModelGenerator(object):
 		for harmony_note in self._tm:
 			for melody_note in self._tm[harmony_note]:
 				output_line = ''.join([str(melody_note), ' ||| ', str(harmony_note), ' ||| ', str(self._tm[harmony_note][melody_note]), '\n'])
-				f.write(self._output_file)
+				f.write(output_line)
 
 
 def main():
