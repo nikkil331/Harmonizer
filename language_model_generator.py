@@ -3,84 +3,106 @@ import optparse
 import re
 import sys
 
-optparser = optparse.OptionParser()
-optparser.add_option("-m", "--mode", dest="mode", default="major", help="Mode of the music to model")
-optparser.add_option("-f", "--file_output", dest="file", default="data/language_model_major.txt", help="File to write the language model to")
-(opts, _) = optparser.parse_args()
 
-mode = 'minor' if opts.mode == 'minor' else 'major'
-output_file = opts.file
+class LanguageModelGenerator(object):
 
-num_songs = 0
-lm = {}
-bach_paths = corpus.getComposer('bach')
-bach_paths += corpus.getComposer('handel')
+	def __init__(self, ngram_size=5, mode='major', part=1, \
+				 output_file='data/language_model.txt', training_composers=['bach', 'handel']):
+		self._ngram_size = ngram_size
+		self._mode = 'major' if mode == 'major' else 'minor'
+		self._part = part
+		self._output_file = output_file
+		self._training_paths = []
+		for composer in training_composers:
+			self._training_paths += corpus.getComposer(composer)
+		self._lm = None
 
-
-def transposeToKey(stream, curr_key, new_key):
-	sc = scale.ChromaticScale(curr_key.pitchAndMode[0].name + '5')
-	sc_pitches = [str(p) for p in sc.pitches]
-	num_halfsteps = 0
-	pattern = re.compile(new_key.upper() + '\d')
-	for pitch in sc_pitches:
-		if pattern.match(pitch):
-			break
-		else:
-			num_halfsteps = num_halfsteps + 1
-	stream.flat.transpose(num_halfsteps, inPlace=True)
-
-for path in bach_paths:
-	sys.stderr.write('.')
-	composition = corpus.parse(path)
-	#if len(composition.parts) < 4:
-	#	continue
-	harmony = composition.parts[-1]
-	keySig = composition.analyze('key')
-	if keySig.pitchAndMode[1] != mode:
-		continue
-	num_songs = num_songs + 1
-	if mode == 'major':
-		scaleFromMode = scale.MajorScale(keySig.pitchAndMode[0])
-		transposeToKey(composition, keySig, 'c')
-	else:
-		scaleFromMode = scale.MinorScale(keySig.pitchAndMode[0])
-		transposeToKey(composition, keySig, 'a')
-
-	sliding_window = ('S',)
-	for note in harmony.flat.notesAndRests:
-		if not note.isNote:
-			note_rep = 'R'
-		else:
-			note_rep = note.nameWithOctave
-		if sliding_window not in lm:
-			lm[sliding_window] = {note_rep: 1}
-		else:
-			if note_rep not in lm[sliding_window]:
-				lm[sliding_window][note_rep] = 1
+	def transpose(self, stream):
+		curr_pitch = stream.analyze('key').pitchAndMode[0].name
+		new_pitch = 'C' if self._mode == 'major' else 'A'
+		# what is 5 and does this generalize to the bass part???
+		sc = scale.ChromaticScale(curr_pitch + '5')
+		sc_pitches = [str(p) for p in sc.pitches]
+		num_halfsteps = 0
+		pattern = re.compile(new_pitch + '\d')
+		for pitch in sc_pitches:
+			if pattern.match(pitch):
+				break
 			else:
-				lm[sliding_window][note_rep] = lm[sliding_window][note_rep] + 1
-		list_window = list(sliding_window)
-		if not (list_window[-1] is 'R' and note_rep is 'R'):
-			list_window.append(note_rep)
-		if len(list_window) > 6:
-			list_window.pop(0)
-		sliding_window = tuple(list_window)
+				num_halfsteps = num_halfsteps + 1
+		stream.flat.transpose(num_halfsteps, inPlace=True)
 
-print num_songs
+	def _update_counts(self, harmony):
+		sliding_window = ('S',)
+		for note in harmony.flat.notesAndRests:
+			if not note.isNote:
+				note_rep = 'R'
+			else:
+				note_rep = note.nameWithOctave
+			if sliding_window not in self._lm:
+				self._lm[sliding_window] = {note_rep: 1}
+			else:
+				if note_rep not in self._lm[sliding_window]:
+					self._lm[sliding_window][note_rep] = 1
+				else:
+					self._lm[sliding_window][note_rep] = self._lm[sliding_window][note_rep] + 1
+			list_window = list(sliding_window)
+			if not (list_window[-1] is 'R' and note_rep is 'R'):
+				list_window.append(note_rep)
+			if len(list_window) > self._ngram_size:
+				list_window.pop(0)
+			sliding_window = tuple(list_window)
 
-f = open(output_file, 'w')
-for context in lm:
-	total_notes_after_context = 0
-	for note in lm[context]:
-		total_notes_after_context = total_notes_after_context + lm[context][note]
-	for note in lm[context]:
-		#approximately 4 octaves in our vocabulary (48 notes)
-		prob = (lm[context][note] + 1e-5) / (float(total_notes_after_context) + 48e-5)
-		output_line = ''.join([' '.join(context), ' ||| ', str(note), ' ||| ', str(prob), '\n'])
-		f.write(output_line)
-	unknown_prob = float(1e-5) / (total_notes_after_context + 48e-5)
-	output_line = ''.join([' '.join(context), ' ||| ', str("<UNK>"), ' ||| ', str(unknown_prob), '\n' ])
-	f.write(output_line)
+	def _update_probs_from_counts(self, smoothing):
+		for context in self._lm:
+			total_notes_after_context = len(self._lm[context])
+			for note in self._lm[context]:
+				#approximately 4 octaves in our vocabulary (48 notes)
+				prob = (self._lm[context][note] + smoothing) / (float(total_notes_after_context) + 48*smoothing)
+				self._lm[context][note] = prob
+			self._lm[context]["<UNK>"] = float(smoothing) / (total_notes_after_context + 48*smoothing)
+
+
+	def generate_lm(self, smoothing=1e-5):
+		self._lm = {}
+		num_songs = 0
+		for path in self._training_paths:
+			sys.stderr.write('.')
+			composition = corpus.parse(path)
+			if self._part >= len(composition.parts):
+				continue
+			harmony = composition.parts[self._part]
+			keySig = composition.analyze('key')
+			if keySig.pitchAndMode[1] != self._mode:
+				continue
+			num_songs = num_songs + 1
+			self.transpose(composition)
+			self._update_counts(harmony)
+			self._update_probs_from_counts(smoothing)
+		print num_songs
+
+	'''
+	Returns language model dictionary
+	'''
+	def get_lm(self):
+		if not self._lm:
+			self.generate_lm()
+		return self._lm()
+
+	def write_lm(self):
+		f = open(self._output_file, 'w')
+		for context in self._lm:
+			for note in self._lm[context]:
+				output_line = ''.join([' '.join(context), ' ||| ', str(note), ' ||| ', str(self._lm[context][note]), '\n'])
+				f.write(output_line)
+
+def main():
+	lm_generator = LanguageModelGenerator(part=3, output_file='data/bass_language_model_major.txt')
+	lm_generator.generate_lm()
+	lm_generator.write_lm()
+
+if __name__ == "__main__":
+    main()
 
 
 

@@ -23,10 +23,6 @@ def get_song_list(file_path):
     return [song.split() for song in songs[:-1]]
 
 def get_language_model():
-    '''est = lambda fdist, bins: KneserNeyProbDist(fdist)
-    songs = get_song_list(train)
-    lm = NgramModel(n, songs, est)
-    return lm'''
     lm = {}
     f = open('data/bass_language_model_major.txt', 'r')
     for line in f:
@@ -52,12 +48,6 @@ def get_translation_model():
         tm[melody][harmony] = prob
     return tm
 
-def get_perplexity(lm):
-    songs = get_song_list(test)
-    perplexity = 0
-    for song in songs:
-    	perplexity = perplexity + lm.perplexity(song)
-    return perplexity
 
 lm = get_language_model()
 tm = get_translation_model()
@@ -77,26 +67,32 @@ for m in melody.flat.notesAndRests:
 print "Missing notes in TM:", missing_in_tm
 
 missing_in_lm = 0
-hypothesis = namedtuple("hypothesis", "notes, context, logprob")
-beam = [hypothesis(["S"], ["S"], 0.0)]
+hypothesis = namedtuple("hypothesis", "notes, context, tm_logprob, lm_logprob")
+beam = [hypothesis(["S"], ["S"], 0.0, 0.0)]
 for m in melody.flat.notesAndRests:
     beam_copy = beam[:]
     for hyp in beam_copy:
-        beam.remove(hyp)
         if m.isNote:
             m_rep = m.nameWithOctave
         else:
             m_rep = "R"
         context_seen = tuple(hyp.context) in lm
+        tm_probs = tm[m_rep].values()
+        avg_tm_prob = sum(tm_probs)/float(len(tm_probs))
+        max_tm_prob = max(tm_probs)
+        min_tm_prob = min(tm_probs)
+        if context_seen:
+            lm_probs = lm[tuple(hyp.context)].values()
+            avg_lm_prob = sum(lm_probs)/float(len(lm_probs))
+            max_lm_prob = max(lm_probs)
+            min_lm_prob = min(lm_probs)
         for h in tm[m_rep]:
-            p_tm = tm[m_rep][h]
-            #p_lm = lm.prob(h, hyp.context)
+            p_tm = abs(tm[m_rep][h] - avg_tm_prob) / float(max_tm_prob - min_tm_prob)
             if context_seen:
                 if h in lm[tuple(hyp.context)]:
-                    p_lm = lm[tuple(hyp.context)][h]
+                    p_lm = abs(lm[tuple(hyp.context)][h] - avg_lm_prob) / float(max_lm_prob - min_lm_prob)
                 else: 
-                    p_lm = lm[tuple(hyp.context)]["<UNK>"]
-                    missing_in_lm += 1
+                    p_lm = abs(lm[tuple(hyp.context)]["<UNK>"] - avg_lm_prob) / float(max_lm_prob - min_lm_prob)
             else:
                 p_lm = 1e-6
                 missing_in_lm = missing_in_lm + 1
@@ -106,11 +102,13 @@ for m in melody.flat.notesAndRests:
             if m_rep != "R" or new_context[-1] != "R":
                 new_context.append(h)
             new_context = new_context[-n:]
-            new_logprob = hyp.logprob + math.log(p_tm) + math.log(p_lm)
-            new_hyp = hypothesis(new_notes, new_context, new_logprob)
+            new_hyp = hypothesis(new_notes, new_context, hyp.tm_logprob + math.log(p_tm), hyp.lm_logprob + math.log(p_lm))
+            if len(new_hyp.notes) == 2:
+                print "tm_prob", new_hyp.lm_logprob
+                print "lm_prob", new_hyp.tm_logprob
             beam.append(new_hyp)
     sys.stderr.write (".")
-    beam = sorted(beam, key = lambda hyp: hyp.logprob, reverse=True)[:500]
+    beam = sorted(beam, key = lambda hyp: hyp.tm_logprob + hyp.lm_logprob, reverse=True)[:500]
 
 print "Missing in LM:", missing_in_lm
 winner = beam[0].notes
