@@ -35,11 +35,15 @@ class LanguageModelGenerator(object):
 
 	def _update_counts(self, harmony):
 		sliding_window = ('S',)
+		weird_note = False
 		for note in harmony.flat.notesAndRests:
 			if not note.isNote:
 				note_rep = 'R'
 			else:
 				note_rep = note.nameWithOctave
+				pattern = re.compile('[A-Z]+[#|-]*\d')
+				if not pattern.match(note_rep):
+					weird_note = True
 			if sliding_window not in self._lm:
 				self._lm[sliding_window] = {note_rep: 1}
 			else:
@@ -53,10 +57,11 @@ class LanguageModelGenerator(object):
 			if len(list_window) > self._ngram_size:
 				list_window.pop(0)
 			sliding_window = tuple(list_window)
+		return weird_note
 
 	def _update_probs_from_counts(self, smoothing):
 		for context in self._lm:
-			total_notes_after_context = len(self._lm[context])
+			total_notes_after_context = sum(self._lm[context].values())
 			context_counts = self._lm[context].items()[:]
 			for (note, count) in context_counts:
 				#approximately 4 octaves in our vocabulary (48 notes)
@@ -78,7 +83,8 @@ class LanguageModelGenerator(object):
 				if keySig.pitchAndMode[1] == self._mode:
 					num_songs += 1
 					self.transpose(composition)
-					self._update_counts(harmony)
+					if self._update_counts(harmony):
+						print path
 			except Exception, e:
 				num_songs_without_part += 1
 		self._update_probs_from_counts(smoothing)

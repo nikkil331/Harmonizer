@@ -9,12 +9,14 @@ optparser = optparse.OptionParser()
 optparser.add_option("--training", dest="train", default="data/major_text.txt", help="File to read training data from")
 optparser.add_option("--test", dest="test", default="data/major_test_text.txt", help="File to read test data from")
 optparser.add_option("--tm", dest="tm", default="data/translation_model_major.txt", help="File containing translation model")
-optparser.add_option("--n", dest="n", default='3', help="N-gram size")
+optparser.add_option("--lm", dest="lm", default="data/language_model_major.txt", help="File containing language model")
+optparser.add_option("--n", dest="n", default='5', help="N-gram size")
 (opts, _) = optparser.parse_args()
 
 train = opts.train
 test = opts.test
 tm_file = opts.tm
+lm_file = opts.lm
 n = int(opts.n)
 
 def get_song_list(file_path):
@@ -24,7 +26,7 @@ def get_song_list(file_path):
 
 def get_language_model():
     lm = {}
-    f = open('data/bass_language_model_major.txt', 'r')
+    f = open(lm_file, 'r')
     for line in f:
         (context, note, prob) = line.split("|||")
         context = tuple(context.strip().split(" "))
@@ -54,7 +56,6 @@ tm = get_translation_model()
 test_song = corpus.parse("bach/bwv390")
 melody = test_song.parts[0]
 
-missing_in_tm = 0
 for m in melody.flat.notesAndRests:
     if m.isNote:
         m_rep = m.nameWithOctave
@@ -64,14 +65,13 @@ for m in melody.flat.notesAndRests:
         tm[m_rep] = {m_rep: 1.0}
         missing_in_tm = missing_in_tm + 1
 
-print "Missing notes in TM:", missing_in_tm
-
 missing_in_lm = 0
 hypothesis = namedtuple("hypothesis", "notes, context, tm_logprob, lm_logprob")
 beam = [hypothesis(["S"], ["S"], 0.0, 0.0)]
 for m in melody.flat.notesAndRests:
     beam_copy = beam[:]
     for hyp in beam_copy:
+        beam.remove(hyp)
         if m.isNote:
             m_rep = m.nameWithOctave
         else:
@@ -103,9 +103,6 @@ for m in melody.flat.notesAndRests:
                 new_context.append(h)
             new_context = new_context[-n:]
             new_hyp = hypothesis(new_notes, new_context, hyp.tm_logprob + math.log(p_tm), hyp.lm_logprob + math.log(p_lm))
-            if len(new_hyp.notes) == 2:
-                print "tm_prob", new_hyp.lm_logprob
-                print "lm_prob", new_hyp.tm_logprob
             beam.append(new_hyp)
     sys.stderr.write (".")
     beam = sorted(beam, key = lambda hyp: hyp.tm_logprob + hyp.lm_logprob, reverse=True)[:500]
@@ -115,6 +112,8 @@ winner = beam[0].notes
 #harmony = stream.Stream()
 i = 1
 
+print "winner length:", len(winner)
+print "melody length:", len(melody.flat.notesAndRests)
 harmony = copy.deepcopy(melody)
 for h in harmony.flat.notesAndRests:
     if winner[i] == "R":
