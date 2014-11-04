@@ -30,7 +30,7 @@ class LanguageModel(object):
 		return self._lm.keys()
 
 	def get_notes_for_context(self, context):
-		return self._lm[context].keys()
+		return self._lm[context].items()
 
 def main():
 	lm = LanguageModel("data/bass_language_model_major.txt")
