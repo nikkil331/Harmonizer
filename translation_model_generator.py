@@ -44,6 +44,7 @@ class TranslationModelGenerator(object):
 												     mustFinishInSpan=False, mustBeginInSpan=False)
 			if harmony_rep not in self._tm:
 				d = {}
+				self._tm[harmony_rep] = d
 			else:
 				d = self._tm[harmony_rep]
 
@@ -59,9 +60,11 @@ class TranslationModelGenerator(object):
 
 	def _update_probs_from_counts(self):
 		for harmony_note in self._tm:
-			total_notes_harmonized = len(self._tm[harmony_note])
-			for melody_note in self._tm[harmony_note]:
-				prob = self._tm[harmony_note][melody_note] / float(total_notes_harmonized)
+			total_notes_harmonized = sum(self._tm[harmony_note].values())
+			harmony_counts = self._tm[harmony_note].items()[:]
+			for (melody_note, count) in harmony_counts:
+				prob = count / float(total_notes_harmonized)
+				self._tm[harmony_note][melody_note] = prob
 
 	def generate_tm(self):
 		self._tm = {}
