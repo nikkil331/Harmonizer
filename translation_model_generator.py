@@ -61,7 +61,7 @@ class TranslationModelGenerator(object):
 		tm = TranslationModel()
 		for harmony_note in self._tm_counts:
 			total_notes_harmonized = sum(self._tm_counts[harmony_note].values())
-			harmony_counts = self._tm_counts[harmony_note].items()[:]
+			harmony_counts = self._tm_counts[harmony_note].items()
 			for (melody_note, count) in harmony_counts:
 				prob = count / float(total_notes_harmonized)
 				tm.add_to_model(melody_note,harmony_note,prob)
@@ -78,7 +78,7 @@ class TranslationModelGenerator(object):
 				keySig = composition.analyze('key')
 				if keySig.pitchAndMode[1] != self._mode:
 					continue
-				num_songs = num_songs + 1
+				num_songs +=  1
 				self.transpose(composition)
 				melody = composition.parts[self._melody_part]
 				harmony = composition.parts[self._harmony_part]
