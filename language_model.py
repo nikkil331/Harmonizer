@@ -32,6 +32,15 @@ class LanguageModel(object):
 	def get_notes_for_context(self, context):
 		return self._lm[context].keys()
 
+	def write_to_file(self, path):
+		f = open(path, 'w')
+		for context in self._lm:
+			for note in self._lm[context]:
+				context_str = ' '.join(context)
+				output_line = ''.join([str(context_str), ' ||| ', str(note), ' ||| ', \
+					str(self.get_probability(context, note)), '\n'])
+				f.write(output_line)
+
 def main():
 	lm = LanguageModel("data/bass_language_model_major.txt")
 	print lm.get_notes_for_context(('G3', 'C4', 'R', 'C3', 'D3'))
