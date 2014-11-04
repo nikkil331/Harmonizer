@@ -65,23 +65,25 @@ class TranslationModelGenerator(object):
 	def generate_tm(self):
 		self._tm = {}
 		num_songs = 0
+		num_songs_without_part = 0
 		for path in self._training_paths:
 			sys.stderr.write('.')
 			composition = corpus.parse(path)
-			if self._melody_part >= len(composition.parts):
-				continue
-			if self._harmony_part >= len(composition.parts):
-				continue
-			keySig = composition.analyze('key')
-			if keySig.pitchAndMode[1] != self._mode:
-				continue
-			num_songs = num_songs + 1
-			self.transpose(composition)
-			melody = composition.parts[self._melody_part]
-			harmony = composition.parts[self._harmony_part]
-			self._update_counts(melody, harmony)
-			self._update_probs_from_counts()
-		print num_songs
+			try: 
+				keySig = composition.analyze('key')
+				if keySig.pitchAndMode[1] != self._mode:
+					continue
+				num_songs = num_songs + 1
+				self.transpose(composition)
+				melody = composition.parts[self._melody_part]
+				harmony = composition.parts[self._harmony_part]
+				self._update_counts(melody, harmony)
+				self._update_probs_from_counts()
+			except Exception, e:
+				num_songs_without_part += 1
+
+		print "Number of songs: {0}".format(num_songs)
+		print "Number of songs without %{0} : {1}".format(self._part, num_songs_without_part)
 
 	def write_tm(self):
 		f = open(self._output_file, 'w')
@@ -92,7 +94,7 @@ class TranslationModelGenerator(object):
 
 
 def main():
-	tm_generator = TranslationModelGenerator(melody_part=0, harmony_part=3, output_file='data/bass_translation_model_major.txt')
+	tm_generator = TranslationModelGenerator(melody_part="Soprano", harmony_part="Bass", output_file='data/bass_translation_model_major.txt')
 	tm_generator.generate_tm()
 	tm_generator.write_tm()
 

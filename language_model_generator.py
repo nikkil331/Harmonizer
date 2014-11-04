@@ -45,7 +45,7 @@ class LanguageModelGenerator(object):
 				if note_rep not in self._lm[sliding_window]:
 					self._lm[sliding_window][note_rep] = 1
 				else:
-					self._lm[sliding_window][note_rep] = self._lm[sliding_window][note_rep] + 1
+					self._lm[sliding_window][note_rep] += 1
 			list_window = list(sliding_window)
 			if not (list_window[-1] is 'R' and note_rep is 'R'):
 				list_window.append(note_rep)
@@ -66,20 +66,24 @@ class LanguageModelGenerator(object):
 	def generate_lm(self, smoothing=1e-5):
 		self._lm = {}
 		num_songs = 0
+		num_songs_without_part = 0
 		for path in self._training_paths:
 			sys.stderr.write('.')
 			composition = corpus.parse(path)
-			if self._part >= len(composition.parts):
-				continue
-			harmony = composition.parts[self._part]
-			keySig = composition.analyze('key')
-			if keySig.pitchAndMode[1] != self._mode:
-				continue
-			num_songs = num_songs + 1
-			self.transpose(composition)
-			self._update_counts(harmony)
-			self._update_probs_from_counts(smoothing)
-		print num_songs
+			try:
+				harmony = composition.parts[self._part]
+				keySig = composition.analyze('key')
+				if keySig.pitchAndMode[1] == self._mode:
+					num_songs += 1
+					self.transpose(composition)
+					self._update_counts(harmony)
+					self._update_probs_from_counts(smoothing)
+
+			except Exception, e:
+				num_songs_without_part += 1
+
+		print "Number of songs: {0}".format(num_songs)
+		print "Number of songs without {0} : {1}".format(self._part, num_songs_without_part)
 
 	'''
 	Returns language model dictionary
@@ -97,7 +101,7 @@ class LanguageModelGenerator(object):
 				f.write(output_line)
 
 def main():
-	lm_generator = LanguageModelGenerator(part=3, output_file='data/bass_language_model_major.txt')
+	lm_generator = LanguageModelGenerator(part='Bass', output_file='data/bass_language_model_major.txt', ngram_size=3)
 	lm_generator.generate_lm()
 	lm_generator.write_lm()
 
