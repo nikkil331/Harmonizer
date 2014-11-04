@@ -1,15 +1,16 @@
 class LanguageModel(object):
 
-	def __init__(self, path):
+	def __init__(self, path=None):
 		self._lm = {}
-		self._read_file(path)
+		if path:
+			self._read_file(path)
 
 	def _read_file(self, path):
 		f = open(path, 'r')
 		for line in f:
-			context_string, note, prob = line.split(" ||| ")
+			context_string, note, prob = line.strip().split(" ||| ")
 			context = tuple(context_string.split())
-			self.add_to_model(context, note, prob)
+			self.add_to_model(context, note, float(prob))
 
 	def add_to_model(self, context, note, prob):
 		if context not in self._lm:
