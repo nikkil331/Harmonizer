@@ -13,8 +13,9 @@ class LanguageModelGenerator(object):
 		self._part = part
 		self._output_file = output_file
 		self._training_paths = []
-		for composer in training_composers:
-			self._training_paths += corpus.getComposer(composer)
+		#for composer in training_composers:
+		#	self._training_paths += corpus.getComposer(composer)
+		self._training_paths = corpus.getBachChorales()
 		self._lm = None
 
 	def transpose(self, stream):
@@ -101,7 +102,7 @@ class LanguageModelGenerator(object):
 				f.write(output_line)
 
 def main():
-	lm_generator = LanguageModelGenerator(part='Bass', output_file='data/bass_language_model_major.txt', ngram_size=3)
+	lm_generator = LanguageModelGenerator(part='Bass', output_file='data/bass_language_model_major.txt', ngram_size=5)
 	lm_generator.generate_lm()
 	lm_generator.write_lm()
 
