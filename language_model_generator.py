@@ -113,10 +113,10 @@ class LanguageModelGenerator(object):
 				f.write(output_line)
 
 def main():
-	lm_generator = LanguageModelGenerator(part='Bass', ngram_size=3)
+	lm_generator = LanguageModelGenerator(part='Bass', ngram_size=1)
 	lm = lm_generator.generate_lm()
 	print lm
-	lm.write_to_file('data/bass_language_model_major.txt')
+	lm.write_to_file('data/1_bass_language_model_major.txt')
 
 if __name__ == "__main__":
     main()
