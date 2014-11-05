@@ -56,19 +56,14 @@ def get_note_rep(note):
     else:
         return "R"
 
-def transpose(stream, mode):
-	curr_pitch = stream.analyze('key').pitchAndMode[0].name
+def transpose(stream):
+	keySig = stream.analyze('key')
+	curr_pitch = keySig.pitchAndMode[0].name
+	mode = keySig.pitchAndMode[1]
 	new_pitch = 'C' if mode == 'major' else 'A'
-	# what is 5 and does this generalize to the bass part???
 	sc = scale.ChromaticScale(curr_pitch + '5')
-	sc_pitches = [str(p) for p in sc.pitches]
-	num_halfsteps = 0
-	pattern = re.compile(new_pitch + '\d')
-	for pitch in sc_pitches:
-		if pattern.match(pitch):
-			break
-		else:
-			num_halfsteps = num_halfsteps + 1
+	sc_pitches = [str(p)[:-1] for p in sc.pitches]
+	num_halfsteps = sc_pitches.index(new_pitch)
 	stream.flat.transpose(num_halfsteps, inPlace=True)
 
 

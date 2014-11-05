@@ -26,8 +26,7 @@ class Evaluator(object):
 		sys.stderr.write('Transposing...')
 		for s in self.testSongs:
 			sys.stderr.write('.')
-			keySig = s.analyze('key')
-			transpose(s, keySig.pitchAndMode[1])
+			transpose(s)
 		sys.stderr.write('\n')
 
 	def evaluate_language_model(self, lm):
