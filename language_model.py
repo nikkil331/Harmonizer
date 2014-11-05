@@ -30,6 +30,8 @@ class LanguageModel(object):
 		return self._lm.keys()
 
 	def get_notes_for_context(self, context):
+		if context not in self._lm:
+			return []
 		return self._lm[context].items()
 
 	def write_to_file(self, path):

@@ -19,7 +19,7 @@ def get_tm_score(m_note, h_note):
 
 def update_hypothesis(curr_hyp, m_note, h_note):
     # update note list
-    new_notes = curr_hyp.notes
+    new_notes = curr_hyp.notes[:]
     new_notes.append(h_note)
 
     # update context sliding window
@@ -61,8 +61,24 @@ for m in melody.flat.notesAndRests:
     m_rep = get_note_rep(m)
     new_beam = []
     for hyp in beam:
+        tm_probs = [p for (h, p) in tm.get_harmonies(m_rep)]
+        tm_avg = sum(tm_probs) / float(len(tm_probs))
+        tm_max = max(tm_probs)
+        tm_min = min(tm_probs)
+        lm_probs = [p for (h, p) in lm.get_notes_for_context(hyp.context)]
+        if lm_probs:
+            lm_avg = sum(lm_probs) / float(len(lm_probs))
+            lm_max = max(lm_probs)
+            lm_min = min(lm_probs)
+        else:
+            lm_avg = 0
+            lm_max = 1
+            lm_min = 0
         for (h, _) in tm.get_harmonies(m_rep):
             new_hyp = update_hypothesis(hyp, m_rep, h)
+            #new_lm_logprob = math.log(abs(math.exp(new_hyp.lm_logprob) - lm_avg) / float(lm_max - lm_min))
+            #new_tm_logprob = math.log(abs(math.exp(new_hyp.tm_logprob) - tm_avg) / float(tm_max - tm_min))
+            #new_hyp = hypothesis(new_hyp.notes, new_hyp.context, new_tm_logprob, new_lm_logprob)
             new_beam.append(new_hyp)
     beam = new_beam
     sys.stderr.write (".")
