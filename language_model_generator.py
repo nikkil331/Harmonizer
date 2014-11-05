@@ -53,7 +53,8 @@ class LanguageModelGenerator(object):
 			sliding_window = tuple(list_window)
 
 	def _create_lm_from_counts(self, smoothing):
-		lm = LanguageModel()
+		lm = LanguageModel(part=self._part)
+		lm.set_ngram_size(self._ngram_size)
 		for context in self._lm_counts:
 			total_notes_after_context = sum(self._lm_counts[context].values())
 			context_counts = self._lm_counts[context].items()

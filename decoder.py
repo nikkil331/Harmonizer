@@ -27,7 +27,7 @@ def update_hypothesis(curr_hyp, m_note, h_note):
     if m_note != "R" or new_context[-1] != "R":
         new_context.append(h_note)
     #get last n
-    new_context = tuple(new_context[-ngram_size:])
+    new_context = tuple(new_context[-lm.ngram_size:])
 
     # update logprob scores
     new_tm_logprob = curr_hyp.tm_logprob + get_tm_score(m_note, h_note)
@@ -44,10 +44,8 @@ optparser = optparse.OptionParser()
 optparser.add_option("--song", dest="song", default="bach/bwv390", help="Song to decode")
 optparser.add_option("--tm", dest="tm", default="data/translation_model_major.txt", help="File containing translation model")
 optparser.add_option("--lm", dest="lm", default="data/language_model_major.txt", help="File containing language model")
-optparser.add_option("--n", dest="n", default='5', help="N-gram size")
 (opts, _) = optparser.parse_args()
 
-ngram_size = int(opts.n)
 lm = LanguageModel(opts.lm)
 tm = TranslationModel(opts.tm)
 song = corpus.parse(opts.song)
