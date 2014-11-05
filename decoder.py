@@ -54,12 +54,16 @@ hypothesis = namedtuple("hypothesis", "notes, context, tm_logprob, lm_logprob")
 beam = [hypothesis(["S"], ("S"), 0.0, 0.0)]
 melody = song.parts[0]
 
-for m in melody.flat.notesAndRests:
+melody_notes = melody.flat.notesAndRests
+song_length = len(melody_notes)
+for (i, m) in enumerate(melody_notes):
     m_rep = get_note_rep(m)
     new_beam = []
     for hyp in beam:
         for (h, _) in tm.get_harmonies(m_rep):
             new_hyp = update_hypothesis(hyp, m_rep, h)
+            if i == song_length:
+                new_hyp = update_hypothesis(new_hyp, 'E', 'E')
             new_beam.append(new_hyp)
     beam = new_beam
     sys.stderr.write (".")

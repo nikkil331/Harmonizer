@@ -31,6 +31,16 @@ class LanguageModelGenerator(object):
 				num_halfsteps = num_halfsteps + 1
 		stream.flat.transpose(num_halfsteps, inPlace=True)
 
+	def _update_count(self, sliding_window, note_rep):
+		if sliding_window not in self._lm_counts:
+				self._lm_counts[sliding_window] = {note_rep: 1}
+		else:
+			if note_rep not in self._lm_counts[sliding_window]:
+				self._lm_counts[sliding_window][note_rep] = 1
+			else:
+				self._lm_counts[sliding_window][note_rep] += 1
+
+
 	def _update_counts(self, harmony):
 		sliding_window = ('S',)
 		for note in harmony.flat.notesAndRests:
@@ -38,19 +48,15 @@ class LanguageModelGenerator(object):
 				note_rep = 'R'
 			else:
 				note_rep = note.nameWithOctave
-			if sliding_window not in self._lm_counts:
-				self._lm_counts[sliding_window] = {note_rep: 1}
-			else:
-				if note_rep not in self._lm_counts[sliding_window]:
-					self._lm_counts[sliding_window][note_rep] = 1
-				else:
-					self._lm_counts[sliding_window][note_rep] += 1
+			self._update_count(sliding_window, note_rep)
 			list_window = list(sliding_window)
 			if not (list_window[-1] is 'R' and note_rep is 'R'):
 				list_window.append(note_rep)
 			if len(list_window) > self._ngram_size:
 				list_window.pop(0)
 			sliding_window = tuple(list_window)
+		self._update_count(sliding_window, 'E')
+
 
 	def _create_lm_from_counts(self, smoothing):
 		lm = LanguageModel(part=self._part)
