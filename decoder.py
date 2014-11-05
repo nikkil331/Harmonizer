@@ -46,8 +46,8 @@ optparser.add_option("--tm", dest="tm", default="data/translation_model_major.tx
 optparser.add_option("--lm", dest="lm", default="data/language_model_major.txt", help="File containing language model")
 (opts, _) = optparser.parse_args()
 
-lm = LanguageModel(opts.lm)
-tm = TranslationModel(opts.tm)
+lm = LanguageModel(path=opts.lm, part="Bass")
+tm = TranslationModel(path=opts.tm, harmony_part="Bass", melody_part="Soprano")
 song = corpus.parse(opts.song)
 
 hypothesis = namedtuple("hypothesis", "notes, context, tm_logprob, lm_logprob")
@@ -63,7 +63,7 @@ for (i, m) in enumerate(melody_notes):
         for (h, _) in tm.get_harmonies(m_rep):
             new_hyp = update_hypothesis(hyp, m_rep, h)
             if i == song_length:
-                new_hyp = update_hypothesis(new_hyp, 'E', 'E')
+                new_hyp = update_hypothesis(new_hyp, 'END', 'END')
             new_beam.append(new_hyp)
     beam = new_beam
     sys.stderr.write (".")

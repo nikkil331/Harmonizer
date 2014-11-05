@@ -13,7 +13,7 @@ class TranslationModelGenerator(object):
 		self._training_paths = []
 		#for composer in training_composers:
 		#	self._training_paths += corpus.getComposer(composer)
-		self._training_paths = corpus.getBachChorales()
+		self._training_paths = corpus.getBachChorales()[:50]
 		self._tm_counts = None
 
 	def transpose(self, stream):

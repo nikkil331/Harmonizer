@@ -66,7 +66,7 @@ def transpose(stream, mode):
 
 results = {}
 
-testSongs = corpus.getBachChorales()[100:]
+testSongs = corpus.getBachChorales()[50:]
 hypothesis = namedtuple("hypothesis", "notes, context, tm_logprob, lm_logprob")
 
 songsSkipped = 0

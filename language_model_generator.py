@@ -13,7 +13,7 @@ class LanguageModelGenerator(object):
 		self._part = part
 		#for composer in training_composers:
 		#	self._training_paths += corpus.getComposer(composer)
-		self._training_paths = corpus.getBachChorales()
+		self._training_paths = corpus.getBachChorales()[:50]
 		self._lm_counts = None
 
 	def transpose(self, stream):
@@ -55,7 +55,7 @@ class LanguageModelGenerator(object):
 			if len(list_window) > self._ngram_size:
 				list_window.pop(0)
 			sliding_window = tuple(list_window)
-		self._update_count(sliding_window, 'E')
+		self._update_count(sliding_window, 'END')
 
 
 	def _create_lm_from_counts(self, smoothing):
