@@ -3,6 +3,7 @@ import optparse
 import re
 import sys
 from translation_model import TranslationModel
+from music_utils import *
 
 class TranslationModelGenerator(object):
 
@@ -15,21 +16,6 @@ class TranslationModelGenerator(object):
 		#	self._training_paths += corpus.getComposer(composer)
 		self._training_paths = corpus.getBachChorales()[50:]
 		self._tm_counts = None
-
-	def transpose(self, stream):
-		curr_pitch = stream.analyze('key').pitchAndMode[0].name
-		new_pitch = 'C' if self._mode == 'major' else 'A'
-		# what is 5 and does this generalize to the bass part???
-		sc = scale.ChromaticScale(curr_pitch + '5')
-		sc_pitches = [str(p) for p in sc.pitches]
-		num_halfsteps = 0
-		pattern = re.compile(new_pitch + '\d')
-		for pitch in sc_pitches:
-			if pattern.match(pitch):
-				break
-			else:
-				num_halfsteps = num_halfsteps + 1
-		stream.flat.transpose(num_halfsteps, inPlace=True)
 
 	def _update_counts(self, melody, harmony):
 		for harmony_note in harmony.flat.notesAndRests:
@@ -79,7 +65,7 @@ class TranslationModelGenerator(object):
 				if keySig.pitchAndMode[1] != self._mode:
 					continue
 				num_songs += 1
-				self.transpose(composition)
+				transpose(composition)
 				melody = composition.parts[self._melody_part]
 				harmony = composition.parts[self._harmony_part]
 				self._update_counts(melody, harmony)

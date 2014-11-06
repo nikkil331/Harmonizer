@@ -20,10 +20,13 @@ class TranslationModel(object):
 			self._tm[melody][harmony] = prob
 
 	def get_probability(self, melody, harmony):
-		if (melody not in self._tm and harmony is not melody) or harmony not in self._tm[melody]:
+		if melody not in self._tm:
+		 	if harmony is not melody:
+				return 1e-10
+			else:
+				return 1.0
+		elif harmony not in self._tm[melody]:
 			return 1e-10
-		elif melody not in self._tm and harmony is melody:
-			return 1.0
 		else:
 			return self._tm[melody][harmony]
 

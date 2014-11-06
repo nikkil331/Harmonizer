@@ -3,6 +3,7 @@ import optparse
 import re
 import sys
 from language_model import LanguageModel
+from music_utils import *
 
 
 class LanguageModelGenerator(object):
@@ -16,21 +17,6 @@ class LanguageModelGenerator(object):
 		self._training_paths = corpus.getBachChorales()[50:]
 		self._lm_counts = None
 
-	def transpose(self, stream):
-		curr_pitch = stream.analyze('key').pitchAndMode[0].name
-		new_pitch = 'C' if self._mode == 'major' else 'A'
-		# what is 5 and does this generalize to the bass part???
-		sc = scale.ChromaticScale(curr_pitch + '5')
-		sc_pitches = [str(p) for p in sc.pitches]
-		num_halfsteps = 0
-		pattern = re.compile(new_pitch + '\d')
-		for pitch in sc_pitches:
-			if pattern.match(pitch):
-				break
-			else:
-				num_halfsteps = num_halfsteps + 1
-		stream.flat.transpose(num_halfsteps, inPlace=True)
-
 	def _update_count(self, sliding_window, note_rep):
 		if sliding_window not in self._lm_counts:
 				self._lm_counts[sliding_window] = {note_rep: 1}
@@ -42,20 +28,27 @@ class LanguageModelGenerator(object):
 
 
 	def _update_counts(self, harmony):
-		sliding_window = ('S',)
-		for note in harmony.flat.notesAndRests:
-			if not note.isNote:
-				note_rep = 'R'
-			else:
-				note_rep = note.nameWithOctave
-			self._update_count(sliding_window, note_rep)
-			list_window = list(sliding_window)
-			if not (list_window[-1] is 'R' and note_rep is 'R'):
-				list_window.append(note_rep)
-			if len(list_window) > self._ngram_size:
-				list_window.pop(0)
-			sliding_window = tuple(list_window)
-		self._update_count(sliding_window, 'END')
+		sliding_window = []
+		sliding_window_size = 0
+		for measure in harmony[1:]:
+			sliding_window.append("BAR")
+			while sliding_window_size > self._ngram_size:
+				if sliding_window.pop(0) != "BAR":
+					sliding_window_size -= 1
+			for note in measure.notesAndRests:
+				if not note.isNote:
+					note_rep = 'R'
+				else:
+					note_rep = note.nameWithOctave
+				self._update_count(tuple(sliding_window), note_rep)
+				if not (sliding_window[-1] is 'R' and note_rep is 'R'):
+					sliding_window.append(note_rep)
+					sliding_window_size += 1
+				while sliding_window_size > self._ngram_size:
+					if sliding_window.pop(0) != "BAR":
+						sliding_window_size -= 1
+
+		self._update_count(tuple(sliding_window), 'END')
 
 
 	def _create_lm_from_counts(self, smoothing):
@@ -85,7 +78,7 @@ class LanguageModelGenerator(object):
 				keySig = composition.analyze('key')
 				if keySig.pitchAndMode[1] == self._mode:
 					num_songs += 1
-					self.transpose(composition)
+					transpose(composition)
 					self._update_counts(harmony)
 
 			except KeyError, e:
@@ -113,10 +106,10 @@ class LanguageModelGenerator(object):
 				f.write(output_line)
 
 def main():
-	lm_generator = LanguageModelGenerator(part='Bass', ngram_size=1)
+	lm_generator = LanguageModelGenerator(part='Bass', ngram_size=3)
 	lm = lm_generator.generate_lm()
 	print lm
-	lm.write_to_file('data/1_bass_language_model_major.txt')
+	lm.write_to_file('data/3_bass_language_model_major.txt')
 
 if __name__ == "__main__":
     main()
