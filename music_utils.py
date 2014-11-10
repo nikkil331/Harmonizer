@@ -56,11 +56,9 @@ def get_note_rep(note):
     else:
         return "R"
 
-def transpose(stream):
+def transpose(stream, new_pitch):
 	keySig = stream.analyze('key')
 	curr_pitch = keySig.pitchAndMode[0].name
-	mode = keySig.pitchAndMode[1]
-	new_pitch = 'C' if mode == 'major' else 'A'
 	sc = scale.ChromaticScale(curr_pitch + '5')
 	sc_pitches = [str(p)[:-1] for p in sc.pitches]
 	num_halfsteps = sc_pitches.index(new_pitch)
