@@ -81,10 +81,9 @@ class TranslationModelGenerator(object):
 
 
 def main():
-	tm = TranslationModel()
-	tm_generator = TranslationModelGenerator(melody_part="Soprano", harmony_part="Bass")
+	tm_generator = TranslationModelGenerator(melody_part="Bass", harmony_part="Alto")
 	tm = tm_generator.generate_tm()
-	tm.write_to_file('data/bass_translation_model_major.txt')
+	tm.write_to_file('data/bass_alto_translation_model_major.txt')
 
 if __name__ == "__main__":
     main()
