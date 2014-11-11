@@ -23,10 +23,8 @@ class TranslationModelGenerator(object):
 				harmony_rep = 'R'
 			else:
 				harmony_rep = harmony_note.nameWithOctave
-			# test this make sure it works
-			harmony_offset = harmony_note.offset
-			melody_notes = melody.getElementsByOffset(harmony_offset, offsetEnd=harmony_offset + harmony_note.duration.quarterLength, 
-												     mustFinishInSpan=False, mustBeginInSpan=False)
+				
+			melody_notes = melody.allPlayingWhileSounding(harmony_note)
 			if harmony_rep not in self._tm_counts:
 				d = {}
 				self._tm_counts[harmony_rep] = d
@@ -69,7 +67,7 @@ class TranslationModelGenerator(object):
 				melody = composition.parts[self._melody_part]
 				harmony = composition.parts[self._harmony_part]
 				self._update_counts(melody, harmony)
-			except Exception, e:
+			except KeyError, e:
 				num_songs_without_part += 1
 
 		print "Number of songs: {0}".format(num_songs)
@@ -81,9 +79,9 @@ class TranslationModelGenerator(object):
 
 
 def main():
-	tm_generator = TranslationModelGenerator(melody_part="Bass", harmony_part="Alto")
+	tm_generator = TranslationModelGenerator(melody_part="soprano", harmony_part="Alto")
 	tm = tm_generator.generate_tm()
-	tm.write_to_file('data/bass_alto_translation_model_major.txt')
+	tm.write_to_file('data/soprano_alto_translation_model_major.txt')
 
 if __name__ == "__main__":
     main()
