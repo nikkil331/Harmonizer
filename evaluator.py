@@ -33,7 +33,11 @@ class Evaluator(object):
 		results = []
 		songsSkipped = 0
 		for s in self.testSongs:
+
 			try:
+				keySig = s.analyze('key')
+				if keySig.pitchAndMode[1] != 'major':
+					continue
 				harmony = s.parts[lm.part].flat.notesAndRests
 				hyp = lm_hypothesis(["S"], ("S"), 0.0)
 				for note in harmony:
@@ -50,6 +54,9 @@ class Evaluator(object):
 		songsSkipped = 0
 		for s in self.testSongs:
 			try:
+				keySig = s.analyze('key')
+				if keySig.pitchAndMode[1] != 'major':
+					continue
 				hyp = 0.0
 				melody = s.parts[tm.melody_part]
 				harmony = s.parts[tm.harmony_part]
@@ -68,16 +75,17 @@ class Evaluator(object):
 
 def main():
 	e = Evaluator()
-	lm_1gram = LanguageModel(path="data/1_bass_language_model_major.txt", part="Bass")
-	lm_2gram = LanguageModel(path="data/2_bass_language_model_major.txt", part="Bass")
-	lm_3gram = LanguageModel(path="data/bass_language_model_major.txt", part="Bass")
-	lm_4gram = LanguageModel(path="data/4_bass_language_model_major.txt", part="Bass")
-	tm = TranslationModel(path="data/bass_translation_model_major.txt", harmony_part="Bass", melody_part="Soprano")
-	print "1 gram: " + str(e.evaluate_language_model(lm_1gram))
-	print "2 gram: " + str(e.evaluate_language_model(lm_2gram))
-	print "3 gram: " + str(e.evaluate_language_model(lm_3gram))
-	print "4 gram: " + str(e.evaluate_language_model(lm_4gram))
-	print "Translation: " + str(e.evaluate_translation_model(tm))
+	lm_major = LanguageModel(path="data/bass_language_model_major.txt", part="Bass")
+	lm_both = LanguageModel(path="data/bass_language_model_both.txt", part="Bass")
+
+	tm_major = TranslationModel(path="data/Soprano_Bass_translation_model_major.txt", harmony_part="Bass", melody_part="Soprano")
+	tm_both = TranslationModel(path="data/Soprano_Bass_translation_model_both.txt", harmony_part="Bass", melody_part="Soprano")
+	tm_adjusted = TranslationModel(path="data/Soprano_Bass_translation_model_major_adjusted.txt", harmony_part="Bass", melody_part="Soprano")
+	print "LM major: " + str(e.evaluate_language_model(lm_major))
+	print "LM both: " + str(e.evaluate_language_model(lm_both))
+	print "TM major: " + str(e.evaluate_translation_model(tm_major))
+	print "TM both: " + str(e.evaluate_translation_model(tm_both))
+	print "TM adjusted: " + str(e.evaluate_translation_model(tm_adjusted))
 
 if __name__ == "__main__":
     main()
