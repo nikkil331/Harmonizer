@@ -79,7 +79,7 @@ class TranslationModelGenerator(object):
 
 
 def main():
-	tm_generator = TranslationModelGenerator(melody_part="soprano", harmony_part="Alto")
+	tm_generator = TranslationModelGenerator(melody_part="Soprano", harmony_part="Alto")
 	tm = tm_generator.generate_tm()
 	tm.write_to_file('data/soprano_alto_translation_model_major.txt')
 
