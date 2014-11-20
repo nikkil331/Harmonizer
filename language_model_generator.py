@@ -76,10 +76,10 @@ class LanguageModelGenerator(object):
 			try:
 				harmony = composition.parts[self._part]
 				keySig = composition.analyze('key')
-				#if keySig.pitchAndMode[1] == self._mode:
-				num_songs += 1
-				transpose(composition)
-				self._update_counts(harmony)
+				if keySig.pitchAndMode[1] == self._mode:
+					num_songs += 1
+					transpose(composition)
+					self._update_counts(harmony)
 
 			except KeyError, e:
 				num_songs_without_part += 1
@@ -106,21 +106,10 @@ class LanguageModelGenerator(object):
 				f.write(output_line)
 
 def main():
-	lm_generator = LanguageModelGenerator(part='Soprano', ngram_size=3, mode='minor')
+	lm_generator = LanguageModelGenerator(part='Alto', ngram_size=3)
 	lm = lm_generator.generate_lm()
-	lm.write_to_file('data/Soprano_language_model_both.txt')
-
-	lm_generator = LanguageModelGenerator(part='Alto', ngram_size=3, mode='both')
-	lm = lm_generator.generate_lm()
-	lm.write_to_file('data/Alto_language_model_both.txt')
-
-	lm_generator = LanguageModelGenerator(part='Tenor', ngram_size=3, mode='both')
-	lm = lm_generator.generate_lm()
-	lm.write_to_file('data/Tenor_language_model_both.txt')
-
-	lm_generator = LanguageModelGenerator(part='Bass', ngram_size=3, mode='both')
-	lm = lm_generator.generate_lm()
-	lm.write_to_file('data/Bass_language_model_both.txt')
+	print lm
+	lm.write_to_file('data/alto_language_model_major.txt')
 
 if __name__ == "__main__":
     main()

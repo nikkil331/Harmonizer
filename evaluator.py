@@ -33,9 +33,6 @@ class Evaluator(object):
 		results = []
 		songsSkipped = 0
 		for s in self.testSongs:
-			keySig = s.analyze('key')
-			if keySig.pitchAndMode[1] != 'major':
-				continue
 			try:
 				harmony = s.parts[lm.part].flat.notesAndRests
 				hyp = lm_hypothesis(["S"], ("S"), 0.0)
@@ -52,21 +49,18 @@ class Evaluator(object):
 		results = []
 		songsSkipped = 0
 		for s in self.testSongs:
-			keySig = s.analyze('key')
-			if keySig.pitchAndMode[1] != 'major':
-				continue
 			try:
 				hyp = 0.0
 				melody = s.parts[tm.melody_part]
 				harmony = s.parts[tm.harmony_part]
 				for h in harmony.flat.notesAndRests:
 					h_note = get_note_rep(h)
-					m_notes =  [get_note_rep(m) for m in melody.allPlayingWhileSounding(h).flat.notesAndRests]
+					m_notes =  [get_note_rep(m) for m in melody.allPlayingWhileSounding(h)]
 					for m_note in m_notes:
 						hyp = update_tm_hypothesis(tm, hyp, m_note, h_note)
 				results.append(float(hyp)/len(harmony.flat.notesAndRests))
 
-				'''
+'''
 				for m in melody.flat.notesAndRests:
 					m_note = get_note_rep(m)
 					h_notes = [get_note_rep(h) for h in get_harmony_notes(m, harmony)]
@@ -83,19 +77,16 @@ class Evaluator(object):
 
 def main():
 	e = Evaluator()
-	lm_major = LanguageModel(path='data/Soprano_language_model_major.txt', part="Soprano")
-	lm_both = LanguageModel(path='data/Soprano_language_model_both.txt', part="Soprano")
-
-	tm_major = TranslationModel(path="data/Soprano_Alto_translation_model_major.txt", harmony_part="Alto", melody_part="Soprano")
-	tm_both = TranslationModel(path="data/Soprano_Alto_translation_model_both.txt", harmony_part="Alto", melody_part="Soprano")
-	tm_adjusted = TranslationModel(path="data/Soprano_Alto_translation_model_major_adjusted.txt", harmony_part="Alto", melody_part="Soprano")
-
-	print "Language major: " + str(e.evaluate_language_model(lm_major))
-	print "Language both: " + str(e.evaluate_language_model(lm_both))
-
-	print "Translation major: " + str(e.evaluate_translation_model(tm_major))
-	print "Translation both: " + str(e.evaluate_translation_model(tm_both))
-	print "Translation adjusted: " + str(e.evaluate_translation_model(tm_adjusted))
+	lm_1gram = LanguageModel(path="data/1_bass_language_model_major.txt", part="Bass")
+	lm_2gram = LanguageModel(path="data/2_bass_language_model_major.txt", part="Bass")
+	lm_3gram = LanguageModel(path="data/bass_language_model_major.txt", part="Bass")
+	lm_4gram = LanguageModel(path="data/4_bass_language_model_major.txt", part="Bass")
+	tm = TranslationModel(path="data/bass_translation_model_major.txt", harmony_part="Bass", melody_part="Soprano")
+	print "1 gram: " + str(e.evaluate_language_model(lm_1gram))
+	print "2 gram: " + str(e.evaluate_language_model(lm_2gram))
+	print "3 gram: " + str(e.evaluate_language_model(lm_3gram))
+	print "4 gram: " + str(e.evaluate_language_model(lm_4gram))
+	print "Translation: " + str(e.evaluate_translation_model(tm))
 
 if __name__ == "__main__":
     main()

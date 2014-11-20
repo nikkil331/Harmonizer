@@ -91,7 +91,6 @@ class Decoder(object):
         beam = self._grow_hyps_in_beam(["END" for _ in self._parts], beam)
         beam = sorted(beam, key = lambda hyp: get_score(hyp.tm_logprob, hyp.lm_logprob), reverse=True)[:1000]
         winner = [n for n in beam[0].notes if n != "BAR" and n != "END"]
-        score = get_score(beam[0].tm_logprob, beam[0].lm_logprob)
 
         # translate note sequence into music21 stream
         harmony = copy.deepcopy(self._parts[0][1])
@@ -103,7 +102,7 @@ class Decoder(object):
             else:
                 h.pitch = pitch.Pitch(winner[i])
 
-        return (harmony, score)
+        return harmony
 
 
 

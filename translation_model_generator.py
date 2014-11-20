@@ -31,16 +31,15 @@ class TranslationModelGenerator(object):
 			else:
 				d = self._tm_counts[harmony_rep]
 
-			total_length = sum([n.quarterLength for n in melody_notes.flat.notesAndRests])
 			for melody_note in melody_notes.flat.notesAndRests:
 				if not melody_note.isNote:
 					melody_rep = 'R'
 				else:
 					melody_rep = melody_note.nameWithOctave
 				if melody_rep not in d:
-					d[melody_rep] = float(melody_note.quarterLength)/total_length
+					d[melody_rep] = 1
 				else:
-					d[melody_rep] += float(melody_note.quarterLength)/total_length
+					d[melody_rep] += 1
 
 	def _create_tm_from_counts(self):
 		tm = TranslationModel(harmony_part=self._harmony_part, melody_part=self._melody_part)
@@ -61,12 +60,13 @@ class TranslationModelGenerator(object):
 			composition = corpus.parse(path)
 			try: 
 				keySig = composition.analyze('key')
-				if keySig.pitchAndMode[1] == self._mode:
-					num_songs += 1
-					transpose(composition)
-					melody = composition.parts[self._melody_part]
-					harmony = composition.parts[self._harmony_part]
-					self._update_counts(melody, harmony)
+				if keySig.pitchAndMode[1] != self._mode:
+					continue
+				num_songs += 1
+				transpose(composition)
+				melody = composition.parts[self._melody_part]
+				harmony = composition.parts[self._harmony_part]
+				self._update_counts(melody, harmony)
 			except KeyError, e:
 				num_songs_without_part += 1
 
@@ -79,14 +79,9 @@ class TranslationModelGenerator(object):
 
 
 def main():
-	parts = ["Soprano", "Alto", "Tenor", "Bass"]
-
-	for p1 in parts:
-		for p2 in parts:
-			if p1 != p2:
-				tm_generator = TranslationModelGenerator(melody_part=p1, harmony_part=p2)
-				tm = tm_generator.generate_tm()
-				tm.write_to_file('data/{0}_{1}_translation_model_major_adjusted.txt'.format(p1,p2))
+	tm_generator = TranslationModelGenerator(melody_part="Soprano", harmony_part="Alto")
+	tm = tm_generator.generate_tm()
+	tm.write_to_file('data/soprano_alto_translation_model_major.txt')
 
 if __name__ == "__main__":
     main()
