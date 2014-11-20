@@ -53,21 +53,12 @@ class Evaluator(object):
 				hyp = 0.0
 				melody = s.parts[tm.melody_part]
 				harmony = s.parts[tm.harmony_part]
-				for h in harmony.flat.notesAndRests:
-					h_note = get_note_rep(h)
-					m_notes =  [get_note_rep(m) for m in melody.allPlayingWhileSounding(h)]
-					for m_note in m_notes:
-						hyp = update_tm_hypothesis(tm, hyp, m_note, h_note)
-				results.append(float(hyp)/len(harmony.flat.notesAndRests))
-
-'''
 				for m in melody.flat.notesAndRests:
 					m_note = get_note_rep(m)
 					h_notes = [get_note_rep(h) for h in get_harmony_notes(m, harmony)]
 					for h_note in h_notes:
 						hyp = update_tm_hypothesis(tm, hyp, m_note, h_note)
 				results.append(float(hyp)/len(harmony.flat.notesAndRests))
-				'''
 
 			except KeyError, e:
 				songsSkipped += 1
