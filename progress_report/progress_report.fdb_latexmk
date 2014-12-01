@@ -1,13 +1,13 @@
 # Fdb version 3
-["bibtex progress_report"] 1417401498 "progress_report.aux" "progress_report.bbl" "progress_report" 1417408507
+["bibtex progress_report"] 1417401498 "progress_report.aux" "progress_report.bbl" "progress_report" 1417457185
   "/usr/local/texlive/2013/texmf-dist/bibtex/bst/base/plain.bst" 1292289607 20613 bd3fbfa9f64872b81ac57a0dd2ed855f ""
-  "progress_report.aux" 1417408507 2358 c59537981fc165c4a137c7f249ed1b2a ""
+  "progress_report.aux" 1417457184 2358 c59537981fc165c4a137c7f249ed1b2a ""
   "progress_report.bcf" 0 -1 0 ""
   "progress_report.bib" 1416852909 4451 43ffe621c4058e2e8afdb2149c966bf4 ""
   (generated)
   "progress_report.blg"
   "progress_report.bbl"
-["pdflatex"] 1417408506 "progress_report.tex" "progress_report.pdf" "progress_report" 1417408507
+["pdflatex"] 1417457183 "progress_report.tex" "progress_report.pdf" "progress_report" 1417457185
   "/usr/local/texlive/2013/texmf-dist/tex/context/base/supp-pdf.mkii" 1337017135 71627 94eb9990bed73c364d7f53f960cc8c5b ""
   "/usr/local/texlive/2013/texmf-dist/tex/generic/oberdiek/etexcmds.sty" 1335995445 7612 c47308d923ec19888707b0f1792b326a ""
   "/usr/local/texlive/2013/texmf-dist/tex/generic/oberdiek/ifluatex.sty" 1303254447 7324 11d14f318d865f420e692d4e6c9c18c3 ""
@@ -45,9 +45,9 @@
   "/usr/local/texlive/2013/texmf-dist/tex/latex/pdftex-def/pdftex.def" 1306616590 55368 3c8a0d99822330f2dfabc0dfb09ce897 ""
   "/usr/local/texlive/2013/texmf-dist/tex/latex/url/url.sty" 1264379145 21932 e3a9cf32ee9b853b42be14c2f25b873c ""
   "design_overview.png" 1416855457 39585 2645c586c0abd485cc01ba4adbfb9ca2 ""
-  "progress_report.aux" 1417408507 2358 c59537981fc165c4a137c7f249ed1b2a ""
+  "progress_report.aux" 1417457184 2358 c59537981fc165c4a137c7f249ed1b2a ""
   "progress_report.bbl" 1417401499 2586 562f958a5a4f5b9155213865251e007d "bibtex progress_report"
-  "progress_report.tex" 1417408506 29250 1a073e38bd9493841225c3bbf774b072 ""
+  "progress_report.tex" 1417457183 29299 449850f7bf1a184671c487a8a4dd29f0 ""
   "sig-alternate.cls" 1376969011 58016 671190e929fd2b32b46dd0fe92041a8b ""
   (generated)
   "progress_report.log"
