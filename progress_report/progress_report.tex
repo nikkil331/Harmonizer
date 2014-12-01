@@ -172,7 +172,7 @@ we used third-party software called Music21 \cite{Cuthbert_music21:a}, a library
 \subsection{Model Generation}
 The translation and language models are implemented as nested dictionaries. The outer dictionary maps the given parameter, $A$, to the inner dictionary, which maps the unknown parameter, $B$, to the probability $P(B | A)$. In the case of the translation model, $A$ is a harmony note and $B$ is a melody note, while in the language model, $A$ is the sequence of $(i - 1) ... (i - n)$ harmony notes and $B$ is the $i^{th}$ harmony note.
 
-The probabilities are calculated based on the counts of the events in the training compositions, plus smoothing techniques applied so that no event is assigned a zero probability. In this first iteration of explaining the probability calculation, we omit the smoothing techniques for the ease of explanation. Formally, the translation probabilities are given by:\\
+The probabilities are calculated based on the counts of the events in the training compositions, plus smoothing techniques applied so that no event is assigned a zero probability. For now, we omit the smoothing techniques for the ease of explanation. Formally, the translation probabilities are given by:\\
 
 $P(m_{i} | h_{i}) = \frac{count(m_{i} \wedge h_{i})}{count(h_{i})}$\\
 
@@ -180,17 +180,19 @@ and the language ngram probabilities are given by: \\
 
 $P(h_{i} | h_{i - 1} ... h_{i - n}) = \frac{count(h_{i} \wedge h_{i - 1} \wedge ... \wedge h_{i - n})}{count(h_{i - 1} \wedge ... \wedge h_{i - n})}$\\
 
+The event $m_{i} \wedge h_{i}$, as seen in the translation probability formula, occurs whenever the note $m_{i}$ is sounding in the melody at the same time as $h_{i}$ is sounding in the harmony. To compute these counts, we iterate through each note $m_{i}$ in the melody and update the counts for event $m_{i} \wedge h_{j}$ for all notes $h_{j}$ that have any portion of their duration sounding at the same time as any portion of the duration of $m_{i}$. Specifically, there is no requirement that the entirety of $h_{i}$ has to sound within the sounding duration of $m_{i}$ or vice versa. 
+
+The event $h_{i} \wedge ... \wedge h_{i - n}$, as seen in the ngram probability formula, occurs whenever the notes $h_{i - n}, h_{i - n + 1}, ..., h_{i}$ appear contiguously in that order in the haromny line. 
+
 In the language model, to avoid any events having zero probability, we use LaPlace smoothing, also known as additive smoothing. Specifically, for some smoothing constant $\alpha$, the language ngram probabilities are given by: \\
 
 $P(h_{i} | h_{i - 1} ... h_{i - n}) = \frac{count(h_{i} \wedge h_{i - 1} \wedge ... \wedge h_{i - n}) + \alpha}{count(h_{i - 1} \wedge ... \wedge h_{i - n}) + (48\alpha)}$\\
 
 The constant $48$ in the equation above is meant to be the number of possible note values for the variable $h_{i}$. It is derived from the fact that there are 12 notes in each octave and that 4 is a very liberal estimate for how many octaves a particular voice can span. An alternate approach that we may experiment with would be to use, instead of $48$, the number of values for $h_{i}$ actually seen with the context $h_{i -1} ... h_{i - n}$, plus an additional $1$, for the ``unobserved'' note.
 
-At the current point, the translation model is not smoothed because the system never considers generating harmony notes that were not seen with the input melody note in the training data. However, it is likely that that will change in the future, necessitating that we implement smoothing for the translation probabilties, probably similarly to how it has been implemented in the language model. 
+At the current point, the translation model is not smoothed because the system never considers generating harmony notes that were not seen with the input melody note in the training data. However, it is likely that that will change in the future, necessitating that we implement smoothing for the translation probabilties similarly to how it has been implemented in the language model. 
 
 Lastly, the values of the variables $n$ and $\alpha$ have so far been left unspecified because they are not yet finalized in the implementation. We intend to tune their values to maximize system performance on a cross-validation set of compositions. Their current values, however, are $n = 3$ and $\alpha = 1e-5$.
-
-%TODO talk about how h ^ m events are determined (sounding at the same time)
 
 \subsection{Note Representation}
 We represent notes in the language and translation models as strings of pitch and octave number. Timing properties are currently not stored in the note representation because we have not yet integrated timing variation into the system. If timing were to be integrated, we propose adding an additional number to the end of the note's string representation describing the note's quarter length. For example, a whole note would have the number $4$ added to it's representation and an eighth note would have the number $0.5$ added to its representation. 
@@ -199,7 +201,6 @@ We also consider rests, moments of silence in the composition, to be ``notes'' i
 
 Measure bars are also modeled as ``notes'' our system. They are represented by the string ``BAR''. A special measure bar, the bar at the end of last measure in the song is given a special representation, ``END''. These notes are slightly different in that they are only present in our language model. ``BAR'' and ``END'' can only be harmonized with actual measure bars and song end in the given melody line, so there is no need to include them in the translation model. The motivation for including ``BAR'' and ``END'' in the language model is that they provide information about where in the composition the notes are being produced. Some notes may be more likely to start or end measures and some sequences of notes may be more likely to end a song. Coming back to the analogies between languages and musical voices, the ``BAR'' and ``END'' symbols can be likened to punctuation marks, which can give very strong cues about which words to generate, given that a string of natural language, a sentence for example, is about to end.
 
-%TODO: talk about ngram size with bar and end included
 \subsection {Decoder}
 The goal of the decoder is to find the harmony line $H$ such that $H$ maximizes the probability of $P(H | M)$. However, the search space is much too large to enumerate all possible harmony lines in order to determine the best. Assuming the harmony voice spans no more than 4 octaves and that there are 12 notes in an octave, an exhaustive search of all harmony lines for a song with $n$ melody notes would require the inspection of $(12\cdot 4)^{n} = 48^{n}$ harmony lines. For an average length song comprised of $100$ melody notes, the number of possible harmony lines comes out to $48^{100} \approx 1.3e+168$. 
 
@@ -208,7 +209,31 @@ In light of this fact, we instead use a beam search decoder which only considers
 For each note in the melody, the decoder finds all possible harmony notes that can sound with that melody note, call it $m$. The harmony possibilities are just all the harmony notes $h$ s.t. $p(m | h)$ is in the translation model. Then the decoder constructs $S_{t + 1}$ by examining each hypothesis in $S_{t}$. For each hypothesis $hyp \in S_{t}$, a new hypothesis is constructed for each possible harmony note $h$, where the new hypothesis is just $h$ appended to $hyp$. All the new hypothesis generated in this iteration are added to $S_{t + 1}$. After all the new hypothesis have been added, the hypotheses in $S_{t + 1}$ are sorted in descending order by their $P(hyp | m_{0} ... m_{t})$ values, and only the top $k$ are saved for the next iteration.
 The parameter $k$ will be tuned to maximize system performance while keeping time and space complexity in check. Currently, $k = 1000$.
 
-%TODO:  Multi- Source (ways of combining translation models & deciding orders), Evaluation Metrics
+\subsection {Generating Multiple Parts}
+The decoder was decribed above with the assumption that there is only one melody line for  which to create translations. In reality, when generating multiple harmony parts, the $j^{th}$ harmony voice generated will be constrained by several source voices: the melody line, $M$ and the $j-1$ previous harmony voices generated. Let this set of source voices be defined as follows\\
+
+$S^{j} = {M} \cup \{\ H^k | 1 \leq k \leq j- 1\ \} $\\
+
+
+Therefore for a given position $i$ in the source voices, the harmony possibilities can also be chosen out of the notes $h$ s.t. $p(H^{k}_{i} | h)$ are in the translation model from the $k^{th}$ harmony voice to the $j^{th}$ harmony voice where $1 \leq k \leq j - 1$. In the current implementation the possible harmonies are actually given by \\
+
+$\bigcap_{s \in S^{j}} \{\ h\ |\ p(s_{i} | h) \in\ $translation model$\ \}$\\
+
+Taking the intersection is simpler because the probabilities of the generated harmony note $h$ sounding with the $i^{th}$ note in any of the source voices is non-zero. In the future, we want to experiment with taking the union of the possible harmonies as well, which would require the implementation of smoothing in the translation model so that there are no events with zero probability. 
+
+We have now explained how harmony lines are generated given multiple source voices, but we have not yet demonstrated how we decide which voices are generated first. One option is to choose an arbitrary ordering that we believe to be sufficient. However, there is no guarantee that an ordering that produces nice sounding harmonies for several compositions will produce optimal harmonies for all compositions. We propose two methods for determining the best order for the given composition: trying all orderings and greedy search for the best ordering. The first option is our current implementation; the second has not yet been implemented.
+
+The first option requires us to generate $(n - 1)!$ outputs, where $n - 1$ is the number of harmony voices to be output. This leads to a total of $(n -1)\cdot((n-1)!)$ individual harmony lines that needs to be generated. This method is obviously not feasible for arbitrary $n$. However, to produce an average size musical arrangement with just $4$ parts, one of which is the melody, would require the production of only $6$ full arrangements. Out of those $6$, the currently-implemented order choosing algorithm outputs the production that maximizes the value\\
+
+$\sum_{j = 1}^{n - 1} \lbrack\ \lbrack\prod_{k = 0}^{j - 1} P(H^{k} | H^{j})\ \rbrack \cdot P(H^{j})\ \rbrack\ \ \ H^{0} = M$\\
+
+The value above is just the sum of the proababilities that each generated harmony attempts to maximize. For each harmony voice generated, the probability is dependent upon the values of the harmony voices generated before it. Another metric that could potentially be used with this method is as formalized as follows: \\
+
+$\sum_{j = 1}^{n - 1} \lbrack\ \lbrack\prod_{k \neq j} P(H^{k} | H^{j})\ \rbrack \cdot P(H^{j})\ \rbrack\ \ \ H^{0} = M$\\
+
+In the above metric, the probabilities of the generated harmony voices are constrained by all the other harmony voices, not just by those that existed at the time of that harmony voices generation. 
+
+The second method, greedily chosing the ordering, would work as follows. All harmony voices not yet generated would be generated with the current source voices. The voice with the highest probability given the source voices will be added to the source voices, and the process will continue until all harmony voices are in the set of source voices. The intuition behind this method is that you would like to build up your musical arrangement with the strongest harmony voices possible. To clarify, if the first harmony voice generated is of low quality, all other voices to be generated will be constrained by that low-quality voice, possibly producing even more low-quality voices. This method has an advantage over the first in that it only produces $(n-1)^{2}$ harmony lines, instead of $(n -1)\cdot((n-1)!)$, which makes it much more well-suited for scaling with arbitrary $n$.
 
 \section{System Performance}
 \label{sec:sys_perform}
