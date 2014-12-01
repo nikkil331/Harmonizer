@@ -24,7 +24,7 @@ class TranslationModelGenerator(object):
 			else:
 				harmony_rep = harmony_note.nameWithOctave
 				
-			melody_notes = melody.allPlayingWhileSounding(harmony_note)
+			melody_notes = melody.flat.notesAndRests.allPlayingWhileSounding(harmony_note)
 			if harmony_rep not in self._tm_counts:
 				d = {}
 				self._tm_counts[harmony_rep] = d
