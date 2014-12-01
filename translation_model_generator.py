@@ -18,28 +18,63 @@ class TranslationModelGenerator(object):
 		self._tm_counts = None
 
 	def _update_counts(self, melody, harmony):
-		for harmony_note in harmony.flat.notesAndRests:
-			if not harmony_note.isNote:
-				harmony_rep = 'R'
-			else:
-				harmony_rep = harmony_note.nameWithOctave
-				
-			melody_notes = melody.allPlayingWhileSounding(harmony_note)
-			if harmony_rep not in self._tm_counts:
-				d = {}
-				self._tm_counts[harmony_rep] = d
-			else:
-				d = self._tm_counts[harmony_rep]
+		melody_phrase_raw = stream.Stream()
+		for melody_note in melody.flat.notesAndRests:
 
-			for melody_note in melody_notes.flat.notesAndRests:
-				if not melody_note.isNote:
-					melody_rep = 'R'
+			melody_phrase_raw.append(melody_note)
+			if len(melody_phrase_raw) == 2:
+				melody_phrase = []
+				melody_duration = 0
+				for melody_note in melody_phrase_raw:
+					length = melody_note.duration.quarterLength
+					melody_duration += length
+					if not melody_note.isNote:
+						melody_phrase.append('R:' + str(length))
+					else:
+						melody_phrase.append(melody_note.nameWithOctave + ":" + str(length))
+
+				melody_phrase_tuple = tuple(melody_phrase)
+
+				harmony_phrase_raw = [h for note in\
+					melody_phrase_raw for h in harmony.flat.notesAndRests\
+					.allPlayingWhileSounding(note) ]
+
+				harmony_phrase = []
+				for (i, harmony_note) in enumerate(harmony_phrase_raw):
+					length = 0
+					if i == 0:
+						length = harmony_note.duration.quarterLength + harmony_note.offset
+					elif i == len(harmony_phrase_raw) - 1:
+						harmony_duration = sum([float(s.split(":")[1]) for s in harmony_phrase])
+						if harmony_duration + harmony_note.duration.quarterLength > melody_duration:
+							length = melody_duration - harmony_duration
+						else:
+							length = harmony_note.duration.quarterLength
+					else:
+						if harmony_note.offset < 0:
+							harmony_phrase.pop()
+						length = harmony_note.duration.quarterLength
+
+					if length == 0:
+						continue
+
+					if not harmony_note.isNote:
+						harmony_phrase.append('R:' + str(length))
+					else:
+						harmony_phrase.append(harmony_note.nameWithOctave + ":" + str(length))
+
+				harmony_phrase_tuple = tuple(harmony_phrase)
+
+				if harmony_phrase_tuple not in self._tm_counts:
+					d = {}
+					self._tm_counts[harmony_phrase_tuple] = d
+
+				if melody_phrase_tuple not in self._tm_counts[harmony_phrase_tuple]:
+					self._tm_counts[harmony_phrase_tuple][melody_phrase_tuple] = 1
 				else:
-					melody_rep = melody_note.nameWithOctave
-				if melody_rep not in d:
-					d[melody_rep] = 1
-				else:
-					d[melody_rep] += 1
+					self._tm_counts[harmony_phrase_tuple][melody_phrase_tuple] += 1
+
+				melody_phrase_raw = stream.Stream()
 
 	def _create_tm_from_counts(self):
 		tm = TranslationModel(harmony_part=self._harmony_part, melody_part=self._melody_part)
@@ -67,6 +102,7 @@ class TranslationModelGenerator(object):
 				melody = composition.parts[self._melody_part]
 				harmony = composition.parts[self._harmony_part]
 				self._update_counts(melody, harmony)
+
 			except KeyError, e:
 				num_songs_without_part += 1
 
@@ -79,9 +115,15 @@ class TranslationModelGenerator(object):
 
 
 def main():
-	tm_generator = TranslationModelGenerator(melody_part="soprano", harmony_part="Alto")
-	tm = tm_generator.generate_tm()
-	tm.write_to_file('data/soprano_alto_translation_model_major.txt')
+	parts = ["Soprano", "Alto", "Tenor", "Bass"]
+	for p1 in parts:
+		for p2 in parts:
+			if p1 != p2:
+				print p1, p2
+				tm_generator = TranslationModelGenerator(melody_part=p1, harmony_part=p2)
+				tm = tm_generator.generate_tm()
+				tm.write_to_file('data/{0}_{1}_translation_model_major_rhythm.txt'.format(p1,p2))
+
 
 if __name__ == "__main__":
     main()

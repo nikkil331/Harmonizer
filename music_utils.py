@@ -52,9 +52,9 @@ def update_tm_hypothesis(tm, curr_hyp, m_note, h_note):
 
 def get_note_rep(note):
     if note.isNote:
-        return note.nameWithOctave
+        return note.nameWithOctave + ":" + str(note.duration.quarterLength)
     else:
-        return "R"
+        return "R:" + note.duration.quarterLength
 
 def transpose(stream):
 	keySig = stream.analyze('key')
