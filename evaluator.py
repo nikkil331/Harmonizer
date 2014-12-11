@@ -43,11 +43,11 @@ class Evaluator(object):
 				for note in harmony:
 					note_rep = get_note_rep(note)
 					hyp = update_lm_hypothesis(lm, hyp, note_rep)
-				results.append(float(hyp.lm_logprob)/len(harmony))
+				results.append(-float(hyp.lm_logprob))
 			except KeyError, e:
 				songsSkipped += 1
 		#print "Songs skipped: {0}".format(songsSkipped)
-		return sum(results)/len(results)
+		return sum(results)
 
 	def evaluate_translation_model(self, tm):
 		results = []
@@ -65,13 +65,13 @@ class Evaluator(object):
 					h_notes = [get_note_rep(h) for h in get_harmony_notes(m, harmony)]
 					for h_note in h_notes:
 						hyp = update_tm_hypothesis(tm, hyp, m_note, h_note)
-				results.append(float(hyp)/len(harmony.flat.notesAndRests))
+				results.append(float(hyp))
 
 			except KeyError, e:
 				songsSkipped += 1
 
 		#print "Songs skipped: {0}".format(songsSkipped)
-		return sum(results)/len(results)
+		return sum(results)
 
 def main():
 	e = Evaluator()
