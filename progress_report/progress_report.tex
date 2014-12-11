@@ -241,7 +241,7 @@ $log_2 PP = - \sum_{s} log_2 p_{TM}(m_s|h_s)$\\
 
 Similarly, the perplecity of a language model $p_{LM}$ is defined over all songs $s$ in our test set as:\\
 
-$log_2 PP = - \sum_{s} log_2 p_{LM}(h_s)$
+$log_2 PP = - \sum_{s} log_2 p_{LM}(h_s)$\\
 
 This measure gives us a real number metric to evaluate different iterations of our language and translation models. We will evaluate our models using this metric based a small subset of major Bach chorales, pulled from the same corpus but not overlapping with our training data.
 
@@ -251,7 +251,7 @@ We created three different language models for each part (Soprano, Alto, Tenor, 
   \begin{center}
       \begin{tabular}{| l | l | l | l | l |}
       \hline
-       Harmony Part & Major & Minor & Both \\ \hline
+       Voice & Major & Minor & Both \\ \hline
        Soprano &  10638.29 & 12174.72 & 9620.13  \\ \hline
        Alto &  10640.96 & 11842.22 & 9548.49 \\ \hline
        Tenor & 11549.71 & 12080.88 & 10015.16 \\ \hline
@@ -294,7 +294,7 @@ A similar approach was taken to creating different types of translation models, 
 In Table 2, we see exactly the same trend as what we saw for the language models in Table 1 - the models trained on both major and minor have the lowest perplexities, followed by the models trained on major, and finally the models trained on minor. The same complications that applied to the language models are still relevant here, although this is still a good indication that our translation models are making consistent predictions with our langauge models.
 
 \subsection{Qualitative evaluation}
-In Figure 1, we have the last three measures of one of the generated compositions from the most recent iteration of our algorithm. The Soprano part was given, and the rest of the voices were generated, with the Bass generated first, then Alto, then Tenor, as this seemed subjectively to produce the best result, and the algorithm to find the best ordering has not yet been implemented. The major language and translation models were used for the same reason. Each note will be referred to by the first letter of its voice, followed by the index of the note in the voice (e.g. S3, T5). As is conventional, the Soprano and Alto parts are written in treble clef, while the Tenor and Bass parts are written in bass clef.
+In Figure 1, we have the last two measures of one of the generated compositions from the most recent iteration of our algorithm. The Soprano part was given, and the rest of the voices were generated, with the Bass generated first, then Alto, then Tenor, as this seemed subjectively to produce the best result, and the algorithm to find the best ordering has not yet been implemented. The major language and translation models were used for the same reason. Each note will be referred to by the first letter of its voice, followed by the index of the note in the voice (e.g. S3, T5). As is conventional, the Soprano and Alto parts are written in treble clef, while the Tenor and Bass parts are written in bass clef.
 
 \subsubsection{Motion}
 
@@ -304,13 +304,13 @@ We can also see examples of oblique motion, in which one voice moves while the o
 Finally, we have some examples of similar motion, which is when notes move in the same direction, and parallel motion, which is similar motion where the notes move exactly the same distance. Parallel motion is considered the worst kind of motion, with similar motion being slightly better. Some amount of similar motion cannot be avoided in compositions with more than three parts. However, we have examples of parallel motion betwween S3-S4 and A3-A4 and T3-T4, which is not ideal. This suggests that improvements could be made to our algorithm to pay closer attention to motion in order to avoid these outputs.
 
 \subsubsection{Harmonies}
-The chords comprised of each of the voices in this example actually make the chords C (1), G (2), Dm7 (3), G (4), and C (5). This is interesting because there was no part of the algorithm deciding what chord to generate at each step, only the individual notes in relation to each other. Regardless, it created this set of chords, which is a reasonable chord progression to find in a piece of music similar to the data we trained on. Additionally, the last three chords comprase a ii-V-I (two-five-one) cadence, which is a very common way to end compositions.
+The chords comprised of each of the voices in this example actually make the chords C (1), G (2), Dm7 (3), G (4), and C (5). This is interesting because there was no part of the algorithm deciding what chord to generate at each step, only the individual notes in relation to each other. Regardless, it created this set of chords, which is a reasonable chord progression to find in a piece of music similar to the data we trained on. Additionally, the last three chords comprise a ii-V-I (two-five-one) cadence, which is a very common way to end compositions.
 
 
 
 \begin{figure}
   \includegraphics[scale=0.8]{measures.png}
-  \caption{The last 3 measures of a generated composition.}
+  \caption{The last 2 measures of a generated composition.}
 \end{figure}
 
 
@@ -330,7 +330,6 @@ In addition to these alterations, more information could be added to each model.
 \bibliographystyle{plain}     % Please do not change the bib-style
 \bibliography{progress_report}  % Just the *.BIB filename
 
-\appendix
 \label{app}
 
 
