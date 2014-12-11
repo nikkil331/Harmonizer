@@ -1,4 +1,3 @@
-
 \documentclass{sig-alternate}
 \usepackage{mdwlist}
 \usepackage{url}
@@ -45,8 +44,8 @@ about pitch and timing. A \textit{harmony} will be a sequence of output notes wh
 the constraint that the sequence of notes supports the input melody. We define the term \textit{voice}
 to be some sequence of notes, either a melody or one of the harmonies, with a certain set of identifying 
 characteristics. For example, the bass part in rock music is one type of voice and the soprano's part in an 
-opera is another. The end result we wish to generate will be a group of $n$ voices--the input melody and 
-$n-1$ automatically-composed harmonies--that, when played together, sound coherent and pleasant.
+opera is another. The end result we wish to generate will be a group of $n$ voices---the input melody and 
+$n-1$ automatically-composed harmonies---that, when played together, sound coherent and pleasant.
 
 We propose to approach the problem from the view point of machine translation, where the input language
 is the melody and the target languages are the specific harmony voices to be generated.
@@ -116,7 +115,7 @@ Modeled as a machine translation problem, the problem of automatic harmonization
 and the desired harmony voices as the target languages. Though we can map these two problems' inputs and outputs cleanly, we
 need to build more intuition as to why a machine translation approach makes sense. There are two main analogies between natural language and musical voices that lead us to believe that machine translation techniques could successfully solve the problem of automatic harmonization. The first analogy is that both natural languages and musical voices have a sense of ``word translations''. Just as there may be several words in the target language that could be sensible translations of a given word in the source 
 langauge, there are also several notes in the harmony voice that can harmonize well with an input melody note. Importantly, 
-however, it is not the case that any note can harmonize well with the melody note. Some notes will sound dissonant when played together and still other notes may not even be in the harmony language, since harmony voices can have specified note
+however, it is not the case that any note can harmonize well with the melody note. Some notes will sound dissonant when played together and still other notes may not be in the harmony language at all, since harmony voices can have specified note
 ranges. 
 
 The second analogy that allows us to view this problem as a machine translation problem is that, like 
@@ -164,7 +163,14 @@ Since we anticipated that the development of the system would involve a signific
 
 \subsection{Data Collection and Interaction}
 In order to train the language and translation models, we needed a large corpus of music data and a way to interact with it. For this,
-we used third-party software called Music21 \cite{Cuthbert_music21:a}, a library developed at MIT which provides a simple interface for querying the library's database of musical scores. Music21 parses MusicXML, a type of encoding for standard music notation, into Stream objects, which can then be queried for any of the information contained in the notation including key, tempo, and notes with pitch and timing. Additionally, the Music21 package has over $2,000$ compositions, mostly written by classical composers. We have primarily trained on the package's Bach chorales, of which there are $402$.
+we used third-party software called Music21 \cite{Cuthbert_music21:a}, a library developed at MIT which provides a simple interface for querying the library's database of musical scores. Music21 parses MusicXML, a type of encoding for standard music notation, into Stream objects which can then be queried for any of the information contained in the notation including key, tempo, and notes with pitch and timing. Additionally, the Music21 package has over $2,000$ compositions, mostly written by classical composers. We have primarily trained on the package's Bach chorales, of which there are $402$.
+
+\subsection{Note Representation}
+We represent notes in the language and translation models as strings of pitch class and octave number, collectively defining the note's pitch. For example, the representation of middle C would be ``C4''. Timing properties are currently not stored in the note representation because we have not yet integrated timing variation into the system. If timing were to be integrated, we propose adding an additional number to the end of the note's string representation describing the note's quarter length. For example, a whole note would have the number $4$ added to it's representation and an eighth note would have the number $0.5$ added to its representation. 
+
+We also consider rests, moments of silence in the composition, to be ``notes'' in our model. They are represented by the string ``R''. Including rests makes it possible to harmonize a melody note with silence, thus offering some opportunity for rhythmic variation. However, including rests does pose the potential problem of producing too much silence, which is not optimal for music generation software. For example, imagine we are using a language model of n-gram size $2$, if $P(R | R)$ and $P (R | R\ R)$ are both relatively high, once we produce one rest, we may very well produce rests for the remainder of the song. Therefore, for fear of continually producing rests, we treat all contiguous sequences of rest symbols in a composition as one rest ``R'' in the model.
+
+Measure bars are also modeled as ``notes'' in our system. They are represented by the string ``BAR''. A special measure bar, the bar at the end of last measure in the song, is given a special representation: ``END''. These notes are slightly different in that they are only present in our language model. ``BAR'' and ``END'' can only be harmonized with actual measure bars and song end in the given melody line, so there is no need to include them in the translation model. The motivation for including ``BAR'' and ``END'' in the language model is that they provide information about where in the composition the system is trying to produce notes. This information is helpful because some notes may be more likely to start or end measures and some sequences of notes may be more likely to end a song. Coming back to the analogies between languages and musical voices, the ``BAR'' and ``END'' symbols can be likened to punctuation marks, which can give very strong cues about which words to generate, given that a string of natural language, a sentence for example, is about to end.
 
 \subsection{Model Generation}
 The translation and language models are implemented as nested dictionaries. The outer dictionary maps the given parameter, $A$, to the inner dictionary, which maps the unknown parameter, $B$, to the probability $P(B | A)$. In the case of the translation model, $A$ is a harmony note and $B$ is a melody note, while in the language model, $A$ is the sequence of $(i - 1) ... (i - n)$ harmony notes and $B$ is the $i^{th}$ harmony note.
@@ -177,7 +183,7 @@ and the language ngram probabilities are given by: \\
 
 $P(h_{i} | h_{i - 1} ... h_{i - n}) = \frac{count(h_{i} \wedge h_{i - 1} \wedge ... \wedge h_{i - n})}{count(h_{i - 1} \wedge ... \wedge h_{i - n})}$\\
 
-The event $m_{i} \wedge h_{j}$, as seen in the translation probability formula, occurs whenever the note $m_{i}$ is sounding in the melody at the same time as $h_{j}$ is sounding in the harmony. To compute these counts, we iterate through each note $m_{i}$ in the melody and update the counts for event $m_{i} \wedge h_{j}$ for all notes $h_{j}$ that have any portion of their duration sounding at the same time as any portion of the duration of $m_{i}$. Specifically, there is no requirement that the entirety of $h_{j}$ has to sound within the sounding duration of $m_{i}$ or vice versa. 
+The event $m_{i} \wedge h_{j}$, as seen in the translation probability formula, occurs whenever the note $m_{i}$ is sounding in the melody at the same time as $h_{j}$ is sounding in the harmony. Since we currently only model the notes as pitches, we consider two notes to be harmonizing with each other as long as their pitches play concurrently, regardless of when either note begins or ends or how long it lasts. To compute these counts, we iterate through each note $m_{i}$ in the melody and update the counts for event $m_{i} \wedge h_{j}$ for all notes $h_{j}$ that have any portion of their duration sounding at the same time as any portion of the duration of $m_{i}$.
 
 The event $h_{i} \wedge ... \wedge h_{i - n}$, as seen in the ngram probability formula, occurs whenever the notes $h_{i - n}, h_{i - n + 1}, ..., h_{i}$ appear contiguously in that order in the haromny line. 
 
@@ -191,13 +197,6 @@ At the current point, the translation model is not smoothed because the system n
 
 Lastly, the values of the variables $n$ and $\alpha$ have so far been left unspecified because they are not yet finalized in the implementation. We intend to tune their values to maximize system performance on a cross-validation set of compositions. Their current values, however, are $n = 3$ and $\alpha = 1e-5$.
 
-\subsection{Note Representation}
-We represent notes in the language and translation models as strings of pitch and octave number. Timing properties are currently not stored in the note representation because we have not yet integrated timing variation into the system. If timing were to be integrated, we propose adding an additional number to the end of the note's string representation describing the note's quarter length. For example, a whole note would have the number $4$ added to it's representation and an eighth note would have the number $0.5$ added to its representation. 
-
-We also consider rests, moments of silence in the composition, to be ``notes'' in our model. They are represented by the string ``R''. Including rests makes it possible to harmonize a melody note with silence, thus offering some opportunity for rhythmic variation. However, including rests does pose a potential problem of producing too much silence, which is not optimal for music generation software. For example, imagine we are using a language model of n-gram size $2$, if $P(R | R)$ and $P (R | R\ R)$ are both relatively high, once we produce one rest, we may very well produce rests for the remainder of the song. Therefore, for fear of continually producing rests, we treat all contiguous sequences of rest symbols in a composition as one rest ``R'' in the model.
-
-Measure bars are also modeled as ``notes'' our system. They are represented by the string ``BAR''. A special measure bar, the bar at the end of last measure in the song, is given a special representation: ``END''. These notes are slightly different in that they are only present in our language model. ``BAR'' and ``END'' can only be harmonized with actual measure bars and song end in the given melody line, so there is no need to include them in the translation model. The motivation for including ``BAR'' and ``END'' in the language model is that they provide information about where in the composition the system is trying to produce notes. This information is helpful because some notes may be more likely to start or end measures and some sequences of notes may be more likely to end a song. Coming back to the analogies between languages and musical voices, the ``BAR'' and ``END'' symbols can be likened to punctuation marks, which can give very strong cues about which words to generate, given that a string of natural language, a sentence for example, is about to end.
-
 \subsection {Decoder}
 The goal of the decoder is to find the harmony line $H$ such that $H$ maximizes the probability of $P(H | M)$. However, the search space is much too large to enumerate all possible harmony lines in order to determine the best. Assuming the harmony voice spans no more than 4 octaves and that there are 12 notes in an octave, an exhaustive search of all harmony lines for a song with $n$ melody notes would require the inspection of $(12\cdot 4)^{n} = 48^{n}$ harmony lines. For an average length song comprised of $100$ melody notes, the number of possible harmony lines comes out to $48^{100} \approx 1.3e+168$. 
 
@@ -207,7 +206,7 @@ For each note in the melody, the decoder finds all possible harmony notes that c
 The parameter $k$ will be tuned to maximize system performance while keeping time and space complexity in check. Currently, $k = 1000$.
 
 \subsection {Generating Multiple Parts}
-The decoder was decribed above with the assumption that there is only one melody line for  which to create translations. In reality, when generating multiple harmony parts, the $j^{th}$ harmony voice generated will be constrained by several source voices: the melody line, $M$ and the $j-1$ previous harmony voices generated. Let this set of source voices be defined as follows\\
+The decoder was decribed above with the assumption that there is only one melody voice for  which to create translations. In reality, when generating multiple harmony parts, the $j^{th}$ harmony voice generated will be constrained by several source voices: the melody voice, $M$ and the $j-1$ previous harmony voices generated. Let this set of source voices be defined as follows\\
 
 $S^{j} = {M} \cup \{\ H^k | 1 \leq k \leq j- 1\ \} $\\
 
@@ -220,7 +219,7 @@ Taking the intersection is simpler because the probabilities of the generated ha
 
 We have now explained how harmony lines are generated given multiple source voices, but we have not yet demonstrated how we decide which voices are generated first. One option is to choose an arbitrary ordering that we believe to be sufficient. However, there is no guarantee that an ordering that produces nice sounding harmonies for several compositions will produce optimal harmonies for all compositions. We propose two methods for determining the best order for the given composition: trying all orderings and greedy search for the best ordering. The first option is our current implementation; the second has not yet been implemented.
 
-The first option requires us to generate $(n - 1)!$ outputs, where $n - 1$ is the number of harmony voices to be output. This leads to a total of $(n -1)\cdot((n-1)!)$ individual harmony lines that needs to be generated. This method is obviously not feasible for arbitrary $n$. However, to produce an average size musical arrangement with just $4$ parts, one of which is the melody, would require the production of only $6$ full arrangements. Out of those $6$, the currently-implemented order choosing algorithm outputs the production that maximizes the value\\
+The first option requires us to generate all $(n - 1)!$ orderings, where $n - 1$ is the number of harmony voices to be output. This can be accomplished with $O((n - 1) \cdot (n - 1)!)$ calls to the decoding algorithm that creates one harmony voice for a set of source voices. This method is obviously not feasible for arbitrary $n$. However, producing an average size musical arrangement with just $4$ parts, one of which is the melody, would require the production of only $6$ full arrangements. Out of those $6$, the currently-implemented order choosing algorithm outputs the production that maximizes the value\\
 
 $\sum_{j = 1}^{n - 1} \lbrack\ \lbrack\prod_{k = 0}^{j - 1} P(H^{k} | H^{j})\ \rbrack \cdot P(H^{j})\ \rbrack\ \ \ H^{0} = M$\\
 
@@ -230,7 +229,7 @@ $\sum_{j = 1}^{n - 1} \lbrack\ \lbrack\prod_{k \neq j} P(H^{k} | H^{j})\ \rbrack
 
 In the above metric, the probabilities of the generated harmony voices are constrained by all the other harmony voices, not just by those that existed at the time of that harmony voice's generation. 
 
-The second method, greedily chosing the ordering, would work as follows. All harmony voices not yet generated would be generated with the current source voices. The voice with the highest probability given the source voices will be added to the source voices, and the process will continue until all harmony voices are in the set of source voices. The intuition behind this method is that you would like to build up your musical arrangement with the strongest harmony voices possible. To clarify, if the first harmony voice generated is of low quality, all other voices to be generated will be constrained by that low-quality voice, possibly producing even more low-quality voices. This method has an advantage over the first in that it only produces $(n-1)^{2}$ harmony lines, instead of $(n -1)\cdot((n-1)!)$, which makes it much more well-suited for scaling with arbitrary $n$.
+The second method, greedily chosing the ordering, would work as follows. All harmony voices not yet generated would be generated with the current source voices. The voice with the highest probability given the source voices will be added to the source voices, and the process will continue until all harmony voices are in the set of source voices. The intuition behind this method is that you would like to build up your musical arrangement with the strongest harmony voices possible. To clarify, if the first harmony voice generated is of low quality, all other voices to be generated will be constrained by that low-quality voice, possibly producing even more low-quality voices. This method has an advantage over the first in that it only produces $O((n-1)^{2})$ harmony lines, instead of $O((n -1)\cdot(n-1)!)$, which makes it much more well-suited for scaling with arbitrary $n$.
 
 \section{System Performance}
 \label{sec:sys_perform}

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.5.30)  1 DEC 2014 13:06
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.5.30)  10 DEC 2014 23:37
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -192,18 +192,18 @@ Package: url 2006/04/12  ver 3.3  Verb mode for urls, etc.
 (./progress_report.aux)
 \openout1 = `progress_report.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 7.
-LaTeX Font Info:    ... okay on input line 7.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 7.
-LaTeX Font Info:    ... okay on input line 7.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 7.
-LaTeX Font Info:    ... okay on input line 7.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 7.
-LaTeX Font Info:    ... okay on input line 7.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 7.
-LaTeX Font Info:    ... okay on input line 7.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 7.
-LaTeX Font Info:    ... okay on input line 7.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 6.
+LaTeX Font Info:    ... okay on input line 6.
 
 (/usr/local/texlive/2013/texmf-dist/tex/context/base/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
@@ -266,33 +266,33 @@ G,.JBIG2,.JB2,.eps]
 File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
-LaTeX Font Info:    Try loading font information for U+msa on input line 16.
+LaTeX Font Info:    Try loading font information for U+msa on input line 15.
 
 (/usr/local/texlive/2013/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Try loading font information for U+msb on input line 16.
+LaTeX Font Info:    Try loading font information for U+msb on input line 15.
 
 (/usr/local/texlive/2013/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-LaTeX Font Info:    Try loading font information for U+lasy on input line 16.
+LaTeX Font Info:    Try loading font information for U+lasy on input line 15.
 
 (/usr/local/texlive/2013/texmf-dist/tex/latex/base/ulasy.fd
 File: ulasy.fd 1998/08/17 v2.2e LaTeX symbol font definitions
 )
-Overfull \hbox (7.21434pt too wide) in paragraph at lines 51--53
+Overfull \hbox (7.21434pt too wide) in paragraph at lines 50--52
 \T1/aer/m/n/9 of ma-chine trans-la-tion, where the in-put lan-guage is the melo
 dy
  []
 
 
-Overfull \hbox (5.30817pt too wide) in paragraph at lines 83--95
+Overfull \hbox (5.30817pt too wide) in paragraph at lines 82--94
 \T1/aer/m/n/9 been con-ducted that model these sig-nals us-ing n-gram Markov
  []
 
 
-Overfull \hbox (7.71353pt too wide) in paragraph at lines 83--95
+Overfull \hbox (7.71353pt too wide) in paragraph at lines 82--94
 \OML/cmm/m/it/9 C[]$ \T1/aer/m/n/9 con-di-tioned on a lim-ited his-tory of pre-
 vi-ous events [$\OML/cmm/m/it/9 C[] [] [] 
  []
@@ -304,12 +304,12 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 133--134
+Underfull \hbox (badness 10000) in paragraph at lines 132--133
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 135--136
+Underfull \hbox (badness 10000) in paragraph at lines 134--135
 
  []
 
@@ -317,32 +317,32 @@ Underfull \hbox (badness 10000) in paragraph at lines 135--136
 Underfull \vbox (badness 1558) has occurred while \output is active []
 
  [2]
-Underfull \hbox (badness 10000) in paragraph at lines 137--138
+Underfull \hbox (badness 10000) in paragraph at lines 136--137
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 141--142
+Underfull \hbox (badness 10000) in paragraph at lines 140--141
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 143--144
+Underfull \hbox (badness 10000) in paragraph at lines 142--143
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 145--146
+Underfull \hbox (badness 10000) in paragraph at lines 144--145
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 147--148
+Underfull \hbox (badness 10000) in paragraph at lines 146--147
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 149--151
+Underfull \hbox (badness 10000) in paragraph at lines 148--150
 
  []
 
@@ -350,112 +350,112 @@ Underfull \hbox (badness 10000) in paragraph at lines 149--151
 File: design_overview.png Graphic file (type png)
 
 <use design_overview.png>
-Package pdftex.def Info: design_overview.png used on input line 152.
+Package pdftex.def Info: design_overview.png used on input line 151.
 (pdftex.def)             Requested size: 244.30843pt x 112.61874pt.
 
-Overfull \hbox (13.30843pt too wide) in paragraph at lines 152--153
+Overfull \hbox (13.30843pt too wide) in paragraph at lines 151--152
 [][] 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 152--153
+Underfull \hbox (badness 10000) in paragraph at lines 151--152
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 154--155
+Underfull \hbox (badness 10000) in paragraph at lines 153--154
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 156--157
+Underfull \hbox (badness 10000) in paragraph at lines 155--156
 
  []
 
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 172--173
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 174--175
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 176--177
-
- []
-
-
+ [3 <./design_overview.png>]
 Underfull \hbox (badness 10000) in paragraph at lines 178--179
 
  []
 
-[3 <./design_overview.png>]
+
+Underfull \hbox (badness 10000) in paragraph at lines 180--181
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 182--183
+
+ []
+
+
 Underfull \hbox (badness 10000) in paragraph at lines 184--185
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 186--187
+Underfull \hbox (badness 10000) in paragraph at lines 190--191
 
  []
 
 
-Overfull \hbox (2.6695pt too wide) in paragraph at lines 190--191
-[]\T1/aer/m/n/9 At the cur-rent point, the trans-la-tion model is not smoothed
- []
+Underfull \hbox (badness 10000) in paragraph at lines 192--193
 
-
-Overfull \hbox (2.68913pt too wide) in paragraph at lines 190--191
-\T1/aer/m/n/9 be-cause the sys-tem never con-sid-ers gen-er-at-ing har-mony not
-es
  []
 
 
 Underfull \vbox (badness 1558) has occurred while \output is active []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 210--211
+Overfull \hbox (2.6695pt too wide) in paragraph at lines 196--197
+[]\T1/aer/m/n/9 At the cur-rent point, the trans-la-tion model is not smoothed
+ []
+
+
+Overfull \hbox (2.68913pt too wide) in paragraph at lines 196--197
+\T1/aer/m/n/9 be-cause the sys-tem never con-sid-ers gen-er-at-ing har-mony not
+es
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 209--210
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 212--213
+Underfull \hbox (badness 10000) in paragraph at lines 211--212
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 215--216
+Underfull \hbox (badness 10000) in paragraph at lines 214--215
 
  []
 
 [4]
-Underfull \hbox (badness 10000) in paragraph at lines 217--218
+Underfull \hbox (badness 10000) in paragraph at lines 216--217
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 223--224
+Underfull \hbox (badness 10000) in paragraph at lines 222--223
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 225--226
+Underfull \hbox (badness 10000) in paragraph at lines 224--225
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 227--228
+Underfull \hbox (badness 10000) in paragraph at lines 226--227
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 229--230
+Underfull \hbox (badness 10000) in paragraph at lines 228--229
 
  []
 
@@ -467,11 +467,11 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 Here is how much of TeX's memory you used:
  2885 strings out of 493315
  36997 string characters out of 6137904
- 104396 words of memory out of 5000000
+ 105396 words of memory out of 5000000
  6268 multiletter control sequences out of 15000+600000
  44167 words of font info for 58 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
- 41i,10n,28p,1110b,246s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 41i,10n,28p,1113b,246s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2013/t
 exmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/texlive/2013/texmf-dist/fonts
 /type1/public/amsfonts/cmextra/cmex9.pfb></usr/local/texlive/2013/texmf-dist/fo
@@ -487,7 +487,7 @@ sfonts/cm/cmsy9.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/public/amsf
 onts/cm/cmti9.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/urw/helvetic/
 uhvb8a.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.
 pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/urw/times/utmb8a.pfb>
-Output written on progress_report.pdf (5 pages, 202601 bytes).
+Output written on progress_report.pdf (5 pages, 202854 bytes).
 PDF statistics:
  78 PDF objects out of 1000 (max. 8388607)
  55 compressed objects within 1 object stream
