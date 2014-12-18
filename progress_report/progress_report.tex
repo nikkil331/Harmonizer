@@ -163,7 +163,20 @@ Since we anticipated that the development of the system would involve a signific
 
 \subsection{Data Collection and Interaction}
 In order to train the language and translation models, we needed a large corpus of music data and a way to interact with it. For this,
-we used third-party software called Music21 \cite{Cuthbert_music21:a}, a library developed at MIT which provides a simple interface for querying the library's database of musical scores. Music21 parses MusicXML, a type of encoding for standard music notation, into Stream objects which can then be queried for any of the information contained in the notation including key, tempo, and notes with pitch and timing. Additionally, the Music21 package has over $2,000$ compositions, mostly written by classical composers. We have primarily trained on the package's Bach chorales, of which there are $402$.
+we used third-party software called Music21 \cite{Cuthbert_music21:a}, a library developed at MIT which provides a simple interface for querying the library's database of musical scores. Music21 parses MusicXML, a type of encoding for standard music notation, into Stream objects which can then be queried for any of the information contained in the notation including key, tempo, and notes with pitch and timing. Additionally, the Music21 package has over $2,000$ compositions, mostly written by classical composers. We have primarily trained on the package's extensive collection of Bach chorales which each have soprano, alto, tenor, and bass voices.
+
+\begin{table}[h]
+  \begin{center}
+      \begin{tabular}{| l | r | r | r | r | r |}
+      \hline
+       \  & Songs & S. Notes & A. Notes & T. Notes & B. Notes \\ \hline
+       Total &  351 & 21062 & 25255 & 25691 & 25867 \\ \hline
+       Major &  185 & 11371 & 13518 & 13647 & 13846 \\ \hline
+       Minor & 166 & 9691 & 11737 & 12044 & 12021  \\ \hline
+      \end{tabular}
+  \end{center}
+  \caption{Number of songs and notes in the training data set. ``S'' stands for soprano, ``A'' for alto, ``T'' for tenor, and ``B'' for bass}
+\end{table}
 
 \subsection{Note Representation}
 We represent notes in the language and translation models as strings of pitch class and octave number, collectively defining the note's pitch. For example, the representation of middle C would be ``C4''. Timing properties are currently not stored in the note representation because we have not yet integrated timing variation into the system. If timing were to be integrated, we propose adding an additional number to the end of the note's string representation describing the note's quarter length. For example, a whole note would have the number $4$ added to it's representation and an eighth note would have the number $0.5$ added to its representation. 
@@ -243,10 +256,10 @@ Similarly, the perplecity of a language model $p_{LM}$ is defined over all songs
 
 $log_2 PP = - \sum_{s} log_2 p_{LM}(H_{s})$\\
 
-This measure gives us a real number metric to evaluate different iterations of our language and translation models. We will evaluate our models using this metric over a small subset of major Bach chorales, pulled from the same corpus but not overlapping with our training data.
+This measure gives us a real number metric to evaluate different iterations of our language and translation models. We will evaluate our models using this metric over a set of 28 major Bach chorales, pulled from the same corpus but not overlapping with our training data.
 
 \subsection{Language Models}
-We created three different language models for each part (Soprano, Alto, Tenor, Bass) and used the perplexity metric to evaluate each one. The first model was trained entirely on chorales in the major mode, matching the test set of data. In creating the model, we were able to train on 183 different chorales. The second model was trained on both major and minor chorales, and therefore had a larger data set of 349 songs to train on. The third model was trained entirely on minor chorales, of which we had 183 songs in our set, to act as a `sanity check' for our evaluation algorithm.
+We created three different language models for each part (Soprano, Alto, Tenor, Bass) and used the perplexity metric to evaluate each one. The first model was trained entirely on chorales in the major mode, matching the test set of data. In creating the model, we were able to train on 185 different chorales. The second model was trained on both major and minor chorales, and therefore had a larger data set of 351 songs to train on. The third model was trained entirely on minor chorales, of which we had 166 songs in our set, to act as a `sanity check' for our evaluation algorithm.
 \begin{table}[h]
   \begin{center}
       \begin{tabular}{| l | l | l | l | l |}
