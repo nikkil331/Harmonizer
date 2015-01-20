@@ -56,6 +56,10 @@ def get_note_rep(note):
     else:
         return "R:" + note.duration.quarterLength
 
+def get_phrase_rep(phrase):
+	return tuple([get_note_rep(note) for note in phrase])
+
+
 def transpose(stream):
 	keySig = stream.analyze('key')
 	curr_pitch = keySig.pitchAndMode[0].name
