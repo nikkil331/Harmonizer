@@ -52,9 +52,9 @@ def update_tm_hypothesis(tm, curr_hyp, m_note, h_note):
 
 def get_note_rep(note):
     if note.isNote:
-        return note.nameWithOctave
+        return note.nameWithOctave + ":" + str(note.duration.quarterLength)
     else:
-        return "R"
+        return "R:" + note.duration.quarterLength
 
 def transpose(stream):
 	keySig = stream.analyze('key')
@@ -72,3 +72,15 @@ def get_harmony_notes(melodyNote, harmonyStream):
 	harmony_section = harmonyStream.getElementsByOffset(melody_offset, offsetEnd=melody_offset + melody_duration, 
 													     mustFinishInSpan=False, mustBeginInSpan=False)
 	return harmony_section.flat.notesAndRests
+
+def make_stream_from_note_list(note_list):
+	s = stream.Stream()
+    for n_rep in note_list:
+        pitch, duration = n_rep.split(":")
+        if pitch == "R":
+            n = note.Rest(quarterLength=float(duration))
+        else:
+            n = note.Note(pitch, quarterLength=float(duration))
+        s.append(n)
+
+    return s

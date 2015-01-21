@@ -37,9 +37,12 @@ def main():
 	test_song = corpus.parse('bach/bwv390')
 	c = Composition()
 	c.add_part('Soprano', test_song.parts['Soprano'])
-	c.create_part('Alto', 'data/alto_language_model_major.txt', ['data/soprano_alto_translation_model_major.txt'])
-	#c.create_part('Alto', 'data/alto_language_model_major.txt', ['data/soprano_alto_translation_model_major.txt',\
-	#															 'data/bass_alto_translation_model_major.txt'])
+	c.create_part('Bass', 'data/bass_language_model_major.txt', ['data/Soprano_Bass_translation_model_major_rhythm.txt'])
+	#c.create_part('Alto', 'data/alto_language_model_major.txt', ['data/Soprano_Alto_translation_model_major_rhythm.txt',\
+	#														    'data/Bass_Alto_translation_model_major_rhythm.txt'])
+	#c.create_part('Tenor', 'data/Tenor_language_model_major.txt', ['data/Soprano_Tenor_translation_model_major_rhythm.txt',\
+	#															 'data/Bass_Tenor_translation_model_major_rhythm.txt',\
+	#															 'data/Alto_Tenor_translation_model_major_rhythm.txt'])
 	c.play()
 
 if __name__ == "__main__":

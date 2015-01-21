@@ -10,8 +10,10 @@ class TranslationModel(object):
 	def _read_file(self, path):
 		f = open(path, 'r')
 		for line in f:
-			melody, harmony, prob = line.strip().split(" ||| ")
-			self.add_to_model(melody, harmony, float(prob))
+			melody_string, harmony_string, prob = line.strip().split(" ||| ")
+			melody_phrase = tuple(melody_string.split())
+			harmony_phrase = tuple(harmony_string.split())
+			self.add_to_model(melody_phrase, harmony_phrase, float(prob))
 
 	def add_to_model(self, melody, harmony, prob):
 		if melody not in self._tm:
@@ -38,10 +40,12 @@ class TranslationModel(object):
 
 	def write_to_file(self,path):
 		f = open(path, 'w')
-		for melody_note in self._tm:
-			for harmony_note in self._tm[melody_note]:
-				output_line = ''.join([str(melody_note), ' ||| ', str(harmony_note), ' ||| ', \
-					str(self.get_probability(melody_note, harmony_note)), '\n'])
+		for melody_phrase in self._tm:
+			for harmony_phrase in self._tm[melody_phrase]:
+				melody_string = ' '.join(melody_phrase)
+				harmony_string = ' '.join(harmony_phrase)
+				output_line = ''.join([str(melody_string), ' ||| ', str(harmony_string), ' ||| ', \
+					str(self.get_probability(melody_phrase, harmony_phrase)), '\n'])
 				f.write(output_line)
 
 
