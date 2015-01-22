@@ -1,3 +1,5 @@
+from music_utils import *
+
 class LanguageModel(object):
 
 	def __init__(self, part, path=None):
@@ -23,13 +25,27 @@ class LanguageModel(object):
 		else:
 			self._lm[context][note] = prob
 
-	def get_probability(self, context, note):
-		if context not in self._lm:
-			return 1e-5
-		elif note not in self._lm[context]:
-			return self._lm[context]["<UNK>"]
-		else:
-			return self._lm[context][note]
+	def get_probability(self, context, phrase):
+		total_prob = 0
+		context_tuple = tuple([s.split(":")[0] for s in get_phrase_rep(context)])
+		for note in phrase:
+			note_rep = get_note_rep(note).split(":")[0]
+			if note_rep == "BAR":
+				context_tuple += ("BAR",)
+			else:
+				if context_tuple not in self._lm:
+					total_prob += math.log(1e-10)
+				elif note_rep not in self._lm[context_tuple]:
+					total_prob += math.log(self._lm[context_tuple]["<UNK>"])
+				else:
+					total_prob += math.log(self._lm[context_tuple][note_rep])
+				context_tuple = list(context_tuple)
+				if context_tuple.pop(0) == "BAR":
+					context_tuple.pop(0)
+				context_tuple.append(note_rep)
+				context_tuple = tuple(context_tuple)
+		return total_prob
+
 
 	def get_contexts(self):
 		return self._lm.keys()

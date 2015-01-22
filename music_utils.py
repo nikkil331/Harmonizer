@@ -2,7 +2,7 @@ from collections import namedtuple
 from music21 import *
 import math
 import re
-
+import copy
 
 lm_hypothesis = namedtuple("lm_hypothesis", "notes, context, lm_logprob")
 
@@ -33,53 +33,63 @@ def update_hypothesis(curr_hyp, m_note, h_note):
     return hypothesis(new_notes, new_context, new_tm_logprob, new_lm_logprob)
 
 def update_lm_hypothesis(lm, curr_hyp, note):
-	new_notes = curr_hyp.notes[:]
-	new_notes.append(note)
-	new_context = list(curr_hyp.context)
-	if new_context[-1] != "R":
-		new_context.append(note)
+    new_notes = curr_hyp.notes[:]
+    new_notes.append(note)
+    new_context = list(curr_hyp.context)
+    if new_context[-1] != "R":
+        new_context.append(note)
 
-	new_context = tuple(new_context[-lm.ngram_size:])
+    new_context = tuple(new_context[-lm.ngram_size:])
 
-	new_lm_logprob = curr_hyp.lm_logprob + get_lm_score(lm, curr_hyp.context, note)
+    new_lm_logprob = curr_hyp.lm_logprob + get_lm_score(lm, curr_hyp.context, note)
 
-	return lm_hypothesis(new_notes, new_context, new_lm_logprob)
+    return lm_hypothesis(new_notes, new_context, new_lm_logprob)
 
 
 def update_tm_hypothesis(tm, curr_hyp, m_note, h_note):
-	return curr_hyp + get_tm_score(tm, m_note, h_note)
+    return curr_hyp + get_tm_score(tm, m_note, h_note)
 
 
 def get_note_rep(note):
-    if note.isNote:
-        return note.nameWithOctave + ":" + str(note.duration.quarterLength)
+    if type(note) == stream.Measure:
+        return "BAR"
+    if type(note) == bar.Barline and note.style == 'final':
+        return "END"
+    elif note.isNote:
+        return note.nameWithOctave + ":" + str(note.quarterLength)
     else:
-        return "R:" + note.duration.quarterLength
+        return "R:" + str(note.quarterLength)
 
 def get_phrase_rep(phrase):
-	return tuple([get_note_rep(note) for note in phrase])
+    return tuple([get_note_rep(note) for note in phrase])
 
 
 def transpose(stream):
-	keySig = stream.analyze('key')
-	curr_pitch = keySig.pitchAndMode[0].name
-	new_pitch = 'C' if keySig.pitchAndMode[1] == "major" else 'A'
-	sc = scale.ChromaticScale(curr_pitch + '5')
-	sc_pitches = [str(p)[:-1] for p in sc.pitches]
-	num_halfsteps = sc_pitches.index(new_pitch)
-	stream.flat.transpose(num_halfsteps, inPlace=True)
+    keySig = stream.analyze('key')
+    curr_pitch = keySig.pitchAndMode[0].name
+    new_pitch = 'C' if keySig.pitchAndMode[1] == "major" else 'A'
+    sc = scale.ChromaticScale(curr_pitch + '5')
+    sc_pitches = [str(p)[:-1] for p in sc.pitches]
+    num_halfsteps = sc_pitches.index(new_pitch)
+    stream.flat.transpose(num_halfsteps, inPlace=True)
 
 
 def get_harmony_notes(melodyNote, harmonyStream):
-	melody_offset = melodyNote.offset
-	melody_duration = melodyNote.duration.quarterLength
-	harmony_section = harmonyStream.getElementsByOffset(melody_offset, offsetEnd=melody_offset + melody_duration, 
-													     mustFinishInSpan=False, mustBeginInSpan=False)
-	return harmony_section.flat.notesAndRests
+    melody_offset = melodyNote.offset
+    melody_duration = melodyNote.duration.quarterLength
+    harmony_section = harmonyStream.getElementsByOffset(melody_offset, offsetEnd=melody_offset + melody_duration, 
+                                                         mustFinishInSpan=False, mustBeginInSpan=False)
+    return harmony_section.flat.notesAndRests
 
-def make_stream_from_note_list(note_list):
-	s = stream.Stream()
-    for n_rep in note_list:
+def make_stream_from_notes(notes):
+    s = stream.Stream()
+    for n in notes:
+        s.append(n)
+    return s
+
+def make_stream_from_strings(notes):
+    s = stream.Stream()
+    for n_rep in notes:
         pitch, duration = n_rep.split(":")
         if pitch == "R":
             n = note.Rest(quarterLength=float(duration))
@@ -88,3 +98,45 @@ def make_stream_from_note_list(note_list):
         s.append(n)
 
     return s
+
+def get_duration_of_stream(s):
+    return sum([get_note_length_from_rep(n)for n in notes_and_rests(s)])
+
+def trim_stream(s, begin_offset, end_offset):
+    section = s.getElementsByOffset(begin_offset, offsetEnd=end_offset, \
+                                    mustBeginInSpan=False, includeEndBoundary=False, \
+                                    includeElementsThatEndAtStart=False, \
+                                    classList=[note.Note, note.Rest, stream.Measure])
+    section = copy.deepcopy(section)
+    if type(section[0]) == stream.Measure:
+        section.pop(0)
+    # trim beginning
+    section[0].quarterLength -= (begin_offset - section[0].offset)
+    section[0].offset = begin_offset
+
+    #trim end
+    section[-1].quarterLength = end_offset - section[-1].offset
+
+    return section
+
+def get_note_length_from_rep(n_rep):
+    return float(n_rep.split(":")[1])
+
+def notes_and_rests(phrase_rep):
+    return [n for n in phrase_rep if n != "BAR" and n != "END"]
+
+# assumed that playing_notes and sounding_notes are lined up
+def notes_playing_while_sounding(playing_notes, sounding_notes, sounding_note_idx):
+    sounding_note_length = get_note_length_from_rep(sounding_notes[sounding_note_idx])
+    sounding_note_offset = 0
+    for i in range(sounding_note_idx):
+        sounding_note_offset += get_note_length_from_rep(sounding_notes[i])
+    notes_to_return = []
+    for n in playing_notes:
+        n_length = get_note_length_from_rep(n)
+        sounding_note_offset -= n_length
+        if sounding_note_offset < 0:
+            notes_to_return.append(n)
+            if abs(sounding_note_offset) >= sounding_note_length:
+                break
+    return notes_to_return
