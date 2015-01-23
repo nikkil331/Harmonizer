@@ -88,6 +88,7 @@ def make_stream_from_notes(notes):
     return s
 
 def make_stream_from_strings(notes):
+    print notes
     s = stream.Stream()
     for n_rep in notes:
         pitch, duration = n_rep.split(":")
@@ -100,7 +101,7 @@ def make_stream_from_strings(notes):
     return s
 
 def get_duration_of_stream(s):
-    return sum([get_note_length_from_rep(n)for n in notes_and_rests(s)])
+    return sum([n.duration.quarterLength for n in s.notesAndRests])
 
 def trim_stream(s, begin_offset, end_offset):
     section = s.getElementsByOffset(begin_offset, offsetEnd=end_offset, \
@@ -120,7 +121,10 @@ def trim_stream(s, begin_offset, end_offset):
     return section
 
 def get_note_length_from_rep(n_rep):
-    return float(n_rep.split(":")[1])
+    return float(n_rep.split(":")[1]) if n_rep != "BAR" and n_rep != "END" else 0
+
+def get_phrase_length_from_rep(p_rep):
+    return sum([get_note_length_from_rep(n) for n in p_rep])
 
 def notes_and_rests(phrase_rep):
     return [n for n in phrase_rep if n != "BAR" and n != "END"]
@@ -140,3 +144,31 @@ def notes_playing_while_sounding(playing_notes, sounding_notes, sounding_note_id
             if abs(sounding_note_offset) >= sounding_note_length:
                 break
     return notes_to_return
+
+def put_notes_in_measures(measure_stream, note_stream):
+    curr_measure_template = measure_stream[0]
+    curr_measure = stream.Measure()
+    new_stream = stream.Stream()
+    for (j, n) in enumerate(note_stream):
+        curr_measure.append(n)
+        if curr_measure.duration.quarterLength >= curr_measure_template.duration.quarterLength:
+            new_measure = stream.Measure()
+
+            if curr_measure.duration.quarterLength > curr_measure_template.duration.quarterLength:
+                new_note = copy.deepcopy(curr_measure[-1])
+                overshoot = curr_measure.duration.quarterLength - curr_measure_template.duration.quarterLength
+                curr_measure[-1].duration.quarterLength -= overshoot
+                curr_measure[-1].tie = tie.Tie("start")
+                new_note.tie = tie.Tie("stop")
+                new_note.duration.quarterLength = overshoot
+                new_measure.append(new_note)
+
+            new_stream.append(curr_measure)
+            curr_measure_template = curr_measure_template.next()
+            new_measure.offset = curr_measure_template.offset
+            curr_measure = new_measure
+
+    return new_stream
+
+
+

@@ -1,4 +1,5 @@
 from music_utils import *
+from itertools import *
 
 class TranslationModel(object):
 
@@ -33,46 +34,61 @@ class TranslationModel(object):
         if not self._tm_phrases:
             return self.get_probability_notes(melody, harmony)
 
-        m_phrase_rep = get_phrase_rep(melody)
-        h_phrase_rep = get_phrase_rep(harmony)
-        if m_phrase_rep not in self._tm_phrases:
+        if melody not in self._tm_phrases:
             if harmony is not melody:
                 return self.get_probability_notes(melody, harmony)
             else:
                 return 0
-        elif h_phrase_rep not in self._tm_phrases[m_phrase_rep]:
+        elif harmony not in self._tm_phrases[melody]:
             return self.get_probability_notes(melody, harmony)
         else:
-            return math.log(self._tm_phrases[m_phrase_rep][h_phrase_rep])
+            return math.log(self._tm_phrases[melody][harmony])
 
     def get_probability_notes(self, melody, harmony):
         if not self._tm_notes:
             return -1
         total_prob = 0
-        for m_note in melody:
-            m_rep = get_note_rep(m_note)
-            if type(m_note) != stream.Measure and type(m_note) != bar.Barline:     
-                h_notes = harmony.allPlayingWhileSounding(m_note)
+        for (i, m_note) in enumerate(melody):
+            if m_note != "BAR" and m_note != "END":   
+                h_notes = notes_playing_while_sounding(harmony, melody, i)  
                 for h_note in h_notes:
-                    h_rep = get_note_rep(h_note)
-                    if m_rep not in self._tm_notes:
-                        if h_rep is not m_rep:
+                    if m_note not in self._tm_notes:
+                        if h_note is not m_note:
                             total_prob += math.log(1e-10)
                         else:
                             total_prob += 0
-                    elif h_rep not in self._tm_notes[m_rep]:
+                    elif h_note not in self._tm_notes[m_note]:
                         total_prob += math.log(1e-10)
                     else:
-                        total_prob += math.log(self._tm_notes[m_rep][h_rep])
+                        total_prob += math.log(self._tm_notes[m_note][h_note])
 
         return total_prob
 
 
-    def get_harmonies(self, melody):
-        if melody not in self._tm_phrases:
-            return ["R:" + str(get_note_length_from_rep(n)) for n in notes_and_rests(melody)]
+    def get_harmonies_note(self, note):
+        pitch, rhythm = note.split(":")
+        if pitch not in self._tm_notes:
+            return [tuple("R:" + rhythm)]
         else:
-            return self._tm_phrases[melody_rep].keys()
+            return [n + ":" + rhythm for n in self._tm_notes[pitch].keys()]
+
+    def get_harmonies(self, melody):
+        melody = tuple([m for m in melody if m != "BAR" and m != "END"])
+        if not melody:
+            return []
+
+        single_note_translation = []
+
+        if len(melody) < 2:
+            single_note_harmonies = [(n,) for m in melody for n in self.get_harmonies_note(m)]
+        else:
+            single_note_harmonies = list(product([n for n in self.get_harmonies_note(melody[0])], [n for n in self.get_harmonies_note(melody[1])]))
+
+        if melody not in self._tm_phrases:
+            single_note_harmonies
+        else:
+            translations = self._tm_phrases[melody].keys() + single_note_harmonies
+            return translations
 
     def write_to_file(self,path):
         f = open(path, 'w')

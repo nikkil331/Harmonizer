@@ -27,9 +27,9 @@ class LanguageModel(object):
 
 	def get_probability(self, context, phrase):
 		total_prob = 0
-		context_tuple = tuple([s.split(":")[0] for s in get_phrase_rep(context)])
+		context_tuple = tuple([s.split(":")[0] for s in context])
 		for note in phrase:
-			note_rep = get_note_rep(note).split(":")[0]
+			note_rep = note.split(":")[0]
 			if note_rep == "BAR":
 				context_tuple += ("BAR",)
 			else:

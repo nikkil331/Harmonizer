@@ -4,7 +4,6 @@ import optparse
 import copy
 import math
 from collections import namedtuple
-from ordered_set import OrderedSet
 from translation_model import TranslationModel
 from language_model import LanguageModel
 from music_utils import *
@@ -33,18 +32,17 @@ class Decoder(object):
     # returns (new_context, new_context_size) based on the old
     # context and size and the added phrase
     def update_context(self, curr_context, curr_context_size, h_phrase):
-        new_context = curr_context + h_phrase
+        new_context = list(curr_context + h_phrase)
         new_context_size = curr_context_size + len(h_phrase)
         while new_context_size > self._lm.ngram_size:
             popped = new_context.pop(0)
-            if type(popped) == note.Note or type(popped) == note.Rest:
+            if popped != "BAR" and popped != "END":
                 new_context_size-=1
-        return (new_context, new_context_size)
+        return (tuple(new_context), new_context_size)
 
-    # TODO: use streams in language model
     def _update_hypothesis(self, curr_hyp, phrases, h_phrase):
-        new_notes = curr_hyp.notes + (h_phrase,)
-        new_duration = curr_hyp.duration + get_duration_of_stream(h_phrase)
+        new_notes = curr_hyp.notes + h_phrase
+        new_duration = curr_hyp.duration + get_phrase_length_from_rep(h_phrase)
         new_context, new_context_size = self.update_context(curr_hyp.context, curr_hyp.context_size, h_phrase)
         new_tm_logprob = curr_hyp.tm_logprob
         for part_idx, phrase in phrases.items():
@@ -56,7 +54,7 @@ class Decoder(object):
         new_beam = []
         # get_harmonies always returns at least one harmony
         possible_harmony_phrases = set(self._tms[main_phrase_part]\
-                                        .get_harmonies(get_phrase_rep(phrases[main_phrase_part])))
+                                        .get_harmonies(phrases[main_phrase_part]))
         for h in possible_harmony_phrases:
             new_hyp = self._update_hypothesis(hyp, phrases, h)
             new_beam.append(new_hyp)
@@ -72,12 +70,13 @@ class Decoder(object):
             phrase_end = second_note.offset + second_note.quarterLength
         else:
             phrase_end = first_note.offset + first_note.quarterLength
+
         melody_phrase = trim_stream(semi_flat_part, duration, phrase_end)
-        
-        phrases[part_idx] = melody_phrase
+
+        phrases[part_idx] = get_phrase_rep(melody_phrase)
         for p_idx in range(len(self._parts)):
             if p_idx != part_idx:
-                section = trim_stream(self._parts[p_idx], duration, phrase_end)
+                section = get_phrase_rep(trim_stream(self._parts[p_idx], duration, phrase_end))
                 phrases[p_idx] = section
         return phrases
 
@@ -108,20 +107,19 @@ class Decoder(object):
                         gc.collect()
                         sys.stderr.write(".")
             if continue_growing_hyps:
-                beam = sorted(new_beam, key = lambda hyp: get_score(hyp), reverse=True)[:50]
+                beam = sorted(new_beam, key = lambda hyp: get_score(hyp), reverse=True)[:5]
                 new_beam = []
 
         for hyp in beam:
-            final_stream = stream.Stream()
-            final_stream.append(bar.Barline(style='final'))
-            new_beam.extend(self._grow_hyps_in_beam({i:final_stream for i in range(len(self._parts))}, 0, hyp))
+            new_beam.extend(self._grow_hyps_in_beam({i:("END",) for i in range(len(self._parts))}, 0, hyp))
        
-        beam = sorted(new_beam, key = lambda hyp: get_score(hyp), reverse=True)[:50]
+        beam = sorted(new_beam, key = lambda hyp: get_score(hyp), reverse=True)[:5]
         winner = [n for n in beam[0].notes if n != "BAR" and n != "END"]
 
         # translate note sequence into music21 stream
-        return make_stream_from_notes(winner)
+        measure_stream = self._parts[0][1].getElementsByClass('Measure')
+        winner_stream = make_stream_from_strings(winner)
 
-
+        return put_notes_in_measures(measure_stream, winner_stream)
 
 
