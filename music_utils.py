@@ -120,6 +120,9 @@ def trim_stream(s, begin_offset, end_offset):
 
     return section
 
+def get_note_pitch_from_rep(n_rep):
+    return n_rep.split(":")[0]
+
 def get_note_length_from_rep(n_rep):
     return float(n_rep.split(":")[1]) if n_rep != "BAR" and n_rep != "END" else 0
 

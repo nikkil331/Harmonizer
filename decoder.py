@@ -33,7 +33,7 @@ class Decoder(object):
     # context and size and the added phrase
     def update_context(self, curr_context, curr_context_size, h_phrase):
         new_context = list(curr_context + h_phrase)
-        new_context_size = curr_context_size + len(h_phrase)
+        new_context_size = curr_context_size + len([h for h in h_phrase if h != "BAR" and h != "END"])
         while new_context_size > self._lm.ngram_size:
             popped = new_context.pop(0)
             if popped != "BAR" and popped != "END":
@@ -76,7 +76,7 @@ class Decoder(object):
         phrases[part_idx] = get_phrase_rep(melody_phrase)
         for p_idx in range(len(self._parts)):
             if p_idx != part_idx:
-                section = get_phrase_rep(trim_stream(self._parts[p_idx], duration, phrase_end))
+                section = get_phrase_rep(trim_stream(self._parts[p_idx].semiFlat, duration, phrase_end))
                 phrases[p_idx] = section
         return phrases
 

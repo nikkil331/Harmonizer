@@ -31,6 +31,9 @@ class TranslationModel(object):
             model[melody][harmony] = prob
 
     def get_probability(self, melody, harmony):
+        melody = tuple([m for m in melody if m != "BAR" and m != "END"])
+        harmony = tuple([h for h in harmony if h != "BAR" and h != "END"])
+
         if not self._tm_phrases:
             return self.get_probability_notes(melody, harmony)
 
@@ -72,23 +75,78 @@ class TranslationModel(object):
         else:
             return [n + ":" + rhythm for n in self._tm_notes[pitch].keys()]
 
+    def insert_bars(self, melody, harmony):
+        bar_offsets = []
+        end_offset = None
+        curr_offset = 0
+        for m in melody:
+            if m == "BAR":
+                bar_offsets.append(curr_offset)
+            elif m == "END":
+                end_offset = curr_offset
+            curr_offset += get_note_length_from_rep(m)
+
+        curr_offset = 0
+        new_harmony = []
+
+        # bar_offsets is sorted in ascending order.
+        # whenever a bar is added to the harmony, its
+        # corresponding offset is popped from the front
+        # of the list. there is an invariant that no offsets
+        # in bar_offsets should be less than curr_offset.
+        for h in harmony:
+            if not bar_offsets:
+                new_harmony.extend(harmony[harmony.index(h):])
+                break
+
+            h_pitch = get_note_pitch_from_rep(h)
+            h_len = get_note_length_from_rep(h)
+            # insert bar into new harmony before the current
+            # harmony note
+            if curr_offset == bar_offsets[0]:
+                new_harmony.append("BAR")
+                bar_offsets.pop(0)
+
+            # split up current note to insert bars if necessary
+            while len(bar_offsets) > 0 and curr_offset + h_len > bar_offsets[0]:
+                note_before_bar_len = bar_offsets[0] - curr_offset
+                note_after_bar_len = curr_offset + h_len - bar_offsets[0]
+                
+                new_harmony.append(h_pitch + ":" + str(note_before_bar_len))
+                new_harmony.append("BAR")
+                bar_offsets.pop(0)
+                
+                h_len = note_after_bar_len
+                curr_offset += note_before_bar_len
+
+            # append a potentially split version of the current note
+            new_harmony.append(h_pitch + ":" + str(h_len))
+
+            curr_offset += h_len
+
+        if end_offset == curr_offset:
+            new_harmony.append("END")
+
+        return tuple(new_harmony)
+
     def get_harmonies(self, melody):
-        melody = tuple([m for m in melody if m != "BAR" and m != "END"])
-        if not melody:
+        melody_no_bars = tuple([m for m in melody if m != "BAR" and m != "END"])
+        if not melody_no_bars:
             return []
 
         single_note_translation = []
 
-        if len(melody) < 2:
-            single_note_harmonies = [(n,) for m in melody for n in self.get_harmonies_note(m)]
+        if len(melody_no_bars) < 2:
+            single_note_harmonies = [(n,) for m in melody_no_bars for n in self.get_harmonies_note(m)]
         else:
-            single_note_harmonies = list(product([n for n in self.get_harmonies_note(melody[0])], [n for n in self.get_harmonies_note(melody[1])]))
+            single_note_harmonies = list(product([n for n in self.get_harmonies_note(melody_no_bars[0])], [n for n in self.get_harmonies_note(melody_no_bars[1])]))
 
-        if melody not in self._tm_phrases:
-            single_note_harmonies
+        if melody_no_bars not in self._tm_phrases:
+            translations = single_note_harmonies
         else:
-            translations = self._tm_phrases[melody].keys() + single_note_harmonies
-            return translations
+            translations = self._tm_phrases[melody_no_bars].keys() + single_note_harmonies
+        translations = [self.insert_bars(melody, t) for t in translations]    
+        return translations
 
     def write_to_file(self,path):
         f = open(path, 'w')

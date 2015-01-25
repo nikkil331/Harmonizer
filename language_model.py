@@ -28,6 +28,7 @@ class LanguageModel(object):
 	def get_probability(self, context, phrase):
 		total_prob = 0
 		context_tuple = tuple([s.split(":")[0] for s in context])
+		context_size = len([n for n in context_tuple if n != "BAR" and n != "END"])
 		for note in phrase:
 			note_rep = note.split(":")[0]
 			if note_rep == "BAR":
@@ -40,9 +41,11 @@ class LanguageModel(object):
 				else:
 					total_prob += math.log(self._lm[context_tuple][note_rep])
 				context_tuple = list(context_tuple)
-				if context_tuple.pop(0) == "BAR":
-					context_tuple.pop(0)
 				context_tuple.append(note_rep)
+				context_size+=1
+				while context_size > self.ngram_size:
+					if context_tuple.pop(0) != "BAR":
+						context_size-=1
 				context_tuple = tuple(context_tuple)
 		return total_prob
 
