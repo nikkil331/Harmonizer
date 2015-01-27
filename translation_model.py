@@ -148,14 +148,14 @@ class TranslationModel(object):
         translations = [self.insert_bars(melody, t) for t in translations]    
         return translations
 
-    def write_to_file(self,path):
+    def write_to_file(self, model, path):
         f = open(path, 'w')
-        for melody_phrase in self._tm_phrases:
-            for harmony_phrase in self._tm_phrases[melody_phrase]:
+        for melody_phrase in model:
+            for harmony_phrase in model[melody_phrase]:
                 melody_string = ' '.join(melody_phrase)
                 harmony_string = ' '.join(harmony_phrase)
                 output_line = ''.join([str(melody_string), ' ||| ', str(harmony_string), ' ||| ', \
-                    str(self.get_probability(melody_phrase, harmony_phrase)), '\n'])
+                    str(model[melody_phrase][harmony_phrase]), '\n'])
                 f.write(output_line)
 
 

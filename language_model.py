@@ -65,7 +65,7 @@ class LanguageModel(object):
 			for note in self._lm[context]:
 				context_str = ' '.join(context)
 				output_line = ''.join([str(context_str), ' ||| ', str(note), ' ||| ', \
-					str(self.get_probability(context, note)), '\n'])
+					str(self._lm[context][note]), '\n'])
 				f.write(output_line)
 
 def main():
