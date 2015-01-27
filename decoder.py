@@ -7,7 +7,7 @@ from collections import namedtuple
 from translation_model import TranslationModel
 from language_model import LanguageModel
 from music_utils import *
-import gc
+import progressbar
 
 hypothesis = namedtuple("hypothesis", "notes, duration, context, context_size, tm_logprob, lm_logprob")
 
@@ -81,45 +81,57 @@ class Decoder(object):
         return phrases
 
     def decode(self):
-        print "total duration:", self._parts[0][1].duration.quarterLength
-        beam = [hypothesis((), 0.0, (), 0, 0.0, 0.0)]
-        new_beam = []
+        bar = progressbar.ProgressBar(maxval=self._parts[0][1].duration.quarterLength, \
+                                      widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+        beam = {0.0: [hypothesis((), 0.0, (), 0, 0.0, 0.0)]}
+        new_beam = {}
         continue_growing_hyps = True
         longest_duration = 0.0
         while continue_growing_hyps:
             continue_growing_hyps = False
-            for hyp in beam:
-                if hyp.duration >= self._parts[0][1].duration.quarterLength:
-                    new_beam.append(hyp)
+            for hyp_dur in beam:
+                if hyp_dur >= self._parts[0][1].duration.quarterLength:
+                    new_beam[hyp_dur] = beam[hyp_dur]
                 else:
-                    if hyp.duration > longest_duration:
-                        longest_duration = hyp.duration
-                        print longest_duration
+                    if hyp_dur > longest_duration:
+                        longest_duration = hyp_dur
+                        bar.update(longest_duration)
                     continue_growing_hyps = True
                     for (part_idx, p) in enumerate(self._parts):
                         # {part_idx: phrase}
-                        melody_phrases = self.get_melody_phrases_after_duration(hyp.duration, part_idx)
-                        # grow_hypes_in_beam() not implemented correctly yet
-                        new_beam.extend(self._grow_hyps_in_beam(melody_phrases, part_idx, hyp)) # is part_idx right?
-                        for part_idx in xrange(len(melody_phrases)):
-                            del melody_phrases[part_idx]
-                        del melody_phrases
-                        gc.collect()
-                        sys.stderr.write(".")
+                        melody_phrases = self.get_melody_phrases_after_duration(hyp_dur, part_idx)
+                        for hyp in beam[hyp_dur]:
+                            new_hyps = self._grow_hyps_in_beam(melody_phrases, part_idx, hyp)
+                            for new_hyp in new_hyps:
+                                if new_hyp.duration not in new_beam:
+                                    new_beam[new_hyp.duration] = []
+                                new_beam[new_hyp.duration].append(new_hyp)
             if continue_growing_hyps:
-                beam = sorted(new_beam, key = lambda hyp: get_score(hyp), reverse=True)[:5]
-                new_beam = []
+                all_new_hyps = [i for j in new_beam.values() for i in j]
+                all_new_hyps = sorted(all_new_hyps, key = lambda hyp: get_score(hyp), reverse=True)[:100]
+                beam = {}
+                for hyp in all_new_hyps:
+                    if hyp.duration not in beam:
+                        beam[hyp.duration] = []
+                    beam[hyp.duration].append(hyp)
+                new_beam = {}
 
         for hyp in beam:
-            new_beam.extend(self._grow_hyps_in_beam({i:("END",) for i in range(len(self._parts))}, 0, hyp))
-       
-        beam = sorted(new_beam, key = lambda hyp: get_score(hyp), reverse=True)[:5]
-        winner = [n for n in beam[0].notes if n != "BAR" and n != "END"]
+            new_hyps = self._grow_hyps_in_beam({i:("END",) for i in range(len(self._parts))}, 0, hyp)
+            for new_hyp in new_hyps:
+                if new_hyp.duration not in new_beam:
+                    new_beam[new_hyp.duration] = []
+                new_beam[new_hyp.duration].append(new_hyp)
+        
+        all_hyps = [i for j in new_beam.values() for i in j]
+        all_hyps = sorted(all_hyps, key = lambda hyp: get_score(hyp), reverse=True)[:100]
+        winner = [n for n in all_hyps[0].notes if n != "BAR" and n != "END"]
 
         # translate note sequence into music21 stream
         measure_stream = self._parts[0][1].getElementsByClass('Measure')
         winner_stream = make_stream_from_strings(winner)
 
+        bar.finish()
         return put_notes_in_measures(measure_stream, winner_stream)
 
 
