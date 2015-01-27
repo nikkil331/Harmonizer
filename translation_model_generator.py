@@ -83,10 +83,9 @@ class TranslationModelGenerator(object):
 
 
 def main():
-	parts_1 = ["Bass"]
-	parts_2 = ["Tenor"]
-	for p1 in parts_1:
-		for p2 in parts_2:
+	parts = ["Soprano", "Alto", "Tenor", "Bass"]
+	for p1 in parts:
+		for p2 in parts:
 			if p1 != p2:
 				print p1, p2
 				tm_generator = TranslationModelGenerator(melody_part=p1, harmony_part=p2)
