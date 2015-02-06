@@ -9,10 +9,12 @@ from language_model import LanguageModel
 from music_utils import *
 import progressbar
 
-hypothesis = namedtuple("hypothesis", "notes, duration, context, context_size, tm_logprob, lm_logprob")
+hypothesis = namedtuple("hypothesis", "notes, duration, context, context_size, tm_phrase_logprob, tm_notes_logprob, lm_logprob")
 
-def get_score(hyp):
-    return (hyp.tm_logprob + hyp.lm_logprob)/float(hyp.duration)
+def get_score(hyp, tm_phrase_weight, tm_notes_weight, lm_weight):
+    return ((tm_phrase_weight*hyp.tm_phrase_logprob) + 
+            (tm_notes_weight*hyp.tm_notes_logprob) +
+            (lm_weight*hyp.lm_logprob))/float(hyp.duration)
 
 def get_lm_score(lm, context, phrase):
     return lm.get_probability(context, phrase)
@@ -21,13 +23,16 @@ def get_tm_score(tm, m_phrase, h_phrase):
     return tm.get_probability(m_phrase, h_phrase)
 
 class Decoder(object):
-    def __init__(self, parts, lm, tms):
+    def __init__(self, parts, lm, tms, tm_phrase_weight=1, tm_notes_weight=1, lm_weight=1):
         #self._original_key = parts[0][1].analyze('key').pitchAndMode[0]
         self._parts = parts
         #for (name, stream) in self._parts:
         #    music_utils.transpose(stream, 'C')
         self._lm = lm
         self._tms = tms
+        self._tm_phrase_weight = tm_phrase_weight
+        self._tm_notes_weight = tm_notes_weight
+        self._lm_weight = lm_weight
 
     # returns (new_context, new_context_size) based on the old
     # context and size and the added phrase
@@ -44,11 +49,14 @@ class Decoder(object):
         new_notes = curr_hyp.notes + h_phrase
         new_duration = curr_hyp.duration + get_phrase_length_from_rep(h_phrase)
         new_context, new_context_size = self.update_context(curr_hyp.context, curr_hyp.context_size, h_phrase)
-        new_tm_logprob = curr_hyp.tm_logprob
+        new_tm_phrase_logprob = curr_hyp.tm_phrase_logprob
+        new_tm_notes_logprob = curr_hyp.tm_notes_logprob
         for part_idx, phrase in phrases.items():
-            new_tm_logprob += self._tms[part_idx].get_probability(phrase, h_phrase)
+            (phrase, notes) = self._tms[part_idx].get_probability(phrase, h_phrase)
+            new_tm_phrase_logprob += phrase
+            new_tm_notes_logprob += notes
         new_lm_logprob = curr_hyp.lm_logprob + self._lm.get_probability(new_context, h_phrase)
-        return hypothesis(new_notes, new_duration, new_context, new_context_size, new_tm_logprob, new_lm_logprob) 
+        return hypothesis(new_notes, new_duration, new_context, new_context_size, new_tm_phrase_logprob, new_tm_notes_logprob, new_lm_logprob) 
 
     def _grow_hyps_in_beam(self, phrases, main_phrase_part, hyp):
         new_beam = []
@@ -80,10 +88,10 @@ class Decoder(object):
                 phrases[p_idx] = section
         return phrases
 
-    def decode(self):
+    def decode(self, n_best_hyps):
         bar = progressbar.ProgressBar(maxval=self._parts[0][1].duration.quarterLength, \
                                       widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
-        beam = {0.0: [hypothesis((), 0.0, (), 0, 0.0, 0.0)]}
+        beam = {0.0: [hypothesis((), 0.0, (), 0, 0.0, 0.0, 0.0)]}
         new_beam = {}
         continue_growing_hyps = True
         longest_duration = 0.0
@@ -108,7 +116,11 @@ class Decoder(object):
                                 new_beam[new_hyp.duration].append(new_hyp)
             if continue_growing_hyps:
                 all_new_hyps = [i for j in new_beam.values() for i in j]
-                all_new_hyps = sorted(all_new_hyps, key = lambda hyp: get_score(hyp), reverse=True)[:100]
+                all_new_hyps = sorted(all_new_hyps, 
+                                      key = lambda hyp: get_score(hyp, self._tm_phrase_weight, 
+                                                                  self._tm_notes_weight, 
+                                                                  self._lm_weight), 
+                                      reverse=True)[:10]
                 beam = {}
                 for hyp in all_new_hyps:
                     if hyp.duration not in beam:
@@ -124,14 +136,20 @@ class Decoder(object):
                 new_beam[new_hyp.duration].append(new_hyp)
         
         all_hyps = [i for j in new_beam.values() for i in j]
-        all_hyps = sorted(all_hyps, key = lambda hyp: get_score(hyp), reverse=True)[:100]
-        winner = [n for n in all_hyps[0].notes if n != "BAR" and n != "END"]
+        all_hyps = sorted(all_hyps, 
+                          key = lambda hyp: get_score(hyp, self._tm_phrase_weight, 
+                                                      self._tm_notes_weight, 
+                                                      self._lm_weight), 
+                          reverse=True)[:10]
+        bar.finish()
+        return all_hyps[:n_best_hyps]
 
+    def hyp_to_stream(self, hyp):
+        notes = [n for n in hyp.notes if n != "BAR" and n != "END"]
         # translate note sequence into music21 stream
         measure_stream = self._parts[0][1].getElementsByClass('Measure')
-        winner_stream = make_stream_from_strings(winner)
+        notes_stream = make_stream_from_strings(notes)
 
-        bar.finish()
-        return put_notes_in_measures(measure_stream, winner_stream)
+        return put_notes_in_measures(measure_stream, notes_stream)
 
 

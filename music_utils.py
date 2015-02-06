@@ -61,7 +61,7 @@ def get_note_rep(note):
         return "R:" + str(note.quarterLength)
 
 def get_phrase_rep(phrase):
-    return tuple([get_note_rep(note) for note in phrase])
+    return tuple([get_note_rep(note) for note in phrase.notesAndRests])
 
 
 def transpose(stream):

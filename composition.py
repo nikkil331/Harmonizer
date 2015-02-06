@@ -25,7 +25,7 @@ class Composition(object):
 		for (i, (f1, f2)) in enumerate(zip(tm_phrase_files, tm_note_files)):
 			tms.append(TranslationModel(phrase_path=f1, note_path=f2, harmony_part=name, melody_part=self._parts[i][0]))
 		d = decoder.Decoder(self._parts, lm, tms)
-		new_part = d.decode()
+		new_part = d.hyp_to_stream(d.decode(1)[0])
 		self._parts.append((name, new_part))
 
 

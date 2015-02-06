@@ -39,13 +39,13 @@ class TranslationModel(object):
 
         if melody not in self._tm_phrases:
             if harmony is not melody:
-                return self.get_probability_notes(melody, harmony)
+                return (math.log(1e-10), self.get_probability_notes(melody, harmony))
             else:
                 return 0
         elif harmony not in self._tm_phrases[melody]:
-            return self.get_probability_notes(melody, harmony)
+            return (math.log(1e-10), self.get_probability_notes(melody, harmony))
         else:
-            return math.log(self._tm_phrases[melody][harmony])
+            return (math.log(self._tm_phrases[melody][harmony]), self.get_probability_notes(melody, harmony))
 
     def get_probability_notes(self, melody, harmony):
         if not self._tm_notes:
