@@ -88,7 +88,6 @@ def make_stream_from_notes(notes):
     return s
 
 def make_stream_from_strings(notes):
-    print notes
     s = stream.Stream()
     for n_rep in notes:
         pitch, duration = n_rep.split(":")

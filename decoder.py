@@ -7,7 +7,6 @@ from collections import namedtuple
 from translation_model import TranslationModel
 from language_model import LanguageModel
 from music_utils import *
-import progressbar
 
 hypothesis = namedtuple("hypothesis", "notes, duration, context, context_size, tm_phrase_logprob, tm_notes_logprob, lm_logprob")
 
@@ -76,8 +75,9 @@ class Decoder(object):
     def get_melody_phrases_after_duration(self, duration, part_idx):
         phrases = {}
         semi_flat_part = self._parts[part_idx][1].semiFlat
-
         first_note = semi_flat_part.notesAndRests.getElementAtOrBefore(duration)
+        if first_note == None:
+            return None
         second_note = semi_flat_part.getElementAfterElement(first_note, [note.Note, note.Rest])
         if second_note:
             phrase_end = second_note.offset + second_note.quarterLength
@@ -96,8 +96,8 @@ class Decoder(object):
         return phrases
 
     def decode(self, n_best_hyps):
-        bar = progressbar.ProgressBar(maxval=self._parts[0][1].duration.quarterLength, \
-                                      widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+        #bar = progressbar.ProgressBar(maxval=self._parts[0][1].duration.quarterLength, \
+        #                              widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
         beam = {0.0: [hypothesis((), 0.0, (), 0, 0.0, 0.0, 0.0)]}
         new_beam = {}
         continue_growing_hyps = True
@@ -110,11 +110,13 @@ class Decoder(object):
                 else:
                     if hyp_dur > longest_duration:
                         longest_duration = hyp_dur
-                        bar.update(longest_duration)
+                        #bar.update(longest_duration)
                     continue_growing_hyps = True
                     for (part_idx, p) in enumerate(self._parts):
                         # {part_idx: phrase}
                         melody_phrases = self.get_melody_phrases_after_duration(hyp_dur, part_idx)
+                        if melody_phrases == None:
+                            continue
                         for hyp in beam[hyp_dur]:
                             new_hyps = self._grow_hyps_in_beam(melody_phrases, part_idx, hyp)
                             for new_hyp in new_hyps:
@@ -160,7 +162,7 @@ class Decoder(object):
                                                       self._tm_notes_weight, 
                                                       self._lm_weight), 
                           reverse=True)[:50]
-        bar.finish()
+        #bar.finish()
         return final_hyps[:n_best_hyps]
 
     def hyp_to_stream(self, hyp):

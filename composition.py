@@ -3,6 +3,7 @@ import decoder
 from translation_model import TranslationModel
 from language_model import LanguageModel
 from collections import namedtuple
+import sys
 
 class Composition(object):
 
@@ -33,20 +34,38 @@ class Composition(object):
 		score = stream.Score([part[1] for part in self._parts])
 		score.show()
 
+        def save(self, name):
+                score = stream.Score([part[1] for part in self._parts])
+                f = open(name, 'w')
+                f.write(musicxml.m21ToString.fromMusic21Object(score))
+                f.close()
+
 def main():
-	test_song = corpus.parse('bach/bwv390')
+        test_song = converter.parse('cis401/Harmonizer/ttls.xml')
+	#test_song = corpus.parse('bach/bwv390')
 	c = Composition()
-	c.add_part('Soprano', test_song.parts['Soprano'])
-	c.create_part('Bass', \
-				  'data/bass_language_model_major.txt', \
-				  ['data/Soprano_Bass_translation_model_major_rhythm.txt'], \
-				  ['data/Soprano_Bass_translation_model_major.txt'])
-	#c.create_part('Alto', 'data/alto_language_model_major.txt', ['data/Soprano_Alto_translation_model_major_rhythm.txt',\
-	#														    'data/Bass_Alto_translation_model_major_rhythm.txt'])
-	#c.create_part('Tenor', 'data/Tenor_language_model_major.txt', ['data/Soprano_Tenor_translation_model_major_rhythm.txt',\
-	#															 'data/Bass_Tenor_translation_model_major_rhythm.txt',\
-	#															 'data/Alto_Tenor_translation_model_major_rhythm.txt'])
-	c.play()
+	c.add_part('Soprano', test_song.parts['Piano'])
+        sys.stderr.write("Creating bass\n")
+        c.create_part('Bass', \
+                      'cis401/Harmonizer/data/bass_language_model_major.txt', \
+                      ['cis401/Harmonizer/data/Soprano_Bass_translation_model_major_rhythm.txt'], \
+                      ['cis401/Harmonizer/data/Soprano_Bass_translation_model_major.txt'])
+        sys.stderr.write("Creating alto\n")
+        c.create_part('Alto', 'cis401/Harmonizer/data/alto_language_model_major.txt', \
+                      ['cis401/Harmonizer/data/Soprano_Alto_translation_model_major_rhythm.txt', \
+                       'cis401/Harmonizer/data/Bass_Alto_translation_model_major_rhythm.txt'], \
+                      ['cis401/Harmonizer/data/Soprano_Alto_translation_model_major.txt',\
+                       'cis401/Harmonizer/data/Bass_Alto_translation_model_major.txt'])
+        sys.stderr.write("Creating tenor\n")
+        c.create_part('Tenor', 'cis401/Harmonizer/data/Tenor_language_model_major.txt', \
+                      ['cis401/Harmonizer/data/Soprano_Tenor_translation_model_major_rhythm.txt',\
+                       'cis401/Harmonizer/data/Bass_Tenor_translation_model_major_rhythm.txt',\
+                       'cis401/Harmonizer/data/Alto_Tenor_translation_model_major_rhythm.txt'], \
+                      ['cis401/Harmonizer/data/Soprano_Tenor_translation_model_major.txt',\
+                       'cis401/Harmonizer/data/Bass_Tenor_translation_model_major.txt',\
+                       'cis401/Harmonizer/data/Alto_Tenor_translation_model_major.txt'])
+
+        c.save('ttls_generated.xml')
 
 if __name__ == "__main__":
     main()
