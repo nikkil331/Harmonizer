@@ -23,7 +23,8 @@ def get_tm_score(tm, m_phrase, h_phrase):
     return tm.get_probability(m_phrase, h_phrase)
 
 class Decoder(object):
-    def __init__(self, parts, lm, tms, tm_phrase_weight=1, tm_notes_weight=1, lm_weight=1):
+    def __init__(self, parts, lm, tms, tm_phrase_weight=1, 
+                 tm_notes_weight=1, lm_weight=1):
         #self._original_key = parts[0][1].analyze('key').pitchAndMode[0]
         self._parts = parts
         #for (name, stream) in self._parts:
@@ -52,17 +53,21 @@ class Decoder(object):
         new_tm_phrase_logprob = curr_hyp.tm_phrase_logprob
         new_tm_notes_logprob = curr_hyp.tm_notes_logprob
         for part_idx, phrase in phrases.items():
-            (phrase, notes) = self._tms[part_idx].get_probability(phrase, h_phrase)
-            new_tm_phrase_logprob += phrase
-            new_tm_notes_logprob += notes
+            if phrase:
+                (phrase_prob, note_prob) = self._tms[part_idx].get_probability(phrase, h_phrase)
+                new_tm_phrase_logprob += phrase_prob
+                new_tm_notes_logprob += note_prob
         new_lm_logprob = curr_hyp.lm_logprob + self._lm.get_probability(new_context, h_phrase)
         return hypothesis(new_notes, new_duration, new_context, new_context_size, new_tm_phrase_logprob, new_tm_notes_logprob, new_lm_logprob) 
 
     def _grow_hyps_in_beam(self, phrases, main_phrase_part, hyp):
         new_beam = []
         # get_harmonies always returns at least one harmony
-        possible_harmony_phrases = set(self._tms[main_phrase_part]\
-                                        .get_harmonies(phrases[main_phrase_part]))
+        if phrases[0] == ("END",):
+            possible_harmony_phrases = set([("END",)])
+        else:
+            possible_harmony_phrases = set(self._tms[main_phrase_part]\
+                                            .get_harmonies(phrases[main_phrase_part]))
         for h in possible_harmony_phrases:
             new_hyp = self._update_hypothesis(hyp, phrases, h)
             new_beam.append(new_hyp)
@@ -85,6 +90,8 @@ class Decoder(object):
         for p_idx in range(len(self._parts)):
             if p_idx != part_idx:
                 section = get_phrase_rep(trim_stream(self._parts[p_idx][1].semiFlat, duration, phrase_end))
+                if len(section) == 0:
+                    section = None
                 phrases[p_idx] = section
         return phrases
 
@@ -116,11 +123,17 @@ class Decoder(object):
                                 new_beam[new_hyp.duration].append(new_hyp)
             if continue_growing_hyps:
                 all_new_hyps = [i for j in new_beam.values() for i in j]
-                all_new_hyps = sorted(all_new_hyps, 
+                consolidated_all_new_hyps = []
+                notes_set = set()
+                for h in all_new_hyps:
+                    if tuple(h.notes) not in notes_set:
+                        consolidated_all_new_hyps.append(h)
+                        notes_set.add(tuple(h.notes))
+                all_new_hyps = sorted(consolidated_all_new_hyps, 
                                       key = lambda hyp: get_score(hyp, self._tm_phrase_weight, 
                                                                   self._tm_notes_weight, 
                                                                   self._lm_weight), 
-                                      reverse=True)[:10]
+                                      reverse=True)[:50]
                 beam = {}
                 for hyp in all_new_hyps:
                     if hyp.duration not in beam:
@@ -128,21 +141,27 @@ class Decoder(object):
                     beam[hyp.duration].append(hyp)
                 new_beam = {}
 
-        for hyp in beam:
-            new_hyps = self._grow_hyps_in_beam({i:("END",) for i in range(len(self._parts))}, 0, hyp)
-            for new_hyp in new_hyps:
-                if new_hyp.duration not in new_beam:
-                    new_beam[new_hyp.duration] = []
-                new_beam[new_hyp.duration].append(new_hyp)
-        
-        all_hyps = [i for j in new_beam.values() for i in j]
-        all_hyps = sorted(all_hyps, 
+        final_hyps = []
+        for hyp_dur in beam:
+            for hyp in beam[hyp_dur]:
+                # end is not working
+                new_beams = self._grow_hyps_in_beam({i:("END",) for i in range(len(self._parts))}, 0, hyp)
+                final_hyps.extend(new_beams)
+                  
+        consolidated_final_hyps = []
+        notes_set = set()
+        for h in final_hyps:
+            if tuple(h.notes) not in notes_set:
+                consolidated_final_hyps.append(h)
+                notes_set.add(tuple(h.notes))
+
+        final_hyps = sorted(consolidated_final_hyps, 
                           key = lambda hyp: get_score(hyp, self._tm_phrase_weight, 
                                                       self._tm_notes_weight, 
                                                       self._lm_weight), 
-                          reverse=True)[:10]
+                          reverse=True)[:50]
         bar.finish()
-        return all_hyps[:n_best_hyps]
+        return final_hyps[:n_best_hyps]
 
     def hyp_to_stream(self, hyp):
         notes = [n for n in hyp.notes if n != "BAR" and n != "END"]
