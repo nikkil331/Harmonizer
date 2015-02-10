@@ -89,8 +89,13 @@ def powell(params, no_iters):
 				threshold_points = sorted(list(threshold_points))
 				params_list = list(params)
 				current_best_score = get_score_for_n_best_lists(n_best_lists)
+				params_list[i] = threshold_points[0] - 0.01
+				best_hyps = get_n_best_lists(tuple(params_list), 1)
+				score = get_score_for_n_best_lists(best_hyps)
+				if score > current_best_score:
+						current_best_score = score
 				for t in threshold_points:
-					params_list[i] = t
+					params_list[i] = t + 0.01
 					best_hyps = get_n_best_lists(tuple(params_list), 1)
 					score = get_score_for_n_best_lists(best_hyps)
 					if score > current_best_score:
