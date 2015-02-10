@@ -109,15 +109,15 @@ def trim_stream(s, begin_offset, end_offset):
                                     includeElementsThatEndAtStart=False, \
                                     classList=[note.Note, note.Rest, stream.Measure])
     section = copy.deepcopy(section)
-    if type(section[0]) == stream.Measure:
-        section.pop(0)
-    # trim beginning
-    section[0].quarterLength -= (begin_offset - section[0].offset)
-    section[0].offset = begin_offset
+    if len(section) > 0:
+        if type(section[0]) == stream.Measure:
+            section.pop(0)
+        # trim beginning
+        section[0].quarterLength -= (begin_offset - section[0].offset)
+        section[0].offset = begin_offset
 
-    #trim end
-    section[-1].quarterLength = end_offset - section[-1].offset
-
+        #trim end
+        section[-1].quarterLength = end_offset - section[-1].offset
     return section
 
 def get_note_pitch_from_rep(n_rep):
