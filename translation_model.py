@@ -41,7 +41,7 @@ class TranslationModel(object):
             if harmony is not melody:
                 return (math.log(1e-10), self.get_probability_notes(melody, harmony))
             else:
-                return 0
+                return (0, 0)
         elif harmony not in self._tm_phrases[melody]:
             return (math.log(1e-10), self.get_probability_notes(melody, harmony))
         else:
@@ -52,9 +52,11 @@ class TranslationModel(object):
             return -1
         total_prob = 0
         for (i, m_note) in enumerate(melody):
-            if m_note != "BAR" and m_note != "END":   
+            if m_note != "BAR" and m_note != "END":  
+                m_note = get_note_pitch_from_rep(m_note) 
                 h_notes = notes_playing_while_sounding(harmony, melody, i)  
                 for h_note in h_notes:
+                    h_note = get_note_pitch_from_rep(h_note)
                     if m_note not in self._tm_notes:
                         if h_note is not m_note:
                             total_prob += math.log(1e-10)
@@ -71,7 +73,7 @@ class TranslationModel(object):
     def get_harmonies_note(self, note):
         pitch, rhythm = note.split(":")
         if pitch not in self._tm_notes:
-            return [tuple("R:" + rhythm)]
+            return ["R:" + rhythm]
         else:
             return [n + ":" + rhythm for n in self._tm_notes[pitch].keys()]
 
