@@ -17,7 +17,7 @@ def get_score(hyp, tm_phrase_weight, tm_notes_weight, lm_weight):
             (lm_weight*hyp.lm_logprob))/float(hyp.duration)
 
 def get_lm_score(lm, context, phrase):
-    return lm.get_probability(context, phrase)
+    return lm.get_probability(tuple([s.encode('ascii') for s in context]), phrase)
     
 def get_tm_score(tm, m_phrase, h_phrase):
     return tm.get_probability(m_phrase, h_phrase)
@@ -165,7 +165,7 @@ class Decoder(object):
                                       widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
         bar.update(0)
         notes_and_scores = namedtuple("notes_and_scores", "notes, tm_phrase_logprob, tm_notes_logprob, lm_logprob, duration")
-        best_hyps_so_far = [notes_and_scores([], 0.0, 0.0, 0.0, 0.0) for i in range(n_best_hyps)]
+        best_hyps_so_far = [notes_and_scores([], 0.0, 0.0, 0.0, 0.0)]
         for (mid, measure_pairs) in enumerate(self._get_measure_pairs()):
             best_hyps_continuation = self._decodeMeasurePair(measure_pairs, n_best_hyps)
             new_best_hyps = []
