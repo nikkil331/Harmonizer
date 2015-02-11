@@ -56,7 +56,7 @@ class Decoder(object):
                 (phrase_prob, note_prob) = self._tms[part_idx].get_probability(phrase, h_phrase)
                 new_tm_phrase_logprob += phrase_prob
                 new_tm_notes_logprob += note_prob
-        new_lm_logprob = curr_hyp.lm_logprob + self._lm.get_probability(new_context, h_phrase)
+        new_lm_logprob = curr_hyp.lm_logprob + self._lm.get_probability(curr_hyp.context, h_phrase)
         return hypothesis(new_notes, new_duration, new_context, new_context_size, new_tm_phrase_logprob, new_tm_notes_logprob, new_lm_logprob) 
 
     def _grow_hyps_in_beam(self, phrases, main_phrase_part, hyp):
