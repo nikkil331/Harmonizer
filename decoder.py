@@ -23,8 +23,8 @@ def get_tm_score(tm, m_phrase, h_phrase):
     return tm.get_probability(m_phrase, h_phrase)
 
 class Decoder(object):
-    def __init__(self, parts, lm, tms, tm_phrase_weight=1, 
-                 tm_notes_weight=1, lm_weight=1):
+    def __init__(self, parts, lm, tms, tm_phrase_weight=0.5726547297805934, 
+                 tm_notes_weight=0.061101102321016725, lm_weight= 0.0020716756164958113):
         #self._original_key = parts[0][1].analyze('key').pitchAndMode[0]
         self._parts = parts
         #for (name, stream) in self._parts:
@@ -73,10 +73,9 @@ class Decoder(object):
             new_beam.append(new_hyp)
         return new_beam
 
-    def get_melody_phrases_after_duration(self, duration, part_idx):
+    def get_melody_phrases_after_duration(self, duration, measure_pairs, part_idx):
         phrases = {}
-        semi_flat_part = self._parts[part_idx][1].semiFlat
-
+        semi_flat_part = measure_pairs[part_idx].semiFlat
         first_note = semi_flat_part.notesAndRests.getElementAtOrBefore(duration)
         second_note = semi_flat_part.getElementAfterElement(first_note, [note.Note, note.Rest])
         if second_note:
@@ -85,36 +84,29 @@ class Decoder(object):
             phrase_end = first_note.offset + first_note.quarterLength
 
         melody_phrase = trim_stream(semi_flat_part, duration, phrase_end)
-
         phrases[part_idx] = get_phrase_rep(melody_phrase)
-        for p_idx in range(len(self._parts)):
+        for p_idx in range(len(measure_pairs)):
             if p_idx != part_idx:
-                section = get_phrase_rep(trim_stream(self._parts[p_idx][1].semiFlat, duration, phrase_end))
+                section = get_phrase_rep(trim_stream(measure_pairs[p_idx].semiFlat, duration, phrase_end))
                 if len(section) == 0:
                     section = None
                 phrases[p_idx] = section
         return phrases
 
-    def decode(self, n_best_hyps):
-        bar = progressbar.ProgressBar(maxval=self._parts[0][1].duration.quarterLength, \
-                                      widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+    def _decodeMeasurePair(self, measure_pairs, n_best_hyps):
         beam = {0.0: [hypothesis((), 0.0, (), 0, 0.0, 0.0, 0.0)]}
         new_beam = {}
         continue_growing_hyps = True
-        longest_duration = 0.0
         while continue_growing_hyps:
             continue_growing_hyps = False
             for hyp_dur in beam:
-                if hyp_dur >= self._parts[0][1].duration.quarterLength:
+                if hyp_dur >= measure_pairs[0].duration.quarterLength - measure_pairs[0][0].offset:
                     new_beam[hyp_dur] = beam[hyp_dur]
                 else:
-                    if hyp_dur > longest_duration:
-                        longest_duration = hyp_dur
-                        bar.update(longest_duration)
                     continue_growing_hyps = True
-                    for (part_idx, p) in enumerate(self._parts):
+                    for (part_idx, p) in enumerate(measure_pairs):
                         # {part_idx: phrase}
-                        melody_phrases = self.get_melody_phrases_after_duration(hyp_dur, part_idx)
+                        melody_phrases = self.get_melody_phrases_after_duration(measure_pairs[0][0].offset + hyp_dur, measure_pairs, part_idx)
                         for hyp in beam[hyp_dur]:
                             new_hyps = self._grow_hyps_in_beam(melody_phrases, part_idx, hyp)
                             for new_hyp in new_hyps:
@@ -160,8 +152,42 @@ class Decoder(object):
                                                       self._tm_notes_weight, 
                                                       self._lm_weight), 
                           reverse=True)[:50]
-        bar.finish()
         return final_hyps[:n_best_hyps]
+
+    def _get_measure_pairs(self):
+        measures = [part.measures(0, len(self._parts[0][1].getElementsByClass('Measure')), collect=())
+                    for (name, part) in self._parts]
+        for i in xrange(0, len(measures[0]) - 3, 4):
+            yield [m[i:i+4] for m in measures]
+
+    def decode(self, n_best_hyps):
+        bar = progressbar.ProgressBar(maxval=self._parts[0][1].duration.quarterLength, \
+                                      widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+        bar.update(0)
+        notes_and_scores = namedtuple("notes_and_scores", "notes, tm_phrase_logprob, tm_notes_logprob, lm_logprob, duration")
+        best_hyps_so_far = [notes_and_scores([], 0.0, 0.0, 0.0, 0.0) for i in range(n_best_hyps)]
+        for (mid, measure_pairs) in enumerate(self._get_measure_pairs()):
+            best_hyps_continuation = self._decodeMeasurePair(measure_pairs, n_best_hyps)
+            new_best_hyps = []
+            for prefix_hyp in best_hyps_so_far:
+                for suffix_hyp in best_hyps_continuation:
+                    new_notes = prefix_hyp.notes + list(suffix_hyp.notes)
+                    new_tm_phrase_logprob = prefix_hyp.tm_phrase_logprob + suffix_hyp.tm_phrase_logprob
+                    new_tm_notes_logprob = prefix_hyp.tm_notes_logprob + suffix_hyp.tm_notes_logprob
+                    new_lm_logprob = prefix_hyp.lm_logprob + suffix_hyp.lm_logprob
+                    new_duration = prefix_hyp.duration + suffix_hyp.duration
+                    new_best_hyps.append(notes_and_scores(new_notes, new_tm_phrase_logprob, new_tm_notes_logprob, new_lm_logprob, new_duration))
+            best_hyps_so_far = sorted(new_best_hyps, 
+                                      key = lambda hyp: get_score(hyp, self._tm_phrase_weight, 
+                                                      self._tm_notes_weight, 
+                                                      self._lm_weight), 
+                                      reverse=True)[:n_best_hyps]
+            bar.update(best_hyps_so_far[0].duration)
+        bar.finish()
+        return best_hyps_so_far[:n_best_hyps]
+
+
+
 
     def hyp_to_stream(self, hyp):
         notes = [n for n in hyp.notes if n != "BAR" and n != "END"]
