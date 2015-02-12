@@ -110,12 +110,21 @@ def trim_stream(s, begin_offset, end_offset):
                                     classList=[note.Note, note.Rest, stream.Measure])
     section = copy.deepcopy(section)
     if len(section) > 0:
-        if type(section[0]) == stream.Measure:
-            section.pop(0)
         # trim beginning
-        section[0].quarterLength -= (begin_offset - section[0].offset)
-        section[0].offset = begin_offset
+        if type(section[0]) == stream.Measure and section[0].offset != section[1].offset:
+            section.pop(0)
 
+        if type(section[0]) == stream.Measure:
+            section[0].offset = begin_offset
+
+            section[1].quarterLength -= (begin_offset - section[1].offset)
+            section[1].offset = begin_offset
+        else: 
+            section[0].quarterLength -= (begin_offset - section[0].offset)
+            section[0].offset = begin_offset
+
+        if type(section[-1]) == stream.Measure:
+            section.pop(len(section) - 1)
         #trim end
         section[-1].quarterLength = end_offset - section[-1].offset
     return section
@@ -160,6 +169,7 @@ def put_notes_in_measures(measure_stream, note_stream):
             if curr_measure.duration.quarterLength > curr_measure_template.duration.quarterLength:
                 new_note = copy.deepcopy(curr_measure[-1])
                 overshoot = curr_measure.duration.quarterLength - curr_measure_template.duration.quarterLength
+                curr_measure.duration.quarterLength -= overshoot
                 curr_measure[-1].duration.quarterLength -= overshoot
                 curr_measure[-1].tie = tie.Tie("start")
                 new_note.tie = tie.Tie("stop")
