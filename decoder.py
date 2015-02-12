@@ -11,7 +11,7 @@ import progressbar
 
 hypothesis = namedtuple("hypothesis", "notes, duration, context, context_size, tm_phrase_logprob, tm_notes_logprob, lm_logprob")
 
-def get_score(hyp, tm_phrase_weight, tm_notes_weight, lm_weight):
+def get_score(hyp, tm_phrase_weight=0.5726547297805934, tm_notes_weight=0.061101102321016725, lm_weight=0.0020716756164958113):
     return ((tm_phrase_weight*hyp.tm_phrase_logprob) + 
             (tm_notes_weight*hyp.tm_notes_logprob) +
             (lm_weight*hyp.lm_logprob))/float(hyp.duration)
