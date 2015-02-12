@@ -10,7 +10,7 @@ from music_utils import *
 
 hypothesis = namedtuple("hypothesis", "notes, duration, context, context_size, tm_phrase_logprob, tm_notes_logprob, lm_logprob")
 
-def get_score(hyp, tm_phrase_weight, tm_notes_weight, lm_weight):
+def get_score(hyp, tm_phrase_weight=0.5726547297805934, tm_notes_weight=0.061101102321016725, lm_weight=0.0020716756164958113):
     return ((tm_phrase_weight*hyp.tm_phrase_logprob) + 
             (tm_notes_weight*hyp.tm_notes_logprob) +
             (lm_weight*hyp.lm_logprob))/float(hyp.duration)
@@ -135,12 +135,7 @@ class Decoder(object):
                     beam[hyp.duration].append(hyp)
                 new_beam = {}
 
-        final_hyps = []
-        for hyp_dur in beam:
-            for hyp in beam[hyp_dur]:
-                # end is not working
-                new_beams = self._grow_hyps_in_beam({i:("END",) for i in range(len(self._parts))}, 0, hyp)
-                final_hyps.extend(new_beams)
+        final_hyps = [i for j in beam.values() for i in j]
                   
         consolidated_final_hyps = []
         notes_set = set()
@@ -166,30 +161,44 @@ class Decoder(object):
         bar = progressbar.ProgressBar(maxval=self._parts[0][1].duration.quarterLength, \
                                       widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
         bar.update(0)
-        notes_and_scores = namedtuple("notes_and_scores", "notes, tm_phrase_logprob, tm_notes_logprob, lm_logprob, duration")
-        best_hyps_so_far = [notes_and_scores([], 0.0, 0.0, 0.0, 0.0)]
+        best_hyps_so_far = [hypothesis((), 0.0, (), 0, 0.0, 0.0, 0.0)]
         for (mid, measure_pairs) in enumerate(self._get_measure_pairs()):
             best_hyps_continuation = self._decodeMeasurePair(measure_pairs, n_best_hyps)
             new_best_hyps = []
-            for prefix_hyp in best_hyps_so_far:
+            for prefix_hyp in best_hyps_so_far[:n_best_hyps]:
                 for suffix_hyp in best_hyps_continuation:
-                    new_notes = prefix_hyp.notes + list(suffix_hyp.notes)
+                    new_notes = prefix_hyp.notes + suffix_hyp.notes
                     new_tm_phrase_logprob = prefix_hyp.tm_phrase_logprob + suffix_hyp.tm_phrase_logprob
                     new_tm_notes_logprob = prefix_hyp.tm_notes_logprob + suffix_hyp.tm_notes_logprob
                     new_lm_logprob = prefix_hyp.lm_logprob + suffix_hyp.lm_logprob
                     new_duration = prefix_hyp.duration + suffix_hyp.duration
-                    new_best_hyps.append(notes_and_scores(new_notes, new_tm_phrase_logprob, new_tm_notes_logprob, new_lm_logprob, new_duration))
+                    new_best_hyps.append(hypothesis(new_notes, new_duration, suffix_hyp.context, suffix_hyp.context_size, new_tm_phrase_logprob, new_tm_notes_logprob, new_lm_logprob))
             best_hyps_so_far = sorted(new_best_hyps, 
                                       key = lambda hyp: get_score(hyp, self._tm_phrase_weight, 
                                                       self._tm_notes_weight, 
                                                       self._lm_weight), 
-                                      reverse=True)[:n_best_hyps]
+                                      reverse=True)
             bar.update(best_hyps_so_far[0].duration)
+
+        final_hyps = []
+        for hyp in best_hyps_so_far:
+            new_beams = self._grow_hyps_in_beam({i:("END",) for i in range(len(self._parts))}, 0, hyp)
+            final_hyps.extend(new_beams)
+
+        consolidated_final_hyps = []
+        notes_set = set()
+        for h in final_hyps:
+            if tuple(h.notes) not in notes_set:
+                consolidated_final_hyps.append(h)
+                notes_set.add(tuple(h.notes))
+
+        final_hyps = sorted(consolidated_final_hyps, 
+                          key = lambda hyp: get_score(hyp, self._tm_phrase_weight, 
+                                                      self._tm_notes_weight, 
+                                                      self._lm_weight), 
+                          reverse=True)[:n_best_hyps]
         bar.finish()
         return best_hyps_so_far[:n_best_hyps]
-
-
-
 
     def hyp_to_stream(self, hyp):
         notes = [n for n in hyp.notes if n != "BAR" and n != "END"]
