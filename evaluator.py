@@ -57,7 +57,8 @@ class Evaluator(object):
 				keySig = s.analyze('key')
 				if keySig.pitchAndMode[1] != 'major':
 					continue
-				hyp = 0.0
+				phrase_hyp = 0.0
+				note_hyp = 0.0
 				melody = s.parts[tm.melody_part]
 				harmony = s.parts[tm.harmony_part]
 				m_notes = get_phrase_rep(melody.flat.notesAndRests)
@@ -67,15 +68,16 @@ class Evaluator(object):
 					cur_melody_phrase.append(m_note)
 					if len(cur_melody_phrase) == 2:
 						harmony_phrase = notes_playing_while_sounding(h_notes, m_notes, i-1, i)
-						hyp += sum(tm.get_probability(cur_melody_phrase, harmony_phrase))
-
-				results.append(float(hyp))
+						result = tm.get_probability(cur_melody_phrase, harmony_phrase)
+						phrase_hyp += result[0]
+						note_hyp += result[1]
+				results.append((phrase_hyp, note_hyp))
 
 			except KeyError, e:
 				songsSkipped += 1
 
 		#print "Songs skipped: {0}".format(songsSkipped)
-		return sum(results)
+		return (sum(map(lambda x: x[0], results)), sum(map(lambda x: x[1], results)))
 
 def main():
 	e = Evaluator()
@@ -83,6 +85,7 @@ def main():
 	lm_both = LanguageModel(path="data/bass_language_model_both.txt", part="Bass")
 
 	tm_major = TranslationModel(phrase_path="data/Soprano_Bass_translation_model_major_rhythm.txt", note_path="data/Soprano_Bass_translation_model_major.txt", harmony_part="Bass", melody_part="Soprano")
+
 
 	print "TM major: " + str(e.evaluate_translation_model(tm_major))
 
