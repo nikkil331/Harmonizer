@@ -60,11 +60,15 @@ class Evaluator(object):
 				hyp = 0.0
 				melody = s.parts[tm.melody_part]
 				harmony = s.parts[tm.harmony_part]
-				for m in melody.flat.notesAndRests:
-					m_note = get_note_rep(m)
-					h_notes = [get_note_rep(h) for h in get_harmony_notes(m, harmony)]
-					for h_note in h_notes:
-						hyp = update_tm_hypothesis(tm, hyp, m_note, h_note)
+				m_notes = get_phrase_rep(melody.flat.notesAndRests)
+				h_notes = get_phrase_rep(harmony.flat.notesAndRests)
+				cur_melody_phrase = []
+				for (i, m_note) in enumerate(m_notes):
+					cur_melody_phrase.append(m_note)
+					if len(cur_melody_phrase) == 2:
+						harmony_phrase = notes_playing_while_sounding(h_notes, m_notes, i-1, i)
+						hyp += sum(tm.get_probability(cur_melody_phrase, harmony_phrase))
+
 				results.append(float(hyp))
 
 			except KeyError, e:
@@ -78,14 +82,9 @@ def main():
 	lm_major = LanguageModel(path="data/bass_language_model_major.txt", part="Bass")
 	lm_both = LanguageModel(path="data/bass_language_model_both.txt", part="Bass")
 
-	tm_major = TranslationModel(path="data/Soprano_Bass_translation_model_major.txt", harmony_part="Bass", melody_part="Soprano")
-	tm_both = TranslationModel(path="data/Soprano_Bass_translation_model_both.txt", harmony_part="Bass", melody_part="Soprano")
-	tm_adjusted = TranslationModel(path="data/Soprano_Bass_translation_model_major_adjusted.txt", harmony_part="Bass", melody_part="Soprano")
-	print "LM major: " + str(e.evaluate_language_model(lm_major))
-	print "LM both: " + str(e.evaluate_language_model(lm_both))
+	tm_major = TranslationModel(phrase_path="data/Soprano_Bass_translation_model_major_rhythm.txt", note_path="data/Soprano_Bass_translation_model_major.txt", harmony_part="Bass", melody_part="Soprano")
+
 	print "TM major: " + str(e.evaluate_translation_model(tm_major))
-	print "TM both: " + str(e.evaluate_translation_model(tm_both))
-	print "TM adjusted: " + str(e.evaluate_translation_model(tm_adjusted))
 
 if __name__ == "__main__":
     main()

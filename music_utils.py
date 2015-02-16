@@ -142,10 +142,12 @@ def notes_and_rests(phrase_rep):
     return [n for n in phrase_rep if n != "BAR" and n != "END"]
 
 # assumed that playing_notes and sounding_notes are lined up
-def notes_playing_while_sounding(playing_notes, sounding_notes, sounding_note_idx):
-    sounding_note_length = get_note_length_from_rep(sounding_notes[sounding_note_idx])
+def notes_playing_while_sounding(playing_notes, sounding_notes, sounding_note_start_idx, sounding_note_end_idx):
+    sounding_note_length = get_note_length_from_rep(sounding_notes[sounding_note_start_idx])
+    if sounding_note_start_idx != sounding_note_end_idx:
+        sounding_note_length += get_note_length_from_rep(sounding_notes[sounding_note_end_idx])
     sounding_note_offset = 0
-    for i in range(sounding_note_idx):
+    for i in range(sounding_note_start_idx):
         sounding_note_offset += get_note_length_from_rep(sounding_notes[i])
     notes_to_return = []
     for n in playing_notes:

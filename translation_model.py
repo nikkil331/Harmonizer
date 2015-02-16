@@ -54,7 +54,7 @@ class TranslationModel(object):
         for (i, m_note) in enumerate(melody):
             if m_note != "BAR" and m_note != "END":  
                 m_note = get_note_pitch_from_rep(m_note) 
-                h_notes = notes_playing_while_sounding(harmony, melody, i)  
+                h_notes = notes_playing_while_sounding(harmony, melody, i, i)  
                 for h_note in h_notes:
                     h_note = get_note_pitch_from_rep(h_note)
                     if m_note not in self._tm_notes:
