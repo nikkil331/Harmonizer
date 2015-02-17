@@ -1,5 +1,7 @@
 from music21 import *
+import multiprocessing
 import optparse
+import itertools
 import re
 import sys
 from translation_model import TranslationModel
@@ -85,14 +87,17 @@ class TranslationModelGenerator(object):
 
 def main():
 	parts = ["Soprano", "Alto", "Tenor", "Bass"]
-	for p1 in parts:
-		for p2 in parts:
-			if p1 != p2:
-				print p1, p2
-				tm_generator = TranslationModelGenerator(melody_part=p1, harmony_part=p2)
-				tm = tm_generator.generate_tm()
-				tm.write_to_file(tm._tm_phrases, 'data/{0}_{1}_translation_model_major_rhythm.txt'.format(p1,p2))
+	pool = multiprocessing.Pool()
+	pool.map(generate_generator_helper, itertools.permutations(parts, 2))
 
+def generate_generator_helper(t):
+	generate_generator(*t)
+
+def generate_generator(melody, harmony):
+	print melody, harmony
+	tm_generator = TranslationModelGenerator(melody_part=melody, harmony_part=harmony)
+	tm = tm_generator.generate_tm()
+	tm.write_to_file(tm._tm_phrases, 'Harmonizer/data/{0}_{1}_translation_model_major_rhythm_threshold.txt'.format(melody,harmony))	
 
 if __name__ == "__main__":
     main()
