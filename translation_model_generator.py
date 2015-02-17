@@ -46,8 +46,9 @@ class TranslationModelGenerator(object):
 			total_notes_harmonized = sum(self._tm_counts[harmony_note].values())
 			harmony_counts = self._tm_counts[harmony_note].items()
 			for (melody_note, count) in harmony_counts:
-				prob = count / float(total_notes_harmonized)
-				tm.add_to_model(melody_note,harmony_note,prob, tm._tm_phrases)
+				if count > 5:
+					prob = count / float(total_notes_harmonized)
+					tm.add_to_model(melody_note,harmony_note,prob, tm._tm_phrases)
 		return tm
 
 	def generate_tm(self):
