@@ -87,8 +87,7 @@ class TranslationModelGenerator(object):
 
 def main():
 	parts = ["Soprano", "Alto", "Tenor", "Bass"]
-	pool = multiprocessing.Pool()
-	pool.map(generate_generator_helper, itertools.permutations(parts, 2))
+	map(generate_generator_helper, itertools.permutations(parts, 2))
 
 def generate_generator_helper(t):
 	generate_generator(*t)
