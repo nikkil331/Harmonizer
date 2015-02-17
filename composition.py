@@ -45,6 +45,7 @@ class Composition(object):
 
 
 def main():
+	#test_song = converter.parse('ttls.xml')
 	test_song = corpus.parse('bach/bwv390')
 	parts = ['Alto', 'Tenor', 'Bass']
 	c = Composition()
