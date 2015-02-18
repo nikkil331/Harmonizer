@@ -65,12 +65,11 @@ class Evaluator(object):
 				h_notes = get_phrase_rep(harmony.flat.notesAndRests)
 				cur_melody_phrase = []
 				for (i, m_note) in enumerate(m_notes):
-					cur_melody_phrase.append(m_note)
-					if len(cur_melody_phrase) == 2:
-						harmony_phrase = notes_playing_while_sounding(h_notes, m_notes, i-1, i)
-						result = tm.get_probability(cur_melody_phrase, harmony_phrase)
-						phrase_hyp += result[0]
-						note_hyp += result[1]
+					if i >= 1 and i < len(m_notes) - 1:
+						harmony_phrase = notes_playing_while_sounding(h_notes, m_notes, i-1, i+1)
+						result = tm.get_probability(m_notes[i-1:i+1], harmony_phrase)
+						phrase_hyp += -float(result[0])
+						note_hyp += -float(result[1])
 				results.append((phrase_hyp, note_hyp))
 
 			except KeyError, e:
@@ -79,15 +78,26 @@ class Evaluator(object):
 		#print "Songs skipped: {0}".format(songsSkipped)
 		return (sum(map(lambda x: x[0], results)), sum(map(lambda x: x[1], results)))
 
+	def evaluate_combined(self, tm, lm, phrase_weight, note_weight, lm_weight):
+		phrase_score, notes_score = self.evaluate_translation_model(tm)
+		lm_score = self.evaluate_language_model(lm)
+		return phrase_weight*phrase_score + note_weight*notes_score + lm_weight*lm_score
+
 def main():
-	e = Evaluator()
-	lm_major = LanguageModel(path="data/bass_language_model_major.txt", part="Bass")
-	lm_both = LanguageModel(path="data/bass_language_model_both.txt", part="Bass")
+	existing_parts = ["Soprano", "Alto", "Tenor", "Bass"]
+	generated_parts = ["Alto", "Tenor", "Bass"]
+	for p1 in existing_parts:
+		for p2 in generated_parts:
+			if p1 == p2:
+				continue
+			print p1, p2
+			e = Evaluator()
+			lm_major = LanguageModel(path="data/{0}_language_model_major.txt".format(p2), part=p2)
+			tm_major = TranslationModel(phrase_path="data/{0}_{1}_translation_model_major_rhythm.txt".format(p1, p2), 
+										note_path="data/{0}_{1}_translation_model_major.txt".format(p1, p2),
+										harmony_part=p2, melody_part=p1)
 
-	tm_major = TranslationModel(phrase_path="data/Soprano_Bass_translation_model_major_rhythm.txt", note_path="data/Soprano_Bass_translation_model_major.txt", harmony_part="Bass", melody_part="Soprano")
-
-
-	print "TM major: " + str(e.evaluate_translation_model(tm_major))
-
+			#print "TM major: ", str(e.evaluate_translation_model(tm_major))
+			print "unweighted with phrases: ", str(e.evaluate_combined(tm_major, lm_major, 0.5726547297805934, 0.061101102321016725, 0.0020716756164958113))
 if __name__ == "__main__":
     main()

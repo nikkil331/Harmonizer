@@ -10,10 +10,10 @@ def get_score(tm_score, lm_score):
     return tm_score + lm_score
 
 def get_lm_score(lm, context, note):
-    return math.log(lm.get_probability(context, note))
+    return lm.get_probability(context, note)
     
 def get_tm_score(tm, m_note, h_note):
-    return math.log(tm.get_probability(m_note, h_note))
+    return tm.get_probability(m_note, h_note)
 
 def update_hypothesis(curr_hyp, m_note, h_note):
     # update note list
