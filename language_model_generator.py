@@ -49,7 +49,7 @@ class LanguageModelGenerator(object):
 				if not (sliding_window[-1] is 'R' and note_rep is 'R'):
 					sliding_window.append(note_rep)
 					sliding_window_size += 1
-				while sliding_window_size > self._window_Size:
+				while sliding_window_size > self._window_size:
 					if sliding_window.pop(0) != "BAR":
 						sliding_window_size -= 1
 
