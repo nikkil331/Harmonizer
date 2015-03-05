@@ -19,6 +19,12 @@ class Composition(object):
 		score = stream.Score([part[1] for part in self._parts])
 		score.show()
 
+	def save(self, name):
+        score = stream.Score([part[1] for part in self._parts])
+        f = open(name, 'w')
+        f.write(musicxml.m21ToString.fromMusic21Object(score))
+        f.close()
+
 
 	'''
 	Should only be called if there exist >= 1 part 
