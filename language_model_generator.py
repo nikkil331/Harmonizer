@@ -2,14 +2,16 @@ from music21 import *
 import optparse
 import re
 import sys
+import itertools
 from language_model import LanguageModel
 from music_utils import *
 
 
 class LanguageModelGenerator(object):
 
-	def __init__(self, ngram_size=5, mode='major', part=1, training_composers=['bach', 'handel']):
+	def __init__(self, ngram_size=4, window_size=8 mode='major', part=1, training_composers=['bach', 'handel']):
 		self._ngram_size = ngram_size
+		self._window_size = window_size
 		self._mode = 'major' if mode == 'major' else 'minor'
 		self._part = part
 		#for composer in training_composers:
@@ -26,13 +28,16 @@ class LanguageModelGenerator(object):
 			else:
 				self._lm_counts[sliding_window][note_rep] += 1
 
+	def _skip_and_update(self, sliding_window, note_rep):
+		for ngram in itertools.combinations(sliding_window, self._ngram_size):
+			self._update_count(ngram, note_rep)
 
 	def _update_counts(self, harmony):
 		sliding_window = []
 		sliding_window_size = 0
 		for measure in harmony[1:]:
 			sliding_window.append("BAR")
-			while sliding_window_size > self._ngram_size:
+			while sliding_window_size > self._window_size:
 				if sliding_window.pop(0) != "BAR":
 					sliding_window_size -= 1
 			for note in measure.notesAndRests:
@@ -40,15 +45,15 @@ class LanguageModelGenerator(object):
 					note_rep = 'R'
 				else:
 					note_rep = note.nameWithOctave
-				self._update_count(tuple(sliding_window), note_rep)
+				self._skip_and_update(tuple(sliding_window), note_rep)
 				if not (sliding_window[-1] is 'R' and note_rep is 'R'):
 					sliding_window.append(note_rep)
 					sliding_window_size += 1
-				while sliding_window_size > self._ngram_size:
+				while sliding_window_size > self._window_Size:
 					if sliding_window.pop(0) != "BAR":
 						sliding_window_size -= 1
 
-		self._update_count(tuple(sliding_window), 'END')
+		self._skip_and_update(tuple(sliding_window), 'END')
 
 
 	def _create_lm_from_counts(self, smoothing):
