@@ -9,7 +9,7 @@ from music_utils import *
 
 class LanguageModelGenerator(object):
 
-	def __init__(self, ngram_size=4, window_size=8 mode='major', part=1, training_composers=['bach', 'handel']):
+	def __init__(self, ngram_size=4, window_size=8, mode='major', part=1, training_composers=['bach', 'handel']):
 		self._ngram_size = ngram_size
 		self._window_size = window_size
 		self._mode = 'major' if mode == 'major' else 'minor'
