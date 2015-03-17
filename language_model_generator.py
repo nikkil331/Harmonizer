@@ -1,5 +1,6 @@
 from music21 import *
 import optparse
+import os
 import re
 import sys
 import itertools
@@ -16,7 +17,7 @@ class LanguageModelGenerator(object):
 		self._part = part
 		#for composer in training_composers:
 		#	self._training_paths += corpus.getComposer(composer)
-		self._training_paths = corpus.getBachChorales()[50:]
+		self._training_paths = get_barbershop_data()
 		self._lm_counts = None
 
 	def _update_count(self, sliding_window, note_rep):
@@ -77,7 +78,7 @@ class LanguageModelGenerator(object):
 
 		for path in self._training_paths:
 			sys.stderr.write('.')
-			composition = corpus.parse(path)
+			composition = converter.parse(path)
 			try:
 				harmony = composition.parts[self._part]
 				keySig = composition.analyze('key')
@@ -111,10 +112,12 @@ class LanguageModelGenerator(object):
 				f.write(output_line)
 
 def main():
-	lm_generator = LanguageModelGenerator(part='Alto', ngram_size=3)
-	lm = lm_generator.generate_lm()
-	print lm
-	lm.write_to_file('data/alto_language_model_major.txt')
+	parts = [0,1,2,3]
+	for p in parts:
+		lm_generator = LanguageModelGenerator(part=p, ngram_size=3)
+		lm = lm_generator.generate_lm()
+		print lm
+		lm.write_to_file('data/barbershop/models/{0}_language_model_major.txt'.format(p))
 
 if __name__ == "__main__":
     main()

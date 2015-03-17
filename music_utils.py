@@ -1,8 +1,10 @@
 from collections import namedtuple
+from fractions import Fraction
 from music21 import *
 import math
 import re
 import copy
+import os
 
 lm_hypothesis = namedtuple("lm_hypothesis", "notes, context, lm_logprob")
 
@@ -55,7 +57,12 @@ def get_note_rep(note):
         return "BAR"
     if type(note) == bar.Barline and note.style == 'final':
         return "END"
+    elif note.isChord:
+        return ','.join([get_note_rep(n) for n in note])
     elif note.isNote:
+        if note.accidental.fullname == 'double-flat' or \
+        note.accidental.fullname == 'double-sharp':
+            note.pitch.getEnharmonic(inPlace=True)
         return note.nameWithOctave + ":" + str(note.quarterLength)
     else:
         return "R:" + str(note.quarterLength)
@@ -133,7 +140,7 @@ def get_note_pitch_from_rep(n_rep):
     return n_rep.split(":")[0]
 
 def get_note_length_from_rep(n_rep):
-    return float(n_rep.split(":")[1]) if n_rep != "BAR" and n_rep != "END" else 0
+    return float(Fraction(n_rep.split(",")[0].split(":")[1])) if n_rep != "BAR" and n_rep != "END" else 0
 
 def get_phrase_length_from_rep(p_rep):
     return sum([get_note_length_from_rep(n) for n in p_rep])
@@ -185,5 +192,10 @@ def put_notes_in_measures(measure_stream, note_stream):
 
     return new_stream
 
+def get_barbershop_data():
+    scores = []
+    for filename in os.listdir("data/barbershop/split"):
+        scores.append("data/barbershop/split/{0}".format(filename))
+    return scores
 
 
