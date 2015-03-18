@@ -71,7 +71,8 @@ def get_phrase_rep(phrase):
     return tuple([get_note_rep(note) for note in phrase])
 
 def transpose_helper(stream, keySig, start, i):
-    print keySig
+    if not keySig:
+        keySig = keySig = stream.measures(start,i-1).analyze('key')
     curr_pitch = keySig.pitchAndMode[0].name
     new_pitch = 'C' if keySig.pitchAndMode[1] == "major" else 'A'
     sc = scale.ChromaticScale(curr_pitch + '5')
@@ -82,6 +83,7 @@ def transpose_helper(stream, keySig, start, i):
 
 def transpose(stream):
     currKeySignature = stream.parts[0][1].keySignature
+    print "start:", currKeySignature
     start = 0
     for i, (t,l,bar,bas) in enumerate(zip(stream.parts[0].getElementsByClass(['Measure']),\
         stream.parts[1].getElementsByClass(['Measure']),\
@@ -208,8 +210,8 @@ def put_notes_in_measures(measure_stream, note_stream):
 
 def get_barbershop_data():
     scores = []
-    for filename in os.listdir("data/barbershop/split"):
-        scores.append("data/barbershop/split/{0}".format(filename))
+    for filename in os.listdir("data/barbershop/clean"):
+        scores.append("data/barbershop/clean/{0}".format(filename))
     return scores
 
 
