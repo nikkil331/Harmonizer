@@ -60,8 +60,8 @@ def get_note_rep(note):
     elif note.isChord:
         return ','.join([get_note_rep(n) for n in note])
     elif note.isNote:
-        if note.accidental.fullname == 'double-flat' or \
-        note.accidental.fullname == 'double-sharp':
+        if note.accidental and (note.accidental.fullName == 'double-flat' or \
+        note.accidental.fullName == 'double-sharp'):
             note.pitch.getEnharmonic(inPlace=True)
         return note.nameWithOctave + ":" + str(note.quarterLength)
     else:
@@ -70,15 +70,29 @@ def get_note_rep(note):
 def get_phrase_rep(phrase):
     return tuple([get_note_rep(note) for note in phrase])
 
-
-def transpose(stream):
-    keySig = stream.analyze('key')
+def transpose_helper(stream, keySig, start, i):
+    print keySig
     curr_pitch = keySig.pitchAndMode[0].name
     new_pitch = 'C' if keySig.pitchAndMode[1] == "major" else 'A'
     sc = scale.ChromaticScale(curr_pitch + '5')
     sc_pitches = [str(p)[:-1] for p in sc.pitches]
     num_halfsteps = sc_pitches.index(new_pitch)
-    stream.flat.transpose(num_halfsteps, inPlace=True)
+    print num_halfsteps
+    stream.measures(start,i-1).transpose(num_halfsteps, inPlace=True)
+
+def transpose(stream):
+    currKeySignature = stream.parts[0][1].keySignature
+    start = 0
+    for i, (t,l,bar,bas) in enumerate(zip(stream.parts[0].getElementsByClass(['Measure']),\
+        stream.parts[1].getElementsByClass(['Measure']),\
+        stream.parts[2].getElementsByClass(['Measure']),\
+        stream.parts[3].getElementsByClass(['Measure']))):
+        if t.keySignature and t.keySignature != currKeySignature:
+            transpose_helper(stream, currKeySignature, start, i)
+            start = i
+            currKeySignature = t.keySignature
+    transpose_helper(stream, currKeySignature, start, len(stream.parts[0].getElementsByClass(['Measure'])))
+    
 
 
 def get_harmony_notes(melodyNote, harmonyStream):
