@@ -1,3 +1,4 @@
+import os
 import optparse
 from language_model import LanguageModel
 from translation_model import TranslationModel
@@ -39,14 +40,8 @@ class ScoreEvaluator(object):
 
 class Evaluator(object):
 
-	def __init__(self):
-		sys.stderr.write('Parsing...')
-		self.testSongs = []
-		for s in corpus.getBachChorales()[:50]:
-			sys.stderr.write('.')
-			self.testSongs.append(corpus.parse(s))
-		sys.stderr.write('\n')
-
+	def __init__(self, testSongs):
+		self.testSongs = testSongs
 		#transpose all songs
 		sys.stderr.write('Transposing...')
 		for s in self.testSongs:
@@ -58,11 +53,7 @@ class Evaluator(object):
 		results = []
 		songsSkipped = 0
 		for s in self.testSongs:
-
 			try:
-				keySig = s.analyze('key')
-				if keySig.pitchAndMode[1] != 'major':
-					continue
 				harmony = s.parts[lm.part].flat.notesAndRests
 				hyp = lm_hypothesis(["S"], ("S"), 0.0)
 				for note in harmony:
@@ -71,7 +62,6 @@ class Evaluator(object):
 				results.append(-float(hyp.lm_logprob))
 			except KeyError, e:
 				songsSkipped += 1
-		#print "Songs skipped: {0}".format(songsSkipped)
 		return sum(results)
 
 	def evaluate_translation_model(self, tm):
@@ -79,9 +69,6 @@ class Evaluator(object):
 		songsSkipped = 0
 		for s in self.testSongs:
 			try:
-				keySig = s.analyze('key')
-				if keySig.pitchAndMode[1] != 'major':
-					continue
 				phrase_hyp = 0.0
 				note_hyp = 0.0
 				melody = s.parts[tm.melody_part]
@@ -100,7 +87,6 @@ class Evaluator(object):
 			except KeyError, e:
 				songsSkipped += 1
 
-		#print "Songs skipped: {0}".format(songsSkipped)
 		return (sum(map(lambda x: x[0], results)), sum(map(lambda x: x[1], results)))
 
 	def evaluate_combined(self, tm, lm, phrase_weight, note_weight, lm_weight):
@@ -109,14 +95,42 @@ class Evaluator(object):
 		return phrase_weight*phrase_score + note_weight*notes_score + lm_weight*lm_score
 
 
+def get_bach_test_songs():
+	test_songs = []
+	for s in corpus.getBachChorales()[:50]:
+		comp = corpus.parse(s)
+		keySig = comp.analyze('key')
+		if keySig.pitchAndMode[1] == 'major':
+			test_songs.append(comp)	
+	return test_songs
+
+def get_random_test_songs():
+	test_songs = []
+	for f in os.listdir("anti_examples"):
+		song_path = os.path.join("anti_examples", f)
+		if os.path.isfile(song_path):
+			comp = converter.parse(song_path)
+			test_songs.append(comp)
+	return test_songs
+
 def main():
-	'''e = Evaluator()
+	test_songs = get_bach_test_songs()
+	e = Evaluator(test_songs)
+	existing_parts = ["Soprano", "Alto", "Tenor", "Bass"]
+	generated_parts = ["Alto", "Tenor", "Bass"]
+	for p1 in existing_parts:
+		for p2 in generated_parts:
+			if p1 == p2:
+				continue
+			print p1, p2
+			lm_major = LanguageModel(path="data/{0}_language_model_both.txt".format(p2), part=p2)
+			tm_major = TranslationModel(phrase_path="data/{0}_{1}_translation_model_both_rhythm.txt".format(p1, p2), 
+									    note_path="data/{0}_{1}_translation_model_both.txt".format(p1, p2),
+										harmony_part=p2, melody_part=p1)
+			score = e.evaluate_combined(tm_major, lm_major, 0.21194250257270197, 0.21194250257270197, 0.21194250257270197)
+			print str(score)
 
-	tm_soprano_bass = TranslationModel(phrase_path="data/Soprano_Bass_translation_model_major_rhythm.txt", note_path="data/Soprano_Bass_translation_model_major.txt", harmony_part="Bass", melody_part="Soprano")
-	tm_alto_bass = TranslationModel(phrase_path="data/Alto_Bass_translation_model_major_rhythm.txt", note_path="data/Alto_Bass_translation_model_major.txt", harmony_part="Bass", melody_part="Soprano")
-
-	print "TM S B: " + str(e.evaluate_translation_model(tm_soprano_bass))
-	print "TM A B: " + str(e.evaluate_translation_model(tm_alto_bass))'''
+def getTheoryScores():
 	print "+++ACTUAL_BACH+++"
 	e = ScoreEvaluator(corpus.parse('bach/bwv390'))
 	e.evaluate()
