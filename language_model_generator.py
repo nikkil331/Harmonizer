@@ -1,20 +1,23 @@
 from music21 import *
 import optparse
+import os
 import re
 import sys
+import itertools
 from language_model import LanguageModel
 from music_utils import *
 
 
 class LanguageModelGenerator(object):
 
-	def __init__(self, ngram_size=5, mode='major', part=1, training_composers=['bach', 'handel']):
+	def __init__(self, ngram_size=4, window_size=8, mode='major', part=1, training_composers=['bach', 'handel']):
 		self._ngram_size = ngram_size
+		self._window_size = window_size
 		self._mode = 'major' if mode == 'major' else 'minor'
 		self._part = part
 		#for composer in training_composers:
 		#	self._training_paths += corpus.getComposer(composer)
-		self._training_paths = corpus.getBachChorales()[50:]
+		self._training_paths = get_barbershop_data()
 		self._lm_counts = None
 
 	def _update_count(self, sliding_window, note_rep):
@@ -26,13 +29,16 @@ class LanguageModelGenerator(object):
 			else:
 				self._lm_counts[sliding_window][note_rep] += 1
 
+	def _skip_and_update(self, sliding_window, note_rep):
+		for ngram in itertools.combinations(sliding_window, self._ngram_size):
+			self._update_count(ngram, note_rep)
 
 	def _update_counts(self, harmony):
 		sliding_window = []
 		sliding_window_size = 0
 		for measure in harmony[1:]:
 			sliding_window.append("BAR")
-			while sliding_window_size > self._ngram_size:
+			while sliding_window_size > self._window_size:
 				if sliding_window.pop(0) != "BAR":
 					sliding_window_size -= 1
 			for note in measure.notesAndRests:
@@ -40,15 +46,15 @@ class LanguageModelGenerator(object):
 					note_rep = 'R'
 				else:
 					note_rep = note.nameWithOctave
-				self._update_count(tuple(sliding_window), note_rep)
+				self._skip_and_update(tuple(sliding_window), note_rep)
 				if not (sliding_window[-1] is 'R' and note_rep is 'R'):
 					sliding_window.append(note_rep)
 					sliding_window_size += 1
-				while sliding_window_size > self._ngram_size:
+				while sliding_window_size > self._window_size:
 					if sliding_window.pop(0) != "BAR":
 						sliding_window_size -= 1
 
-		self._update_count(tuple(sliding_window), 'END')
+		self._skip_and_update(tuple(sliding_window), 'END')
 
 
 	def _create_lm_from_counts(self, smoothing):
@@ -72,7 +78,7 @@ class LanguageModelGenerator(object):
 
 		for path in self._training_paths:
 			sys.stderr.write('.')
-			composition = corpus.parse(path)
+			composition = converter.parse(path)
 			try:
 				harmony = composition.parts[self._part]
 				keySig = composition.analyze('key')
@@ -106,10 +112,12 @@ class LanguageModelGenerator(object):
 				f.write(output_line)
 
 def main():
-	lm_generator = LanguageModelGenerator(part='Alto', ngram_size=3)
-	lm = lm_generator.generate_lm()
-	print lm
-	lm.write_to_file('data/alto_language_model_major.txt')
+	parts = [0,1,2,3]
+	for p in parts:
+		lm_generator = LanguageModelGenerator(part=p, ngram_size=3)
+		lm = lm_generator.generate_lm()
+		print lm
+		lm.write_to_file('data/barbershop/models/{0}_language_model_major.txt'.format(p))
 
 if __name__ == "__main__":
     main()

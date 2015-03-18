@@ -1,5 +1,7 @@
 from music21 import *
+import multiprocessing
 import optparse
+import itertools
 import re
 import sys
 from translation_model import TranslationModel
@@ -14,7 +16,7 @@ class TranslationModelGenerator(object):
 		self._training_paths = []
 		#for composer in training_composers:
 		#	self._training_paths += corpus.getComposer(composer)
-		self._training_paths = corpus.getBachChorales()[50:]
+		self._training_paths = get_barbershop_data()
 		self._tm_counts = None
 
 	def _update_counts(self, melody, harmony):
@@ -54,21 +56,17 @@ class TranslationModelGenerator(object):
 		self._tm_counts = {}
 		num_songs = 0
 		num_songs_without_part = 0
-		for path in self._training_paths:
+		for composition in training_songs:
 			sys.stderr.write('.')
-			composition = corpus.parse(path)
 			try: 
-				keySig = composition.analyze('key')
-				if keySig.pitchAndMode[1] != self._mode:
-					continue
+				#keySig = composition.analyze('key')
+				#if keySig.pitchAndMode[1] != self._mode:
+				#	continue
 				num_songs += 1
-				transpose(composition)
+				#transpose(composition)
 				melody = composition.parts[self._melody_part]
 				harmony = composition.parts[self._harmony_part]
-				try:
-					self._update_counts(melody, harmony)
-				except Exception:
-					print path
+				self._update_counts(melody, harmony)
 
 
 			except KeyError, e:
@@ -79,19 +77,24 @@ class TranslationModelGenerator(object):
 
 		return self._create_tm_from_counts()
 
-
-
+print "reading in..."
+training_songs = [converter.parse(path) for path in get_barbershop_data()]
+print "transposing..."
+[transpose(s) for s in training_songs]
 
 def main():
-	parts = ["Soprano", "Alto", "Tenor", "Bass"]
-	for p1 in parts:
-		for p2 in parts:
-			if p1 != p2:
-				print p1, p2
-				tm_generator = TranslationModelGenerator(melody_part=p1, harmony_part=p2)
-				tm = tm_generator.generate_tm()
-				tm.write_to_file(tm._tm_phrases, 'data/{0}_{1}_translation_model_major_rhythm.txt'.format(p1,p2))
+	parts = [0,1,2,3]
 
+	map(generate_generator_helper, itertools.permutations(parts, 2))
+
+def generate_generator_helper(t):
+	generate_generator(*t)
+
+def generate_generator(melody, harmony):
+	print melody, harmony
+	tm_generator = TranslationModelGenerator(melody_part=melody, harmony_part=harmony)
+	tm = tm_generator.generate_tm()
+	tm.write_to_file(tm._tm_phrases, 'data/barbershop/models/{0}_{1}_translation_model_major_rhythm_threshold.txt'.format(melody,harmony))	
 
 if __name__ == "__main__":
     main()
