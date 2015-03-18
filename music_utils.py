@@ -60,8 +60,8 @@ def get_note_rep(note):
     elif note.isChord:
         return ','.join([get_note_rep(n) for n in note])
     elif note.isNote:
-        if note.accidental.fullname == 'double-flat' or \
-        note.accidental.fullname == 'double-sharp':
+        if note.accidental and (note.accidental.fullName == 'double-flat' or \
+           note.accidental.fullName == 'double-sharp'):
             note.pitch.getEnharmonic(inPlace=True)
         return note.nameWithOctave + ":" + str(note.quarterLength)
     else:
@@ -113,7 +113,7 @@ def trim_stream(s, begin_offset, end_offset):
     section = s.getElementsByOffset(begin_offset, offsetEnd=end_offset, \
                                     mustBeginInSpan=False, includeEndBoundary=False, \
                                     includeElementsThatEndAtStart=False, \
-                                    classList=[note.Note, note.Rest, stream.Measure])
+                                    classList=[note.Note, chord.Chord, note.Rest, stream.Measure])
     section = copy.deepcopy(section)
     if len(section) > 0:
         # trim beginning
@@ -193,8 +193,9 @@ def put_notes_in_measures(measure_stream, note_stream):
 
 def get_barbershop_data():
     scores = []
-    for filename in os.listdir("data/barbershop/split"):
-        scores.append("data/barbershop/split/{0}".format(filename))
+    for filename in os.listdir("data/barbershop_scores/split"):
+        scores.append("data/barbershop_scores/split/{0}".format(filename))
+
     return scores
 
 

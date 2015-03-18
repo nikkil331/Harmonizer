@@ -84,7 +84,6 @@ print "transposing..."
 
 def main():
 	parts = [0,1,2,3]
-
 	map(generate_generator_helper, itertools.permutations(parts, 2))
 
 def generate_generator_helper(t):
@@ -95,7 +94,6 @@ def generate_generator(melody, harmony):
 	tm_generator = TranslationModelGenerator(melody_part=melody, harmony_part=harmony)
 	tm = tm_generator.generate_tm()
 	tm.write_to_file(tm._tm_phrases, 'data/barbershop/models/{0}_{1}_translation_model_major_rhythm_threshold.txt'.format(melody,harmony))	
-
 if __name__ == "__main__":
     main()
 

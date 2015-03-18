@@ -70,12 +70,16 @@ class TranslationModel(object):
 
 
     def get_harmonies_note(self, note):
-        pitch, rhythm = note.split(":")
-        if pitch not in self._tm_notes:
+        notes = note.split(",")
+        note_pitches = [pitch for (pitch, _) in [n.split(":") for n in notes]]
+        rhythm = notes[0].split(":")[1]
+        harmonies = []
+        for pitch in note_pitches:
+            harmonies.extend([n + ":" + rhythm for n in self._tm_notes[pitch].keys()])
+        if len(harmonies) == 0:
             return ["R:" + rhythm]
-        else:
-            return [n + ":" + rhythm for n in self._tm_notes[pitch].keys()]
-
+        return harmonies
+        
     def insert_bars(self, melody, harmony):
         bar_offsets = []
         end_offset = None
