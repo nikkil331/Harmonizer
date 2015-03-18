@@ -194,8 +194,8 @@ def put_notes_in_measures(measure_stream, note_stream):
 
 def get_barbershop_data():
     scores = []
-    for filename in os.listdir("data/barbershop/split"):
-        scores.append("data/barbershop/split/{0}".format(filename))
+    for filename in os.listdir("Harmonizer/data/barbershop/split"):
+        scores.append("Harmonizer/data/barbershop/split/{0}".format(filename))
     return scores
 
 
