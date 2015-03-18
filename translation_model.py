@@ -35,9 +35,8 @@ class TranslationModel(object):
         harmony = tuple([h for h in harmony if h != "BAR" and h != "END"])
 
         if not self._tm_phrases:
-            return self.get_probability_notes(melody, harmony)
-
-        if melody not in self._tm_phrases:
+            return (math.log(1e-10), self.get_probability_notes(melody, harmony))
+        elif melody not in self._tm_phrases:
             if harmony is not melody:
                 return (math.log(1e-10), self.get_probability_notes(melody, harmony))
             else:
