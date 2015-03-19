@@ -75,7 +75,8 @@ class TranslationModel(object):
         rhythm = notes[0].split(":")[1]
         harmonies = []
         for pitch in note_pitches:
-            harmonies.extend([n + ":" + rhythm for n in self._tm_notes[pitch].keys()])
+            if pitch in self._tm_notes:
+                harmonies.extend([n + ":" + rhythm for n in self._tm_notes[pitch].keys()])
         if len(harmonies) == 0:
             return ["R:" + rhythm]
         return harmonies
