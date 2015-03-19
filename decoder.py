@@ -3,11 +3,13 @@ import sys
 import optparse
 import copy
 import math
+from decimal import *
 from collections import namedtuple
 from translation_model import TranslationModel
 from language_model import LanguageModel
 from music_utils import *
 import progressbar
+
 
 hypothesis = namedtuple("hypothesis", "notes, duration, context, context_size, tm_phrase_logprob, tm_notes_logprob, lm_logprob")
 
@@ -97,10 +99,11 @@ class Decoder(object):
         beam = {0.0: [hypothesis((), 0.0, (), 0, 0.0, 0.0, 0.0)]}
         new_beam = {}
         continue_growing_hyps = True
+        full_duration = measure_pairs[0].duration.quarterLength - measure_pairs[0][0].offset
         while continue_growing_hyps:
             continue_growing_hyps = False
             for hyp_dur in beam:
-                if hyp_dur >= measure_pairs[0].duration.quarterLength - measure_pairs[0][0].offset:
+                if abs(full_duration - hyp_dur) < 0.00000000001:
                     new_beam[hyp_dur] = beam[hyp_dur]
                 else:
                     continue_growing_hyps = True
@@ -147,7 +150,7 @@ class Decoder(object):
                                                       self._tm_notes_weight, 
                                                       self._lm_weight), 
                           reverse=True)[:50]
-        return final_hyps[:n_best_hyps]
+        return final_hyps[:max(n_best_hyps, 50)]
 
     def _get_measure_pairs(self):
         measures = [part.measures(0, len(self._parts[0][1].getElementsByClass('Measure')), collect=())
