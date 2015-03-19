@@ -70,15 +70,31 @@ def get_note_rep(note):
 def get_phrase_rep(phrase):
     return tuple([get_note_rep(note) for note in phrase])
 
-
-def transpose(stream):
-    keySig = stream.analyze('key')
+def transpose_helper(stream, keySig, start, i):
+    if not keySig:
+        keySig = keySig = stream.measures(start,i-1).analyze('key')
     curr_pitch = keySig.pitchAndMode[0].name
     new_pitch = 'C' if keySig.pitchAndMode[1] == "major" else 'A'
     sc = scale.ChromaticScale(curr_pitch + '5')
     sc_pitches = [str(p)[:-1] for p in sc.pitches]
     num_halfsteps = sc_pitches.index(new_pitch)
-    stream.flat.transpose(num_halfsteps, inPlace=True)
+    print num_halfsteps
+    stream.measures(start,i-1).transpose(num_halfsteps, inPlace=True)
+
+def transpose(stream):
+    currKeySignature = stream.parts[0][1].keySignature
+    print "start:", currKeySignature
+    start = 0
+    for i, (t,l,bar,bas) in enumerate(zip(stream.parts[0].getElementsByClass(['Measure']),\
+        stream.parts[1].getElementsByClass(['Measure']),\
+        stream.parts[2].getElementsByClass(['Measure']),\
+        stream.parts[3].getElementsByClass(['Measure']))):
+        if t.keySignature and t.keySignature != currKeySignature:
+            transpose_helper(stream, currKeySignature, start, i)
+            start = i
+            currKeySignature = t.keySignature
+    transpose_helper(stream, currKeySignature, start, len(stream.parts[0].getElementsByClass(['Measure'])))
+    
 
 
 def get_harmony_notes(melodyNote, harmonyStream):
@@ -193,9 +209,14 @@ def put_notes_in_measures(measure_stream, note_stream):
 
 def get_barbershop_data():
     scores = []
+<<<<<<< HEAD
+    for filename in os.listdir("data/barbershop/clean"):
+        scores.append("data/barbershop/clean/{0}".format(filename))
+=======
     for filename in os.listdir("data/barbershop_scores/split"):
         scores.append("data/barbershop_scores/split/{0}".format(filename))
 
+>>>>>>> fb569f5e99479f12d476e61e6c2294d30ad9c6fa
     return scores
 
 
