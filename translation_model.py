@@ -140,7 +140,7 @@ class TranslationModel(object):
         if not melody_no_bars:
             return []
 
-        single_note_translation = []
+        single_note_harmonies = []
 
         if len(melody_no_bars) < 2:
             single_note_harmonies = [(n,) for m in melody_no_bars for n in self.get_harmonies_note(m)]
@@ -151,7 +151,8 @@ class TranslationModel(object):
             translations = single_note_harmonies
         else:
             translations = self._tm_phrases[melody_no_bars].keys() + single_note_harmonies
-        translations = [self.insert_bars(melody, t) for t in translations]    
+
+        translations = [self.insert_bars(melody, t) for t in translations if t]    
         return translations
 
     def write_to_file(self, model, path):
