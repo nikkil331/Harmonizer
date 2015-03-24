@@ -1,4 +1,4 @@
-1;2cfrom music21 import *
+from music21 import *
 import sys
 import optparse
 import copy
@@ -8,6 +8,7 @@ from collections import namedtuple
 from translation_model import TranslationModel
 from language_model import LanguageModel
 from music_utils import *
+import progressbar
 
 
 hypothesis = namedtuple("hypothesis", "notes, duration, context, context_size, tm_phrase_logprob, tm_notes_logprob, lm_logprob")
@@ -130,7 +131,7 @@ class Decoder(object):
                                       key = lambda hyp: get_score(hyp, self._tm_phrase_weight, 
                                                                   self._tm_notes_weight, 
                                                                   self._lm_weight), 
-                                      reverse=True)[:50]
+                                      reverse=True)[:10]
                 beam = {}
                 for hyp in all_new_hyps:
                     if hyp.duration not in beam:
@@ -151,14 +152,15 @@ class Decoder(object):
                           key = lambda hyp: get_score(hyp, self._tm_phrase_weight, 
                                                       self._tm_notes_weight, 
                                                       self._lm_weight), 
-                          reverse=True)[:50]
-        return final_hyps[:max(n_best_hyps, 50)]
+                          reverse=True)[:10]
+        return final_hyps[:max(n_best_hyps, 10)]
 
     def _get_measure_pairs(self):
         measures = [part.measures(0, len(self._parts[0][1].getElementsByClass('Measure')), collect=())
                     for (name, part) in self._parts]
-        for i in xrange(0, len(measures[0]) - 3, 4):
-            yield [m[i:i+4] for m in measures]
+        for i in xrange(0, len(measures[0]), 4):
+            end_idx = min(4, len(measures[0]) - i)
+            yield [m[i:i+end_idx] for m in measures]
 
     def decode(self, n_best_hyps):
         bar = progressbar.ProgressBar(maxval=self._parts[0][1].duration.quarterLength, \
