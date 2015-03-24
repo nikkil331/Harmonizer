@@ -5,30 +5,46 @@ from translation_model import TranslationModel
 from language_model import LanguageModel
 from decoder import Decoder
 
-lm_file = 'cis401/Harmonizer/data/bass_language_model_major.txt'
-tm_phrases_file = ['cis401/Harmonizer/data/Soprano_Bass_translation_model_major_rhythm.txt']
-tm_notes_file =	 ['cis401/Harmonizer/data/Soprano_Bass_translation_model_major.txt']
+lm_file = 'cis401/Harmonizer/data/barbershop_models/2_language_model_major_threshold_2.txt'
+tm_phrases_file = ['cis401/Harmonizer/data/barbershop_models/1_2_translation_model_major_rhythm_threshold_2.txt']
+tm_notes_file =	 ['cis401/Harmonizer/data/barbershop_models/1_2_translation_model_major.txt']
 
 def get_n_best_lists(initial_params, n):
         sys.stderr.write("Getting n best lists...\n")
 	num_songs_translated = 0
 	n_best_lists = {}
-	for path in corpus.getBachChorales()[:20]:		
-                training_song = corpus.parse(path);
-                keySig = training_song.analyze('key')
-                if keySig.pitchAndMode[1] != "major":
+	i = 0
+        for path in get_barbershop_data():
+        #for path in corpus.getBachChorales()[:20]:
+		if i == 50:
+                        break
+                if "classic_tags" not in path:
                         continue
+                training_song = converter.parse(path);
+                #keySig = training_song.analyze('key')
+                #if keySig.pitchAndMode[1] != "major":
+                #        continue
                 num_songs_translated += 1
                 transpose(training_song)
-                lm = LanguageModel("Bass", lm_file)
+                sys.stderr.write("transposed " + path + "\n")
+                lm = LanguageModel(2, lm_file)
                 tms = []
                 for (phrases, notes) in zip(tm_phrases_file, tm_notes_file):
-                        tm = TranslationModel("Bass", "Soprano", phrases, notes)
+                        tm = TranslationModel(2, 1, phrases, notes)
                         tms.append(tm)
-                d = Decoder([("Soprano", training_song.parts[0])], lm, tms,
-                              initial_params[0], initial_params[1], initial_params[2])
-                n_best_lists[path] = d.decode(n)
-	return n_best_lists
+                d = Decoder([(1, training_song.parts[1])], lm, tms,
+                              tm_phrase_weight=initial_params[0], tm_notes_weight=initial_params[1], 
+                              lm_weight=initial_params[2])
+                try:
+                        hyps = d.decode(n)
+                        sys.stderr.write("num hyps: " + str(len(hyps)))
+                        n_best_lists[path] = hyps
+                        sys.stderr.write("decoded " + path + "\n")
+                        i+=1
+                except Exception as e:
+                        sys.stderr.write(str(e))
+                        
+        return n_best_lists
 
 def get_score_for_n_best_lists(n_best_lists):
 	return sum([hyps[0].tm_phrase_logprob + hyps[0].tm_notes_logprob + hyps[0].lm_logprob
@@ -57,9 +73,10 @@ def get_threshold_points(param_id, n_best_lists):
 		translation_lines = []
 		for harmony_hyp in n_best_lists[song_path]:
 			translation_lines.append(get_line_from_hyp(harmony_hyp, param_id))
-		translation_lines = sorted(translation_lines, reverse=True)
-		if param_id == 1:
-                        sys.stderr.write("Translation Lines Sorted(" + str(len(translation_lines)) + "): "  + str(translation_lines) + "\n")
+		if len(translation_lines) == 0:
+                        sys.stderr.write(song_path + "has no translations")
+                        continue
+                translation_lines = sorted(translation_lines, reverse=True)
                 prev_boundary = 0.01
 		curr_line_index = 0
 		l = translation_lines[curr_line_index]
@@ -69,8 +86,6 @@ def get_threshold_points(param_id, n_best_lists):
 			line_idx = curr_line_index
 			for (j, l2) in enumerate(translation_lines[curr_line_index + 1:]):
 				intersection = get_intersection(l, l2)
-				if param_id == 1:
-                                        sys.stderr.write("Line " + str(curr_line_index) + ": " + str(l) + ", Line " + str(j) + ": " + str(l2) + "\n")
                                 if not intersection:
                                         continue
                                 if intersection > prev_boundary and intersection < smallest_intersection:
@@ -91,16 +106,17 @@ def is_converged(params1, params2):
 			return False
 	return True
 
-def get_score_from_hyps(n_best_lists, initial_params, new_params):
+def get_score_from_hyps(n_best_lists, params):
         score_total = 0
         for hyps in n_best_lists.values():
-                new_scores = []
+                scores = []
                 for h in hyps:
-                        tm_phrase_logprob = new_params[0]*(h.tm_phrase_logprob / float(initial_params[0]))
-                        tm_notes_logprob = new_params[1]*(h.tm_notes_logprob/ float(initial_params[1]))
-                        lm_logprob = new_params[2]*(h.lm_logprob / float(initial_params[2]))
-                        new_scores.append(tm_phrase_logprob + tm_notes_logprob + lm_logprob)
-                score_total += max(new_scores)
+                        tm_phrase_logprob = params[0]*(h.tm_phrase_logprob)
+                        tm_notes_logprob = params[1]*(h.tm_notes_logprob)
+                        lm_logprob = params[2]*(h.lm_logprob)
+                        scores.append(tm_phrase_logprob + tm_notes_logprob + lm_logprob)
+                if len(scores) > 0:
+                        score_total += max(scores)
         return score_total
 
 def powell(initial_params, no_iters):
@@ -118,17 +134,17 @@ def powell(initial_params, no_iters):
                                 threshold_points = get_threshold_points(i, n_best_lists)
                                 threshold_points = sorted(list(threshold_points))
                                 if len(threshold_points) > 0:
-                                        current_best_score = get_score_from_hyps(n_best_lists, initial_params, initial_params)
+                                        current_best_score = get_score_from_hyps(n_best_lists, initial_params)
                                         current_best_param_val = prev_params[i]
                                         curr_params_list = list(prev_params)
                                         curr_params_list[i] = threshold_points[0] - 0.01
-                                        score = get_score_from_hyps(n_best_lists, initial_params, tuple(curr_params_list))
+                                        score = get_score_from_hyps(n_best_lists, tuple(curr_params_list))
                                         if score > current_best_score:
                                                 current_best_score = score
                                                 current_best_param_val = curr_params_list[i]
                                         for t in threshold_points:
                                                 curr_params_list[i] = t + 0.01
-                                                score = get_score_from_hyps(n_best_lists, initial_params, tuple(curr_params_list))
+                                                score = get_score_from_hyps(n_best_lists, tuple(curr_params_list))
                                                 if score > current_best_score:
                                                         current_best_score = score
                                                         current_best_param_val = curr_params_list[i]
@@ -143,7 +159,7 @@ def powell(initial_params, no_iters):
 
 def main():
         sys.stderr.write("Beginning...\n")
-        sys.stderr.write(str(powell((1, 1.0, 1), 5)) + "\n")
+        sys.stderr.write(str(powell((1, 1, 1), 5)) + "\n")
 
 if __name__ == '__main__':
         main()
