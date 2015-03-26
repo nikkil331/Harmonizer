@@ -51,8 +51,8 @@ class TranslationModelGenerator(object):
                 harmony_notes = [(get_pitch_rep(n), n) for n in
                                  harmony.flat.notesAndRests.allPlayingWhileSounding(melody_note)]
                 for (h_rep, h_note) in harmony_notes:
-                    if h_note.pitch < limits[self._harmony_part][0] or \
-                                    h_note.pitch > limits[self._harmony_part][1]:
+                    if h_note.isNote and (h_note.pitch < limits[self._harmony_part][0] or
+                                                  h_note.pitch > limits[self._harmony_part][1]):
                         continue
                     if h_rep not in self._tm_counts:
                         self._tm_counts[h_rep] = {}
