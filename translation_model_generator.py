@@ -17,16 +17,17 @@ class TranslationModelGenerator(object):
         self._harmony_part = harmony_part
         self._training_paths = []
         self._phrase_based_mode = phrase_based
-        # for composer in training_composers:
-        #	self._training_paths += corpus.getComposer(composer)
         self._training_paths = get_barbershop_data()
         self._tm_counts = None
 
-    def _update_counts(self, melody, harmony):
+    def _update_counts(self, melody, harmony, limits):
         melody_phrase = []
         begin_offset = 0.0
 
         for melody_note in melody.flat.notesAndRests:
+            if melody_note.pitch < limits[self._melody_part][0] or \
+                            melody_note.pitch > limits[self._melody_part][1]:
+                continue
             if self._phrase_based_mode:
                 melody_phrase.append(get_note_rep(melody_note))
                 if len(melody_phrase) == 2:
@@ -47,12 +48,12 @@ class TranslationModelGenerator(object):
                     begin_offset = end_offset
             else:
                 m_rep = get_pitch_rep(melody_note)
-                harmony_notes = [get_pitch_rep(n) for n in
+                harmony_notes = [(get_pitch_rep(n), n) for n in
                                  harmony.flat.notesAndRests.allPlayingWhileSounding(melody_note)]
-                for h_rep in harmony_notes:
-                    # if int(h_rep[-1]) >= 5:
-                    #	sys.stderr.write('***'+h_rep+'***')
-                    #	raise ValueError('too damn high')
+                for (h_rep, h_note) in harmony_notes:
+                    if h_note.pitch < limits[self._harmony_part][0] or \
+                                    h_note.pitch > limits[self._harmony_part][1]:
+                        continue
                     if h_rep not in self._tm_counts:
                         self._tm_counts[h_rep] = {}
                     if m_rep not in self._tm_counts[h_rep]:
@@ -75,7 +76,10 @@ class TranslationModelGenerator(object):
         self._tm_counts = {}
         num_songs = 0
         num_songs_without_part = 0
-        for composition in training_songs:
+        for path in self._training_paths:
+            composition = converter.parse(path)
+            limits = {self._melody_part: (get_min_pitch(composition, 0), get_max_pitch(composition, 0)),
+                      self._harmony_part: (get_min_pitch(composition, 1), get_max_pitch(composition, 1))}
             sys.stderr.write('.')
             try:
                 keySig = composition.analyze('key')
@@ -86,7 +90,7 @@ class TranslationModelGenerator(object):
                 # transpose(composition)
                 melody = composition.parts[int(self._melody_part)]
                 harmony = composition.parts[int(self._harmony_part)]
-                self._update_counts(melody, harmony)
+                self._update_counts(melody, harmony, limits)
 
 
             except KeyError, e:
@@ -102,8 +106,6 @@ class TranslationModelGenerator(object):
 
 print "reading in..."
 training_songs = [converter.parse(path) for path in get_barbershop_data() if "classic_tags" in path]
-print "transposing..."
-[transpose(s) for s in training_songs]
 
 
 def main():
