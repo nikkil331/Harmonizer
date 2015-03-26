@@ -51,6 +51,19 @@ def update_lm_hypothesis(lm, curr_hyp, note):
 def update_tm_hypothesis(tm, curr_hyp, m_note, h_note):
     return curr_hyp + get_tm_score(tm, m_note, h_note)
 
+def get_pitch_rep(note):
+    if type(note) == stream.Measure:
+        return "BAR"
+    if type(note) == bar.Barline and note.style == 'final':
+        return "END"
+    elif note.isChord:
+        return ','.join([get_pitch_rep(n) for n in note])
+    elif note.isNote:
+        if note.accidental and note.accidental.fullName not in ['sharp','flat']:
+            note.pitch.getEnharmonic(inPlace=True)
+        return note.nameWithOctave
+    else:
+        return "R"
 
 def get_note_rep(note):
     if type(note) == stream.Measure:
@@ -58,44 +71,39 @@ def get_note_rep(note):
     if type(note) == bar.Barline and note.style == 'final':
         return "END"
     elif note.isChord:
-        return ','.join([get_note_rep(n) for n in note])
+        return (','.join([get_pitch_rep(n) for n in note]) + ':' + str(note.quarterLength)).encode('ascii')
     elif note.isNote:
         if note.accidental and (note.accidental.fullName == 'double-flat' or \
            note.accidental.fullName == 'double-sharp'):
             note.pitch.getEnharmonic(inPlace=True)
-        return note.nameWithOctave + ":" + str(note.quarterLength)
+        return (note.nameWithOctave + ":" + str(note.quarterLength)).encode('ascii')
     else:
-        return "R:" + str(note.quarterLength)
+        return ("R:" + str(note.quarterLength)).encode('ascii')
 
 def get_phrase_rep(phrase):
     return tuple([get_note_rep(note) for note in phrase])
 
 def transpose_helper(stream, keySig, start, i):
     if not keySig:
-        keySig = keySig = stream.measures(start,i-1).analyze('key')
+        keySig = keySig = stream.measures(start,i).analyze('key')
     curr_pitch = keySig.pitchAndMode[0].name
     new_pitch = 'C' if keySig.pitchAndMode[1] == "major" else 'A'
     sc = scale.ChromaticScale(curr_pitch + '5')
     sc_pitches = [str(p)[:-1] for p in sc.pitches]
     num_halfsteps = sc_pitches.index(new_pitch)
-    print num_halfsteps
-    stream.measures(start,i-1).transpose(num_halfsteps, inPlace=True)
+    if num_halfsteps >= 6:
+        num_halfsteps -= 12
+    stream.measures(start,i).transpose(num_halfsteps, inPlace=True)
 
 def transpose(stream):
     currKeySignature = stream.parts[0][1].keySignature
-    print "start:", currKeySignature
     start = 0
-    for i, (t,l,bar,bas) in enumerate(zip(stream.parts[0].getElementsByClass(['Measure']),\
-        stream.parts[1].getElementsByClass(['Measure']),\
-        stream.parts[2].getElementsByClass(['Measure']),\
-        stream.parts[3].getElementsByClass(['Measure']))):
+    for i,t in enumerate(stream.parts[0].getElementsByClass(['Measure'])):
         if t.keySignature and t.keySignature != currKeySignature:
-            transpose_helper(stream, currKeySignature, start, i)
+            transpose_helper(stream, currKeySignature, start, i-1)
             start = i
             currKeySignature = t.keySignature
     transpose_helper(stream, currKeySignature, start, len(stream.parts[0].getElementsByClass(['Measure'])))
-    
-
 
 def get_harmony_notes(melodyNote, harmonyStream):
     melody_offset = melodyNote.offset
@@ -113,11 +121,15 @@ def make_stream_from_notes(notes):
 def make_stream_from_strings(notes):
     s = stream.Stream()
     for n_rep in notes:
-        pitch, duration = n_rep.split(":")
-        if pitch == "R":
+        note_pitches = [n.split(":")[0] for n in n_rep.split(",")]
+	duration = n_rep.split(":")[1]
+        if "R" in note_pitches:
             n = note.Rest(quarterLength=float(duration))
         else:
-            n = note.Note(pitch, quarterLength=float(duration))
+            if len(note_pitches) > 1:
+		n = chord.Chord([note.Note(p, duration) for p in note_pitches])
+	    else:
+            	n = note.Note(note_pitches[0], quarterLength=float(duration))
         s.append(n)
 
     return s
@@ -155,7 +167,11 @@ def get_note_pitch_from_rep(n_rep):
     return n_rep.split(":")[0]
 
 def get_note_length_from_rep(n_rep):
-    return float(Fraction(n_rep.split(",")[0].split(":")[1])) if n_rep != "BAR" and n_rep != "END" else 0
+    try:
+    	return float(Fraction(n_rep.split(":")[1])) if n_rep != "BAR" and n_rep != "END" else 0
+    except:
+	print n_rep
+	exit()
 
 def get_phrase_length_from_rep(p_rep):
     return sum([get_note_length_from_rep(n) for n in p_rep])
@@ -209,14 +225,8 @@ def put_notes_in_measures(measure_stream, note_stream):
 
 def get_barbershop_data():
     scores = []
-<<<<<<< HEAD
-    for filename in os.listdir("data/barbershop/clean"):
-        scores.append("data/barbershop/clean/{0}".format(filename))
-=======
-    for filename in os.listdir("data/barbershop_scores/split"):
-        scores.append("data/barbershop_scores/split/{0}".format(filename))
-
->>>>>>> fb569f5e99479f12d476e61e6c2294d30ad9c6fa
+    for filename in os.listdir("Harmonizer/data/barbershop/clean"):
+        scores.append("Harmonizer/data/barbershop/clean/{0}".format(filename))
     return scores
 
 

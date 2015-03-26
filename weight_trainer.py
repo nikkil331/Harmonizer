@@ -5,9 +5,9 @@ from translation_model import TranslationModel
 from language_model import LanguageModel
 from decoder import Decoder
 
-lm_file = 'cis401/Harmonizer/data/barbershop_models/2_language_model_major_threshold_2.txt'
-tm_phrases_file = ['cis401/Harmonizer/data/barbershop_models/1_2_translation_model_major_rhythm_threshold_2.txt']
-tm_notes_file =	 ['cis401/Harmonizer/data/barbershop_models/1_2_translation_model_major.txt']
+lm_file = 'Harmonizer/data/barbershop/models/2_language_model_major_threshold_2_tag.txt'
+tm_phrases_file = ['Harmonizer/data/barbershop/models/1_2_translation_model_major_rhythm_threshold_2_tag.txt']
+tm_notes_file =	 ['Harmonizer/data/barbershop/models/1_2_translation_model_major_threshold_2_tag.txt']
 
 def get_n_best_lists(initial_params, n):
         sys.stderr.write("Getting n best lists...\n")
@@ -21,9 +21,9 @@ def get_n_best_lists(initial_params, n):
                 if "classic_tags" not in path:
                         continue
                 training_song = converter.parse(path);
-                #keySig = training_song.analyze('key')
-                #if keySig.pitchAndMode[1] != "major":
-                #        continue
+                keySig = training_song.analyze('key')
+                if keySig.pitchAndMode[1] != "major":
+                        continue
                 num_songs_translated += 1
                 transpose(training_song)
                 sys.stderr.write("transposed " + path + "\n")

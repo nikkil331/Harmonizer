@@ -70,9 +70,8 @@ class TranslationModel(object):
 
 
     def get_harmonies_note(self, note):
-        notes = note.split(",")
-        note_pitches = [pitch for (pitch, _) in [n.split(":") for n in notes]]
-        rhythm = notes[0].split(":")[1]
+        note_pitches = note.split(":")[0].split(",")
+        rhythm = note.split(":")[1]
         harmonies = []
         for pitch in note_pitches:
             if pitch in self._tm_notes:
@@ -141,12 +140,11 @@ class TranslationModel(object):
             return []
 
         single_note_harmonies = []
-
+	
         if len(melody_no_bars) < 2:
             single_note_harmonies = [(n,) for m in melody_no_bars for n in self.get_harmonies_note(m)]
         else:
             single_note_harmonies = list(product([n for n in self.get_harmonies_note(melody_no_bars[0])], [n for n in self.get_harmonies_note(melody_no_bars[1])]))
-
         if melody_no_bars not in self._tm_phrases:
             translations = single_note_harmonies
         else:
@@ -155,14 +153,18 @@ class TranslationModel(object):
         translations = [self.insert_bars(melody, t) for t in translations if t]    
         return translations
 
-    def write_to_file(self, model, path):
+    def write_to_file(self, model, path, phrase=True):
         f = open(path, 'w')
         for melody_phrase in model:
             for harmony_phrase in model[melody_phrase]:
-                melody_string = ' '.join(melody_phrase)
-                harmony_string = ' '.join(harmony_phrase)
-                output_line = ''.join([str(melody_string), ' ||| ', str(harmony_string), ' ||| ', \
-                    str(model[melody_phrase][harmony_phrase]), '\n'])
+	 	if phrase:
+                	melody_string = ' '.join(melody_phrase)
+                	harmony_string = ' '.join(harmony_phrase)
+			output_line = ''.join([str(melody_string), ' ||| ', str(harmony_string), ' ||| ', \
+                    		str(model[melody_phrase][harmony_phrase]), '\n'])
+		else:
+			output_line = ''.join([str(melody_phrase), ' ||| ', str(harmony_phrase), ' ||| ', \
+                                str(model[melody_phrase][harmony_phrase]), '\n'])
                 f.write(output_line)
 
 

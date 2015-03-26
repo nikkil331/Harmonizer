@@ -10,14 +10,14 @@ from music_utils import *
 
 class LanguageModelGenerator(object):
 
-	def __init__(self, ngram_size=4, window_size=8, mode='major', part=1, training_composers=['bach', 'handel']):
+	def __init__(self, ngram_size=4, window_size=4, mode='major', part=1, training_composers=['bach', 'handel']):
 		self._ngram_size = ngram_size
 		self._window_size = window_size
 		self._mode = 'major' if mode == 'major' else 'minor'
 		self._part = part
 		#for composer in training_composers:
 		#	self._training_paths += corpus.getComposer(composer)
-		self._training_paths = get_barbershop_data()
+		self._training_paths = [p for p in get_barbershop_data() if "classic_tags" in p]
 		self._lm_counts = None
 
 	def _update_count(self, sliding_window, note_rep):
@@ -62,12 +62,13 @@ class LanguageModelGenerator(object):
 		lm.set_ngram_size(self._ngram_size)
 		for context in self._lm_counts:
 			total_notes_after_context = sum(self._lm_counts[context].values())
-			context_counts = self._lm_counts[context].items()
-			for (note, count) in context_counts:
-				#approximately 4 octaves in our vocabulary (48 notes)
-				prob = (count + smoothing) / float(total_notes_after_context + (48*smoothing))
-				lm.add_to_model(context, note, prob)
-			lm.add_to_model(context, "<UNK>", (smoothing / float(total_notes_after_context + (48*smoothing))) )
+			if len(self._lm_counts[context].keys()) > 2:	
+				context_counts = self._lm_counts[context].items()
+				for (note, count) in context_counts:
+					#approximately 4 octaves in our vocabulary (48 notes)
+					prob = (count + smoothing) / float(total_notes_after_context + (48*smoothing))
+					lm.add_to_model(context, note, prob)
+				lm.add_to_model(context, "<UNK>", (smoothing / float(total_notes_after_context + (48*smoothing))) )
 		return lm
 
 
@@ -80,7 +81,7 @@ class LanguageModelGenerator(object):
 			sys.stderr.write('.')
 			composition = converter.parse(path)
 			try:
-				harmony = composition.parts[self._part]
+				harmony = composition.parts[int(self._part)]
 				keySig = composition.analyze('key')
 				if keySig.pitchAndMode[1] == self._mode:
 					num_songs += 1
@@ -112,12 +113,10 @@ class LanguageModelGenerator(object):
 				f.write(output_line)
 
 def main():
-	parts = [0,1,2,3]
-	for p in parts:
-		lm_generator = LanguageModelGenerator(part=p, ngram_size=3)
-		lm = lm_generator.generate_lm()
-		print lm
-		lm.write_to_file('data/barbershop/models/{0}_language_model_major.txt'.format(p))
+	lm_generator = LanguageModelGenerator(part=sys.argv[1], ngram_size=3)
+	lm = lm_generator.generate_lm()
+	print lm
+	lm.write_to_file('Harmonizer/data/barbershop/models/{0}_language_model_major_threshold_2_tag.txt'.format(sys.argv[1]))
 
 if __name__ == "__main__":
     main()
