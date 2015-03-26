@@ -32,7 +32,7 @@ class LanguageModelGenerator(object):
 
     def _skip_and_update(self, sliding_window, note_rep, limits):
         for ngram in itertools.combinations(sliding_window, self._ngram_size):
-            note_ngram = [note.Note(n) for n in ngram]
+            note_ngram = [note.Note(n) for n in ngram if n != "BAR" and n != "END"]
             if min(note_ngram) > limits[0] and max(note_ngram) < limits[1]:
                 self._update_count(ngram, note_rep)
 
