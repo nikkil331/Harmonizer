@@ -1,8 +1,9 @@
-from music_utils import *
 from itertools import *
 
-class TranslationModel(object):
+from music_utils import *
 
+
+class TranslationModel(object):
     def __init__(self, harmony_part, melody_part, phrase_path=None, note_path=None):
         self._tm_phrases = {}
         self._tm_notes = {}
@@ -26,7 +27,7 @@ class TranslationModel(object):
 
     def add_to_model(self, melody, harmony, prob, model):
         if melody not in model:
-            model[melody] = {harmony : prob}
+            model[melody] = {harmony: prob}
         else:
             model[melody][harmony] = prob
 
@@ -51,9 +52,9 @@ class TranslationModel(object):
             return -1
         total_prob = 0
         for (i, m_note) in enumerate(melody):
-            if m_note != "BAR" and m_note != "END":  
-                m_note = get_note_pitch_from_rep(m_note) 
-                h_notes = notes_playing_while_sounding(harmony, melody, i, i)  
+            if m_note != "BAR" and m_note != "END":
+                m_note = get_note_pitch_from_rep(m_note)
+                h_notes = notes_playing_while_sounding(harmony, melody, i, i)
                 for h_note in h_notes:
                     h_note = get_note_pitch_from_rep(h_note)
                     if m_note not in self._tm_notes:
@@ -79,7 +80,7 @@ class TranslationModel(object):
         if len(harmonies) == 0:
             return ["R:" + rhythm]
         return harmonies
-        
+
     def insert_bars(self, melody, harmony):
         bar_offsets = []
         end_offset = None
@@ -116,11 +117,11 @@ class TranslationModel(object):
             while len(bar_offsets) > 0 and curr_offset + h_len > bar_offsets[0]:
                 note_before_bar_len = bar_offsets[0] - curr_offset
                 note_after_bar_len = curr_offset + h_len - bar_offsets[0]
-                
+
                 new_harmony.append(h_pitch + ":" + str(note_before_bar_len))
                 new_harmony.append("BAR")
                 bar_offsets.pop(0)
-                
+
                 h_len = note_after_bar_len
                 curr_offset += note_before_bar_len
 
@@ -140,31 +141,32 @@ class TranslationModel(object):
             return []
 
         single_note_harmonies = []
-	
+
         if len(melody_no_bars) < 2:
             single_note_harmonies = [(n,) for m in melody_no_bars for n in self.get_harmonies_note(m)]
         else:
-            single_note_harmonies = list(product([n for n in self.get_harmonies_note(melody_no_bars[0])], [n for n in self.get_harmonies_note(melody_no_bars[1])]))
+            single_note_harmonies = list(product([n for n in self.get_harmonies_note(melody_no_bars[0])],
+                                                 [n for n in self.get_harmonies_note(melody_no_bars[1])]))
         if melody_no_bars not in self._tm_phrases:
             translations = single_note_harmonies
         else:
             translations = self._tm_phrases[melody_no_bars].keys() + single_note_harmonies
 
-        translations = [self.insert_bars(melody, t) for t in translations if t]    
+        translations = [self.insert_bars(melody, t) for t in translations if t]
         return translations
 
     def write_to_file(self, model, path, phrase=True):
         f = open(path, 'w')
         for melody_phrase in model:
             for harmony_phrase in model[melody_phrase]:
-	 	if phrase:
-                	melody_string = ' '.join(melody_phrase)
-                	harmony_string = ' '.join(harmony_phrase)
-			output_line = ''.join([str(melody_string), ' ||| ', str(harmony_string), ' ||| ', \
-                    		str(model[melody_phrase][harmony_phrase]), '\n'])
-		else:
-			output_line = ''.join([str(melody_phrase), ' ||| ', str(harmony_phrase), ' ||| ', \
-                                str(model[melody_phrase][harmony_phrase]), '\n'])
+                if phrase:
+                    melody_string = ' '.join(melody_phrase)
+                    harmony_string = ' '.join(harmony_phrase)
+                    output_line = ''.join([str(melody_string), ' ||| ', str(harmony_string), ' ||| ', \
+                                           str(model[melody_phrase][harmony_phrase]), '\n'])
+                else:
+                    output_line = ''.join([str(melody_phrase), ' ||| ', str(harmony_phrase), ' ||| ', \
+                                           str(model[melody_phrase][harmony_phrase]), '\n'])
                 f.write(output_line)
 
 
@@ -172,6 +174,6 @@ def main():
     tm = TranslationModel("Bass", "Soprano", note_path="data/bass_translation_model_major.txt")
     print tm.get_harmonies("C5")
 
-        
+
 if __name__ == "__main__":
     main()
