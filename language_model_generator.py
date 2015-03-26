@@ -30,11 +30,13 @@ class LanguageModelGenerator(object):
             else:
                 self._lm_counts[sliding_window][note_rep] += 1
 
-    def _skip_and_update(self, sliding_window, note_rep):
+    def _skip_and_update(self, sliding_window, note_rep, limits):
         for ngram in itertools.combinations(sliding_window, self._ngram_size):
-            self._update_count(ngram, note_rep)
+            note_ngram = [note.Note(n) for n in ngram]
+            if min(note_ngram) > limits[0] and max(note_ngram) < limits[1]:
+                self._update_count(ngram, note_rep)
 
-    def _update_counts(self, harmony):
+    def _update_counts(self, harmony, limits):
         sliding_window = []
         sliding_window_size = 0
         for measure in harmony[1:]:
@@ -46,8 +48,8 @@ class LanguageModelGenerator(object):
                 if not note.isNote:
                     note_rep = 'R'
                 else:
-                    note_rep = note.nameWithOctave
-                self._skip_and_update(tuple(sliding_window), note_rep)
+                    note_rep = get_pitch_rep(note)
+                self._skip_and_update(tuple(sliding_window), note_rep, limits)
                 if not (sliding_window[-1] is 'R' and note_rep is 'R'):
                     sliding_window.append(note_rep)
                     sliding_window_size += 1
@@ -81,20 +83,20 @@ class LanguageModelGenerator(object):
         for path in self._training_paths:
             sys.stderr.write('.')
             composition = converter.parse(path)
+            limits = (get_min_pitch(composition, 1), get_max_pitch(composition, 1))
             try:
                 harmony = composition.parts[int(self._part)]
                 keySig = composition.analyze('key')
                 if keySig.pitchAndMode[1] == self._mode:
                     num_songs += 1
                     transpose(composition)
-                    self._update_counts(harmony)
+                    self._update_counts(harmony, limits)
 
             except KeyError, e:
                 num_songs_without_part += 1
 
         print "Number of songs: {0}".format(num_songs)
         print "Number of songs without {0} : {1}".format(self._part, num_songs_without_part)
-
         return self._create_lm_from_counts(smoothing)
 
 
