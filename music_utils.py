@@ -247,12 +247,15 @@ def put_notes_in_measures(measure_stream, note_stream):
 
 def get_max_pitch(song, part):
     p = song.parts[part].flat.notes
+    p = [max(n) if n.isChord else n for n in p]
     return max(p)
 
 
 def get_min_pitch(song, part):
     p = song.parts[part].flat.notes
+    p = [min(n) if n.isChord else n for n in p]
     return min(p)
+
 
 def get_barbershop_data():
     scores = []
