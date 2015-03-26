@@ -25,7 +25,7 @@ class TranslationModelGenerator(object):
         begin_offset = 0.0
 
         for melody_note in melody.flat.notesAndRests:
-            if melody_note.pitch < limits[self._melody_part][0] or \
+            if melody_note.isNote and melody_note.pitch < limits[self._melody_part][0] or \
                             melody_note.pitch > limits[self._melody_part][1]:
                 continue
             if self._phrase_based_mode:
