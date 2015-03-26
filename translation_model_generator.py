@@ -87,7 +87,7 @@ class TranslationModelGenerator(object):
                     sys.stderr.write(str(composition) + '\n')
                     continue
                 num_songs += 1
-                # transpose(composition)
+                transpose(composition)
                 melody = composition.parts[int(self._melody_part)]
                 harmony = composition.parts[int(self._harmony_part)]
                 self._update_counts(melody, harmony, limits)
