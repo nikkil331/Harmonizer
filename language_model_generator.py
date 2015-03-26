@@ -30,11 +30,11 @@ class LanguageModelGenerator(object):
             else:
                 self._lm_counts[sliding_window][note_rep] += 1
 
-    def _skip_and_update(self, sliding_window, note_rep, limits):
-        for ngram in itertools.combinations(sliding_window, self._ngram_size):
-            note_ngram = [note.Note(n) for n in ngram if n != "BAR" and n != "END" and n != "R"]
-            if min(note_ngram) > limits[0] and max(note_ngram) < limits[1]:
-                self._update_count(ngram, note_rep)
+    # doesn't actually skip for now
+    def _skip_and_update(self, ngram, note_rep, limits):
+        note_ngram = [note.Note(n) for n in ngram if n != "BAR" and n != "END" and n != "R"]
+        if min(note_ngram) > limits[0] and max(note_ngram) < limits[1]:
+            self._update_count(ngram, note_rep)
 
     def _update_counts(self, harmony, limits):
         sliding_window = []
@@ -119,7 +119,7 @@ class LanguageModelGenerator(object):
 
 
 def main():
-    lm_generator = LanguageModelGenerator(part=sys.argv[1], ngram_size=3)
+    lm_generator = LanguageModelGenerator(part=sys.argv[1], ngram_size=3, window_size=3)
     lm = lm_generator.generate_lm()
     print lm
     lm.write_to_file(
