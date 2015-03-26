@@ -246,12 +246,12 @@ def put_notes_in_measures(measure_stream, note_stream):
 
 
 def get_max_pitch(song, part):
-    p = song.parts[part].flat.notesAndRests
+    p = song.parts[part].flat.notes
     return max(p)
 
 
 def get_min_pitch(song, part):
-    p = song.parts[part].flat.notesAndRests
+    p = song.parts[part].flat.notes
     return min(p)
 
 def get_barbershop_data():
