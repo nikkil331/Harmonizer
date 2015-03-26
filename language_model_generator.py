@@ -57,7 +57,7 @@ class LanguageModelGenerator(object):
                     if sliding_window.pop(0) != "BAR":
                         sliding_window_size -= 1
 
-        self._skip_and_update(tuple(sliding_window), 'END')
+        self._skip_and_update(tuple(sliding_window), 'END', limits)
 
 
     def _create_lm_from_counts(self, smoothing):
