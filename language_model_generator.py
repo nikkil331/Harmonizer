@@ -33,7 +33,7 @@ class LanguageModelGenerator(object):
     # doesn't actually skip for now
     def _skip_and_update(self, ngram, note_rep, limits):
         note_ngram = [note.Note(n) for n in ngram if n != "BAR" and n != "END" and n != "R"]
-        if min(note_ngram) > limits[0] and max(note_ngram) < limits[1]:
+        if note_ngram and min(note_ngram) > limits[0] and max(note_ngram) < limits[1]:
             self._update_count(ngram, note_rep)
 
     def _update_counts(self, harmony, limits):
@@ -83,7 +83,7 @@ class LanguageModelGenerator(object):
         for path in self._training_paths:
             sys.stderr.write('.')
             composition = converter.parse(path)
-            limits = (get_min_pitch(composition, 1), get_max_pitch(composition, 1))
+            limits = (get_min_pitch(composition, int(self._part)), get_max_pitch(composition, int(self._part)))
             try:
                 harmony = composition.parts[int(self._part)]
                 keySig = composition.analyze('key')
