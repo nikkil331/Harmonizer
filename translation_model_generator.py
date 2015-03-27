@@ -78,8 +78,12 @@ class TranslationModelGenerator(object):
         num_songs_without_part = 0
         for path in self._training_paths:
             composition = converter.parse(path)
-            limits = {self._melody_part: (get_min_pitch(composition, 0), get_max_pitch(composition, 0)),
-                      self._harmony_part: (get_min_pitch(composition, 1), get_max_pitch(composition, 1))}
+            limits = {self._melody_part:
+                      (get_min_pitch(composition, self._melody_part),
+                       get_max_pitch(composition, self._melody_part)),
+                      self._harmony_part:
+                      (get_min_pitch(composition, self._harmony_part),
+                       get_max_pitch(composition, self._harmony_part))}
             sys.stderr.write('.')
             try:
                 keySig = composition.analyze('key')
