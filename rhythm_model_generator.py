@@ -6,11 +6,11 @@ import itertools
 
 from music21 import *
 
-from language_model import LanguageModel
+from rhythm_model import RhythmModel
 from music_utils import *
 
 
-class LanguageModelGenerator(object):
+class RhythmModelGenerator(object):
     def __init__(self, ngram_size=4, window_size=4, mode='major', part=1, training_composers=['bach', 'handel']):
         self._ngram_size = ngram_size
         self._window_size = window_size
@@ -45,10 +45,7 @@ class LanguageModelGenerator(object):
                 if sliding_window.pop(0) != "BAR":
                     sliding_window_size -= 1
             for note in measure.notesAndRests:
-                if not note.isNote:
-                    note_rep = 'R'
-                else:
-                    note_rep = get_pitch_rep(note)
+                    note_rep = get_rhythm_rep(note)
                 self._skip_and_update(tuple(sliding_window), note_rep, limits)
                 if not (sliding_window[-1] is 'R' and note_rep is 'R'):
                     sliding_window.append(note_rep)
@@ -87,10 +84,9 @@ class LanguageModelGenerator(object):
             try:
                 harmony = composition.parts[int(self._part)]
                 keySig = composition.analyze('key')
-                if keySig.pitchAndMode[1] == self._mode:
-                    num_songs += 1
-                    transpose(composition)
-                    self._update_counts(harmony, limits)
+                num_songs += 1
+                transpose(composition)
+                self._update_counts(harmony, limits)
 
             except KeyError, e:
                 num_songs_without_part += 1
@@ -116,18 +112,5 @@ class LanguageModelGenerator(object):
                 output_line = ''.join(
                     [' '.join(context), ' ||| ', str(note), ' ||| ', str(self._lm[context][note]), '\n'])
                 f.write(output_line)
-
-
-def main():
-    lm_generator = LanguageModelGenerator(part=sys.argv[1], ngram_size=3, window_size=3)
-    lm = lm_generator.generate_lm()
-    print lm
-    lm.write_to_file(
-        'Harmonizer/data/barbershop/models/{0}_language_model_major_threshold_2_tag.txt'.format(sys.argv[1]))
-
-
-if __name__ == "__main__":
-    main()
-
 
 
