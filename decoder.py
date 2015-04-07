@@ -56,7 +56,7 @@ class Decoder(object):
                 new_context_size -= 1
         return (tuple(new_context), new_context_size)
 
-    def _update_hypothesis(self, curr_hyp, phrases, h_phrase):
+    def _update_hypothesis(self, curr_hyp, phrases, prev_note, h_phrase):
         new_notes = curr_hyp.notes + h_phrase
         new_duration = curr_hyp.duration + get_phrase_length_from_rep(h_phrase)
         new_context, new_context_size = self.update_context(curr_hyp.context, curr_hyp.context_size, h_phrase)
@@ -64,14 +64,19 @@ class Decoder(object):
         new_tm_notes_logprob = curr_hyp.tm_notes_logprob
         for part_idx, phrase in phrases.items():
             if phrase:
-                (phrase_prob, note_prob) = self._tms[part_idx].get_probability(phrase, h_phrase)
-                new_tm_phrase_logprob += phrase_prob
-                new_tm_notes_logprob += note_prob
+                (phrase_prob_1, note_prob_1) = self._tms[part_idx].get_probability(phrase, h_phrase)
+                if prev_note:
+                    (phrase_prob_2, _) = self._tms[part_idx].get_probability((prev_note, phrase[0]),
+                                                                                   (curr_hyp.notes[-1], h_phrase[0]))
+                else:
+                    phrase_prob_2 = 0
+                new_tm_phrase_logprob += phrase_prob_1 + phrase_prob_2
+                new_tm_notes_logprob += note_prob_1
         new_lm_logprob = curr_hyp.lm_logprob + self._lm.get_probability(curr_hyp.context, h_phrase)
         return hypothesis(new_notes, new_duration, new_context, new_context_size, new_tm_phrase_logprob,
                           new_tm_notes_logprob, new_lm_logprob)
 
-    def _grow_hyps_in_beam(self, phrases, main_phrase_part, hyp):
+    def _grow_hyps_in_beam(self, phrases, prev_note, main_phrase_part, hyp):
         new_beam = []
         # get_harmonies always returns at least one harmony
         if phrases[0] == ("END",):
@@ -80,7 +85,7 @@ class Decoder(object):
             possible_harmony_phrases = set(self._tms[main_phrase_part] \
                                            .get_harmonies(phrases[main_phrase_part]))
         for h in possible_harmony_phrases:
-            new_hyp = self._update_hypothesis(hyp, phrases, h)
+            new_hyp = self._update_hypothesis(hyp, phrases, prev_note, h)
             new_beam.append(new_hyp)
         return new_beam
 
@@ -88,7 +93,7 @@ class Decoder(object):
         phrases = {}
         semi_flat_part = measure_pairs[part_idx].semiFlat
         first_note = semi_flat_part.notesAndRests.getElementAtOrBefore(duration)
-        if first_note == None:
+        if first_note is None:
             return None
         second_note = semi_flat_part.getElementAfterElement(first_note, [note.Note, note.Rest])
         if second_note:
@@ -121,10 +126,12 @@ class Decoder(object):
                     continue_growing_hyps = True
                     for (part_idx, p) in enumerate(measure_pairs):
                         # {part_idx: phrase}
-                        melody_phrases = self.get_melody_phrases_after_duration(measure_pairs[0][0].offset + hyp_dur,
+                        phrase_offset = measure_pairs[0][0].offset + hyp_dur
+                        melody_phrases = self.get_melody_phrases_after_duration(phrase_offset,
                                                                                 measure_pairs, part_idx)
+                        prev_note = measure_pairs[0].getElementAtOrBefore(phrase_offset - 0.1)
                         for hyp in beam[hyp_dur]:
-                            new_hyps = self._grow_hyps_in_beam(melody_phrases, part_idx, hyp)
+                            new_hyps = self._grow_hyps_in_beam(melody_phrases, prev_note, part_idx, hyp)
                             for new_hyp in new_hyps:
                                 if new_hyp.duration not in new_beam:
                                     new_beam[new_hyp.duration] = []
@@ -199,7 +206,7 @@ class Decoder(object):
 
         final_hyps = []
         for hyp in best_hyps_so_far:
-            new_beams = self._grow_hyps_in_beam({i: ("END",) for i in range(len(self._parts))}, 0, hyp)
+            new_beams = self._grow_hyps_in_beam({i: ("END",) for i in range(len(self._parts))}, None,  0, hyp)
             final_hyps.extend(new_beams)
 
         consolidated_final_hyps = []
