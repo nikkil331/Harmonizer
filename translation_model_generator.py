@@ -107,7 +107,6 @@ class TranslationModelGenerator(object):
 
         return self._create_tm_from_counts()
 
-
 print "reading in..."
 training_songs = [converter.parse(path) for path in get_barbershop_data() if "classic_tags" in path]
 

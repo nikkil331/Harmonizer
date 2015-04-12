@@ -3,6 +3,9 @@ from music21 import *
 import decoder
 from translation_model import TranslationModel
 from language_model import LanguageModel
+from collections import namedtuple
+from music_utils import *
+
 
 
 class Composition(object):
@@ -40,16 +43,10 @@ class Composition(object):
         return (name, new_part, decoder.get_score(hyp))
 
     def best_new_part(self, parts):
-        second_parts = map(lambda x: self.create_part(x,
-                                                      'Harmonizer/data/barbershop/models/{0}_language_model_major_threshold_2_tag.txt'.format(
-                                                          x),
-                                                      [
-                                                          'Harmonizer/data/barbershop/models/{0}_{1}_translation_model_major_rhythm_threshold_2_tag.txt'.format(
-                                                              y[0], x) for y in self._parts],
-                                                      [
-                                                          'Harmonizer/data/barbershop/models/{0}_{1}_translation_model_major_threshold_2_tag.txt'.format(
-                                                              y[0], x) for y in self._parts]),
-                           parts)
+        second_parts = map(lambda x: self.create_part(x, 'data/{0}_language_model_major.txt'.format(x),
+                                            ['data/{0}_{1}_translation_model_major_rhythm.txt'.format(y[0],x) for y in self._parts],
+                                            ['data/{0}_{1}_translation_model_major.txt'.format(y[0],x) for y in self._parts]), 
+                                        parts)
         winner = max(second_parts, key=lambda x: x[2])
         self._parts.append((winner[0], winner[1]))
         return winner[0]
@@ -63,19 +60,15 @@ class Composition(object):
 
 
 def main():
-    test_song = converter.parse('Harmonizer/ttls.xml')
-    # test_song = corpus.parse('bach/bwv390')
-    parts = ['0', '2', '3']
+    #test_song = converter.parse('ttls.xml')
+    test_song = corpus.parse('bach/bwv115.6')
+    transpose(test_song)
+    parts = ['Alto', 'Tenor', 'Bass']
     c = Composition()
-    c.add_part(1, test_song.parts[0])
+    c.add_part('Soprano', test_song.parts['Soprano'])
     while parts:
         parts.remove(c.best_new_part(parts))
-        #bass = c.create_part(3,'Harmonizer/data/barbershop/models/3_language_model_major_threshold_2_tag.txt',\
-    #		  ['Harmonizer/data/barbershop/models/1_3_translation_model_major_rhythm_threshold_2_tag.txt'],\
-    #                 ['Harmonizer/data/barbershop/models/1_3_translation_model_major_threshold_2_tag.txt'])
-    #c._parts.append((3, bass[1]))
-    c.save("barbershop_equal_tags.xml")
-
+    c.save('ttls_generated.xml')
 
 if __name__ == "__main__":
     main()

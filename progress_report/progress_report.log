@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.5.30)  12 DEC 2014 12:42
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.5.30)  12 APR 2015 01:10
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -281,35 +281,32 @@ LaTeX Font Info:    Try loading font information for U+lasy on input line 15.
 (/usr/local/texlive/2013/texmf-dist/tex/latex/base/ulasy.fd
 File: ulasy.fd 1998/08/17 v2.2e LaTeX symbol font definitions
 )
-Overfull \hbox (7.21434pt too wide) in paragraph at lines 50--52
-\T1/aer/m/n/9 of ma-chine trans-la-tion, where the in-put lan-guage is the melo
-dy
+Overfull \hbox (2.83372pt too wide) in paragraph at lines 31--32
+[]\T1/aer/m/n/9 Multi-part mu-si-cal ar-range-ments are a cor-ner-stone of many
+
  []
 
 
-Overfull \hbox (5.30817pt too wide) in paragraph at lines 82--94
+Overfull \hbox (5.30817pt too wide) in paragraph at lines 72--84
 \T1/aer/m/n/9 been con-ducted that model these sig-nals us-ing n-gram Markov
  []
 
 
-Overfull \hbox (7.71353pt too wide) in paragraph at lines 82--94
+Overfull \hbox (7.71353pt too wide) in paragraph at lines 72--84
 \OML/cmm/m/it/9 C[]$ \T1/aer/m/n/9 con-di-tioned on a lim-ited his-tory of pre-
 vi-ous events [$\OML/cmm/m/it/9 C[] [] [] 
  []
 
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [1{/usr/local/texlive/2013/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
+[1{/usr/local/texlive/2013/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
 
 
 ]
-Underfull \hbox (badness 10000) in paragraph at lines 132--133
+Underfull \hbox (badness 10000) in paragraph at lines 108--110
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 134--135
+Underfull \hbox (badness 10000) in paragraph at lines 111--112
 
  []
 
@@ -317,86 +314,118 @@ Underfull \hbox (badness 10000) in paragraph at lines 134--135
 Underfull \vbox (badness 1558) has occurred while \output is active []
 
  [2]
-Underfull \hbox (badness 10000) in paragraph at lines 136--137
+Underfull \hbox (badness 10000) in paragraph at lines 113--114
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 140--141
+Underfull \hbox (badness 10000) in paragraph at lines 115--117
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 142--143
+Underfull \hbox (badness 10000) in paragraph at lines 115--117
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 144--145
+Underfull \hbox (badness 10000) in paragraph at lines 118--119
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 146--147
+Underfull \hbox (badness 10000) in paragraph at lines 120--121
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 148--150
+Underfull \hbox (badness 10000) in paragraph at lines 122--123
 
  []
 
-<design_overview.png, id=19, 1221.56375pt x 563.10374pt>
-File: design_overview.png Graphic file (type png)
+<system_design.png, id=19, 743.77875pt x 400.49625pt>
+File: system_design.png Graphic file (type png)
+ <use system_design.png>
+Package pdftex.def Info: system_design.png used on input line 129.
+(pdftex.def)             Requested size: 223.13535pt x 120.1498pt.
 
-<use design_overview.png>
-Package pdftex.def Info: design_overview.png used on input line 151.
-(pdftex.def)             Requested size: 244.30843pt x 112.61874pt.
-
-Overfull \hbox (13.30843pt too wide) in paragraph at lines 151--152
-[][] 
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 151--152
+Underfull \hbox (badness 10000) in paragraph at lines 133--134
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 153--154
+Underfull \hbox (badness 10000) in paragraph at lines 135--136
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 155--156
+Underfull \hbox (badness 10000) in paragraph at lines 137--138
 
  []
 
 
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-
-Overfull \hbox (12.03235pt too wide) in paragraph at lines 170--177
+Overfull \hbox (12.03235pt too wide) in paragraph at lines 148--155
  [] 
  []
 
-[3 <./design_overview.png>]
-Underfull \hbox (badness 10000) in paragraph at lines 191--192
+LaTeX Font Info:    Try loading font information for T1+aett on input line 162.
+
+(/usr/local/texlive/2013/texmf-dist/tex/latex/ae/t1aett.fd
+File: t1aett.fd 1997/11/16 Font definitions for T1/aett.
+)
+Underfull \hbox (badness 10000) in paragraph at lines 160--166
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 193--194
+Overfull \hbox (19.37599pt too wide) in paragraph at lines 160--166
+\T1/aett/m/n/9 note -> {pitch}(,{pitch})*(:{quarter-length du-ra-tion})? 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 160--166
+
+ []
+
+[3 <./system_design.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 174--175
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 195--196
+Underfull \hbox (badness 10000) in paragraph at lines 176--177
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 197--198
+Underfull \hbox (badness 10000) in paragraph at lines 178--179
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 180--181
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 182--183
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 184--185
+
+ []
+
+
+Overfull \hbox (6.75125pt too wide) in paragraph at lines 186--187
+[]$\OML/cmm/m/it/9 P\OT1/cmr/m/n/9 ((\OML/cmm/m/it/9 m[]; m[]\OT1/cmr/m/n/9 )\O
+MS/cmsy/m/n/9 j\OT1/cmr/m/n/9 (\OML/cmm/m/it/9 h[] [] h[]\OT1/cmr/m/n/9 )) = []
+$ 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 186--187
 
  []
 
@@ -404,137 +433,275 @@ Underfull \hbox (badness 10000) in paragraph at lines 197--198
 Underfull \vbox (badness 1558) has occurred while \output is active []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 203--204
+<./phrase_examples.png, id=25, 3137.7225pt x 1549.79pt>
+File: ./phrase_examples.png Graphic file (type png)
+
+<use ./phrase_examples.png>
+Package pdftex.def Info: ./phrase_examples.png used on input line 196.
+(pdftex.def)             Requested size: 251.02293pt x 123.98573pt.
+
+Overfull \hbox (11.02293pt too wide) in paragraph at lines 196--197
+[][] 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 200--201
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 205--206
+Underfull \hbox (badness 10000) in paragraph at lines 202--203
 
  []
 
 
-Overfull \hbox (2.6695pt too wide) in paragraph at lines 209--210
-[]\T1/aer/m/n/9 At the cur-rent point, the trans-la-tion model is not smoothed
- []
-
-
-Overfull \hbox (2.68913pt too wide) in paragraph at lines 209--210
-\T1/aer/m/n/9 be-cause the sys-tem never con-sid-ers gen-er-at-ing har-mony not
-es
- []
-
-
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
- [4]
-Underfull \hbox (badness 10000) in paragraph at lines 222--223
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 224--225
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 227--228
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 229--230
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 235--236
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 237--238
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 239--240
-
- []
-
-
-Underfull \hbox (badness 10000) in paragraph at lines 241--242
+Underfull \hbox (badness 10000) in paragraph at lines 204--205
 
  []
 
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
+ [4 <./phrase_examples.png>]
+Overfull \hbox (12.03235pt too wide) in paragraph at lines 217--224
+ [] 
+ []
 
-Underfull \hbox (badness 10000) in paragraph at lines 250--252
+
+Overfull \hbox (3.79614pt too wide) in paragraph at lines 235--236
+\T1/aer/m/n/9 all pos-si-ble har-mony phrases that can sound with that melody
+ []
+
+
+Overfull \hbox (4.46237pt too wide) in paragraph at lines 235--236
+\T1/aer/m/n/9 pos-si-bil-i-ties are two-note phrases which have the same rhythm
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 253--254
+Overfull \hbox (2.96205pt too wide) in paragraph at lines 237--238
+\T1/aer/m/n/9 are sorted in de-scend-ing or-der by their $\OML/cmm/m/it/9 S\OT1
+/cmr/m/n/9 (\OML/cmm/m/it/9 hyp\OMS/cmsy/m/n/9 j\OML/cmm/m/it/9 m[]:::m[]\OT1/c
+mr/m/n/9 )$
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 240--241
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 255--256
+Underfull \hbox (badness 10000) in paragraph at lines 242--243
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 257--258
+Underfull \vbox (badness 1558) has occurred while \output is active []
+
+ [5]
+Underfull \hbox (badness 10000) in paragraph at lines 254--255
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 256--257
 
  []
 
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-[5] <measures.png, id=34, 301.125pt x 307.1475pt>
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 308--322
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 308--322
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 308--322
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 308--322
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 308--322
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 308--322
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 308--322
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 308--322
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 308--322
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 308--322
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 308--322
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 308--322
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 308--322
+
+ []
+
+
+Overfull \hbox (196.26747pt too wide) in paragraph at lines 328--344
+ [] 
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Overfull \hbox (91.05962pt too wide) in paragraph at lines 350--366
+ [] 
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 370--384
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 370--384
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 370--384
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 370--384
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 370--384
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 370--384
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 370--384
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 370--384
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 370--384
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 370--384
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 370--384
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 370--384
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 370--384
+
+ []
+
+[6] <measures.png, id=41, 301.125pt x 307.1475pt>
 File: measures.png Graphic file (type png)
  <use measures.png>
-Package pdftex.def Info: measures.png used on input line 325.
+Package pdftex.def Info: measures.png used on input line 401.
 (pdftex.def)             Requested size: 240.90031pt x 245.71832pt.
 
-Overfull \hbox (0.90031pt too wide) in paragraph at lines 325--326
+Overfull \hbox (0.90031pt too wide) in paragraph at lines 401--402
 [][] 
  []
 
-[6] (./progress_report.bbl [7 <./measures.png>]) [8
-
-] (./progress_report.aux) ) 
+[7 <./measures.png>] (./progress_report.bbl) [8] (./progress_report.aux) ) 
 Here is how much of TeX's memory you used:
- 2901 strings out of 493315
- 37171 string characters out of 6137904
- 108404 words of memory out of 5000000
- 6276 multiletter control sequences out of 15000+600000
- 48451 words of font info for 65 fonts, out of 8000000 for 9000
+ 2937 strings out of 493315
+ 37746 string characters out of 6137904
+ 119404 words of memory out of 5000000
+ 6303 multiletter control sequences out of 15000+600000
+ 52577 words of font info for 71 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
- 41i,10n,28p,1113b,246s stack positions out of 5000i,500n,10000p,200000b,80000s
-{/usr/local/texlive/2013/texmf-dist/fonts/enc/dvips/
-base/8r.enc}</usr/local/texlive/2013/texmf-dist/fonts/type1/public/amsfonts/cm/
-cmbx9.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/public/amsfonts/cmext
-ra/cmex9.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/public/amsfonts/cm
-/cmmi5.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/public/amsfonts/cm/c
-mmi6.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmm
-i9.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmr5.
-pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb
-></usr/local/texlive/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></
-usr/local/texlive/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></us
-r/local/texlive/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/
-local/texlive/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/lo
-cal/texlive/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmti9.pfb></usr/loca
-l/texlive/2013/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb></usr/local/texli
-ve/2013/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb></usr/local/texlive/2013
-/texmf-dist/fonts/type1/urw/times/utmb8a.pfb></usr/local/texlive/2013/texmf-dis
-t/fonts/type1/urw/times/utmri8a.pfb>
-Output written on progress_report.pdf (8 pages, 265490 bytes).
+ 41i,10n,28p,1381b,246s stack positions out of 5000i,500n,10000p,200000b,80000s
+{/usr
+/local/texlive/2013/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/texlive/
+2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb></usr/local/texlive/20
+13/texmf-dist/fonts/type1/public/amsfonts/cmextra/cmex9.pfb></usr/local/texlive
+/2013/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/local/texlive/2
+013/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/local/texlive/201
+3/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/local/texlive/2013/
+texmf-dist/fonts/type1/public/amsfonts/cm/cmr5.pfb></usr/local/texlive/2013/tex
+mf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/texlive/2013/texmf-
+dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/local/texlive/2013/texmf-dis
+t/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/local/texlive/2013/texmf-dist/
+fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/local/texlive/2013/texmf-dist/fo
+nts/type1/public/amsfonts/cm/cmsy9.pfb></usr/local/texlive/2013/texmf-dist/font
+s/type1/public/amsfonts/cm/cmti9.pfb></usr/local/texlive/2013/texmf-dist/fonts/
+type1/public/amsfonts/cm/cmtt9.pfb></usr/local/texlive/2013/texmf-dist/fonts/ty
+pe1/urw/helvetic/uhvb8a.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/urw
+/helvetic/uhvr8a.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/urw/times/
+utmb8a.pfb></usr/local/texlive/2013/texmf-dist/fonts/type1/urw/times/utmri8a.pf
+b>
+Output written on progress_report.pdf (8 pages, 589859 bytes).
 PDF statistics:
- 100 PDF objects out of 1000 (max. 8388607)
- 70 compressed objects within 1 object stream
+ 106 PDF objects out of 1000 (max. 8388607)
+ 73 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 11 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 16 words of extra memory for PDF output out of 10000 (max. 10000000)
 

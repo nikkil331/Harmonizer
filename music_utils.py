@@ -87,16 +87,14 @@ def get_note_rep(note):
     else:
         return ("R:" + str(note.quarterLength)).encode('ascii')
 
-
 def get_phrase_rep(phrase):
     return tuple([get_note_rep(note) for note in phrase])
 
-
-def transpose_helper(stream, keySig, start, i):
+def transpose_helper(stream, newKey, keySig, start, i):
     if not keySig:
         keySig = keySig = stream.measures(start, i).analyze('key')
     curr_pitch = keySig.pitchAndMode[0].name
-    new_pitch = 'C' if keySig.pitchAndMode[1] == "major" else 'A'
+    new_pitch = newKey
     sc = scale.ChromaticScale(curr_pitch + '5')
     sc_pitches = [str(p)[:-1] for p in sc.pitches]
     num_halfsteps = sc_pitches.index(new_pitch)
@@ -105,7 +103,8 @@ def transpose_helper(stream, keySig, start, i):
     stream.measures(start, i).transpose(num_halfsteps, inPlace=True)
 
 
-def transpose(stream):
+def transpose(stream, newKey):
+    newKey = newKey.upper()
     currKeySignature = stream.parts[0][1].keySignature
     start = 0
     for i, t in enumerate(stream.parts[0].getElementsByClass(['Measure'])):
@@ -114,7 +113,6 @@ def transpose(stream):
             start = i
             currKeySignature = t.keySignature
     transpose_helper(stream, currKeySignature, start, len(stream.parts[0].getElementsByClass(['Measure'])))
-
 
 def get_harmony_notes(melodyNote, harmonyStream):
     melody_offset = melodyNote.offset
@@ -259,8 +257,8 @@ def get_min_pitch(song, part):
 
 def get_barbershop_data():
     scores = []
-    for filename in os.listdir("Harmonizer/data/barbershop/clean"):
-        scores.append("Harmonizer/data/barbershop/clean/{0}".format(filename))
+    for filename in os.listdir("data/barbershop_scores/split"):
+        scores.append("data/barbershop_scores/split/{0}".format(filename))
     return scores
 
 
