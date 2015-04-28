@@ -141,9 +141,13 @@ Viewing translation as a sequence of generation steps then introduces the proble
 \section{System Implementation}
 \label{sec:sys_implement}
 \subsection{Data Collection and Interaction}
-To interact with music data, a third-party software called Music21\cite{Cuthbert_music21:a} was used. Music21 is a library developed at MIT which provides a simple API for querying several types of music formats.  MusicXML, a type of encoding for standard music notation, is the primary data format used. This format can be parsed by Music21 into Stream objects which can then be queried for any of the information contained in the notation, including key, tempo, and notes with pitch and timing. Additionally, the Music21 package has a library of over $2,000$ compositions, mostly written by classical composers. The package's extensive collection of Bach chorales --- which each have soprano, alto, tenor, and bass voices --- was used as the main source of training, optimization, and test data. 
+To interact with music data, a third-party software called Music21\cite{Cuthbert_music21:a} was used. Music21 is a library developed at MIT which provides a simple API for querying several types of music formats.  MusicXML, a type of encoding for standard music notation, is the primary data format used. This format can be parsed by Music21 into Stream objects which can then be queried for any of the information contained in the notation, including key, tempo, and notes with pitch and timing. 
+\subsubsection{Bach Data}
+The Music21 package has a library of over $2,000$ compositions, mostly written by classical composers. The package's extensive collection of Bach chorales --- which each have soprano, alto, tenor, and bass voices --- was used as the main source of training, optimization, and test data. Table 1 gives information regarding the size of our Bach corpus.
+\subsubsection{Barbershop Data}
+In order to make sure the system was extensible and not optimized to just Bach chorales, a data set of barbershop music was also collected. Barbershop as a genre was chosen due to its musical difference with Bach chorales, generally including much more dissonance and less predictable harmonies. However, it is structurally similar to Bach in that it traditionally is written with four separate voices, making it easy to apply the system to both types of music. This data was gathered from various sources, largely in PDF format. These documents were parsed by Optical Music Recognition systems in order to convert them to MusicXML, so that they could be manipulated by the Music21 library. However, the scanning was far from perfect, and many of the scores required significant manual editing in order to be usable for the system. As such, many of the scores were simply discarded, and so the barbershop data was not large enough to perform the same robust evaluation as the Bach data set. However, it was large enough to train some models and produce very simple barbershop harmonies, which acted as a sanity check as we made changes to the system.
 
-\begin{table}[h]
+\begin{table}
   \begin{center}
       \begin{tabular}{| l | r | r | r | r | r |}
       \hline
@@ -319,6 +323,26 @@ In order to evaluate our system, we relied on Music21's Theory Analyzer module \
 
 results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results 
 
+\begin{table*}[t]
+      \begin{tabular}{| l | l | l | l | l | l |}
+      \hline
+     Song & Score & No Phrase Model & Equal Weights & Tuned Weights \\ \hline
+     Soprano & Alto & 61101.80 & 44923.42 & 19134.74 \\ 
+     Soprano & Tenor & 61703.21 & 45324.36 & 19080.18 \\ 
+     Soprano & Bass & 62057.16 & 45560.33 & 18891.65 \\ 
+     Alto & Soprano & 60914.25 & 44826.01 & 19256.47 \\ 
+     Alto & Tenor & 61776.83 & 45401.07 & 19177.60 \\ 
+     Alto & Bass & 61968.08 & 45528.57 & 18906.19 \\ 
+     Tenor & Soprano & 60781.91 & 44795.90 & 19315.09 \\ 
+     Tenor & Alto & 61047.42 & 44972.91 & 19292.98 \\ 
+     Tenor & Bass & 62122.35 & 45689.53 & 19110.80 \\ 
+     Bass & Soprano & 60332.09 & 44587.48 & 19284.29 \\ 
+     Bass & Alto & 60478.43 & 44685.04 & 19201.49 \\ 
+     Bass & Tenor & 61294.38 & 45229.00 & 19256.21 \\ \hline
+        \end{tabular}
+  \caption{The perplexity over the anti-examples training set of translation between each pair of voices for three different iterations of the system.}
+\end{table*}
+
 \subsection{Human Evaluation}
 In Machine Translation domains, human evaluation is seen as the ideal metric, and other metrics are designed in order to correlate well with human judgement. Therefore, we wanted incorporate human evaluation in order to ensure that the iterations of MelTS were making an improvement, and that the output of MelTS was improving on other systems.
 \subsubsection{Experimental Setup}
@@ -341,7 +365,6 @@ In addition, the different iterations of MelTS were evaluated to be an increase 
 \caption{Results of our Mechincal Turk Task - last iteration of MelTS versus all other systems.}
 \end{figure}
 \label{sec:system_performance}
-
 
 \section{Ethics}
 As with most artificial intelligence applications, an obvious ethical concern with this system is its potential impact on people whose activities it attempts to mimic. If MelTS produced compositions with such high quality that they were competitive with the compositions of modern professional composers, the system may threaten the livelihoods of composers and musicians. However, the authors believe that such a high level of output quality is so far in the future that this hypothetical situation could not be considered a legitimate concern.
