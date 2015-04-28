@@ -97,11 +97,11 @@ The previous data driven approaches applied to automatic harmonization all share
 
 In the best case, chord prediction will alow only the generation of those chords seen in the training data. In more restrictive set-ups where classification algorithms are used, the chord predicted is based on a classifier choosing from a relatively small number of chord classes. Some chord prediction systems do not generate individual parts at all, but rather view the harmony output as just the underlying chord sequence generated. If individual parts are produced, the notes for each part are chosen from the predicted chord, not based on the context of previous notes in that part. Chord prediction further limits interesting musical structure since some assumptions must be made about when the predicted chord is to be played. This is a far cry from actual musical arrangements, whose parts can move independently of each other and at times produce non-conventional chords. In fact, this approach differs greatly from how actual composers create multi-part arrangements, creating musical phrases in each part rather than purely choosing chords to sound on each beat.
 
-Predicting the note sequences for individual parts in such a way that will allow them to sound consont when played together can bypass many of the pitfalls of chord prediction. 
+Predicting the note sequences for individual parts in such a way that will allow them to sound consonant when played together can bypass many of the pitfalls of chord prediction. 
 Such an approach will allow unseen chords to be produced because there is no restriction on which groups of notes can sound simultaenously, only on which notes can be produced. Furthermore, the system can be made to encourage interesting movement within the individual parts, for example by taking the part's context into account and by allowing rhythmic variation. Machine translation techniques are used to achieve these goals of simultaneous consonance and part fluidity.
 
 There are two main analogies between natural languages and musical voices that motivate the usage of machine translation techniques for automatic harmonization. The first analogy is that both natural languages and musical voices have a sense of ``word translations''. Just as there may be several words in the target language that could be sensible translations of a given word in the source 
-langauge, there are also several notes in the harmony voice that can harmonize well with an input melody note. Importantly, however, it is not the case that any note can harmonize well with the melody note. Some notes will sound dissonant when played together and still other notes may not be in the harmony voice at all, since harmony voices may have specific note ranges. The second analogy is that both natural languages and musical voices have a concept of ``fluency'', the idea that only certain strings of tokens (i.e. words or notes) are sensible. For example, the statement ``colorless green ideas sleep furiously'' contains all English words but is unlikely to be understood by an English speaker since that string of words is meaningless based on the rules of the language. Similarly, a random sequence of notes may not sound sensible in the context of its harmony voice, if the notes are recognized as music at all. Since machine translation techniques can produce novel natural language utterances based on the properties of word translations and fluency, it follows that novel musical parts can be generated with the same techniques.
+langauge, there are also several notes in the harmony voice that can harmonize well with an input melody note. Importantly, however, it is not the case that any note can harmonize well with the melody note. Some notes will sound dissonant when played together and still other notes may not be in the harmony voice at all, since harmony voices may have specific note ranges. The second analogy is that both natural languages and musical voices have a concept of ``fluency'', the idea that only certain strings of tokens (i.e. words or notes) are sensible. For example, the statement ``colorless green ideas sleep furiously'' contains all English words but is unlikely to be understood by an English speaker since that string of words is meaningless based on the semantic rules of the language. Similarly, a random sequence of notes may not sound sensible in the context of its harmony voice, if the notes are recognized as music at all. Since machine translation techniques can produce novel natural language utterances based on the properties of word translations and fluency, it follows that novel musical parts can be generated with the same techniques.
 
 \subsection{System Design Overview}
 
@@ -148,8 +148,8 @@ To interact with music data, a third-party software called Music21\cite{Cuthbert
       \begin{tabular}{| l | r | r | r | r | r |}
       \hline
        \  & Songs & S. Notes & A. Notes & T. Notes & B. Notes \\ \hline
-       Total &  351 & 21062 & 25255 & 25691 & 25867 \\ \hline
-       Major &  185 & 11371 & 13518 & 13647 & 13846 \\ \hline
+       Total &  351 & 21062 & 25255 & 25691 & 25867 \\ 
+       Major &  185 & 11371 & 13518 & 13647 & 13846 \\ 
        Minor & 166 & 9691 & 11737 & 12044 & 12021  \\ \hline
       \end{tabular}
   \end{center}
@@ -197,7 +197,7 @@ and determing, for each 2-note melody phrase, the phrase of notes $(h_{j} \ldots
 	\caption{Two phrase events are boxed. The original harmony part is displayed along with edited notes that line up with their corresponding melody phrase.}
 \end{figure} 
 
-LaPlace smoothing, also known as additive smoothing, is incorporated into the language model to avoid any events having zero probability. Specifically, for some smoothing constant $\alpha$, the language ngram probabilities are given by: \\
+Laplace smoothing, also known as additive smoothing, is incorporated into the language model to avoid any events having zero probability. Specifically, for some smoothing constant $\alpha$, the language ngram probabilities are given by: \\
 
 $P(pitch(h_{i}) | pitch(h_{i - 1}) ... pitch(h_{i - n})) = $\\
 
@@ -210,15 +210,15 @@ The translation models use a simple smoothing constant, $\alpha = 1e-10$, for wh
 Lastly, the ngram size $n$ and smoothing parameter $\alpha$ have been choosen as $n = 3$ and $\alpha = 1e-10$. Qualitatively, it seems that these values are sufficient, though one could imagine optimizing these parameters to maximize the quality of the system output.
 
 \subsection{Weight Trainer}
-The weights for each model are tuned using the Powell algorithm \cite{Koehn:2010:SMT:1734086} on a set of held out training data, separate from the data used to train the models. If the harmonies to be generated are for major songs, only the major compositions in the training data are used, and vice versa for minor songs. The algorithm tunes the weights to optimize an arbitrary metric; in this case, the weighted log-linear score was optimized. See Table 2 for information on the held out training set. 
+The weights for each model are tuned using the Powell algorithm \cite{Koehn:2010:SMT:1734086} on a set of held out data data, which overlaps with our testing set but is separate from the data used to train the models. If the harmonies to be generated are for major songs, only the major compositions in the training data are used, and vice versa for minor songs. The algorithm tunes the weights to optimize an arbitrary metric; in this case, the weighted log-linear score was optimized. See Table 2 for information on the held out optimization set. 
 
 \begin{table}[h]
   \begin{center}
       \begin{tabular}{| l | r | r | r | r | r |}
       \hline
        \  & Songs & S. Notes & A. Notes & T. Notes & B. Notes \\ \hline
-       Total &  20 & 1178 & 1392 & 1413 & 1468 \\ \hline
-       Major &  11 & 658 & 779 & 793 & 822 \\ \hline
+       Total &  20 & 1178 & 1392 & 1413 & 1468 \\ 
+       Major &  11 & 658 & 779 & 793 & 822 \\ 
        Minor & 9 & 520 & 613 & 620 & 646  \\ \hline
       \end{tabular}
   \end{center}
@@ -226,11 +226,11 @@ The weights for each model are tuned using the Powell algorithm \cite{Koehn:2010
 \end{table}
 
 \subsection {Decoder}
-The goal of the decoder is to find the harmony part $H$ such that $H$ maximizes the weighted log-linear score $S(H | M)$. However, the search space is much too large to enumerate all possible harmony parts in order to determine the best. Assuming the harmony voice spans no more than 4 octaves and that there are 12 notes in an octave, an exhaustive search of all harmony parts for a song with $n$ melody notes would require the inspection of $(12\cdot 4)^{n} = 48^{n}$ harmony parts. For an average length song comprised of $100$ melody notes, the number of possible harmony parts comes out to $48^{100} \approx 1.3e+168$. 
+The goal of the decoder is to find the harmony part $H$ such that $H$ maximizes the weighted log-linear score $S(H | M)$. However, the search space is much too large to enumerate all possible harmony parts in order to determine the best. Assuming the harmony voice spans no more than 4 octaves and that there are 12 notes in an octave, an exhaustive search of all harmony parts for a song with $n$ melody notes would require the inspection of $(12\cdot 4)^{n} = 48^{n}$ harmony parts. For an average length song comprised of $100$ melody notes, the number of possible harmony parts comes out to $48^{100} \approx 1.3\times10^{168}$. 
 
 To shrink the search space, harmony parts are generated four measures at a time. That is, for each four measure chunk, a set of $k$ harmonies are generated. The cross-product of those $k$ harmonies with the stored harmonies corresponding to the previous measures result in a new set of full-song harmony prefixes, out of which the top ranking $j$ are stored for the next iteration.
 
-The harmony generation process for a four-measure chunk is accomplished with a beam-seach decoder. Secifically, at every iteration $t$, the decoder will have a set of hypotheses $S_{t}$ where each hypothesis is a sequence of notes with a duration equivalent to the duration of the melody part up to its $min(2t, l)^{th}$ note, where $l$ is the total number of notes in the melody. The decoder is begun with the set $S_{0}$ containing only the empty hypothesis. 
+The harmony generation process for a four-measure chunk is accomplished with a beam-seach decoder. Specifically, at every iteration $t$, the decoder will have a set of hypotheses $S_{t}$ where each hypothesis is a sequence of notes with a duration equivalent to the duration of the melody part up to its $min(2t, l)^{th}$ note, where $l$ is the total number of notes in the melody. The decoder is begun with the set $S_{0}$ containing only the empty hypothesis. 
 
 For each two-note phrase in the melody, the decoder finds all possible harmony phrases that can sound with that melody phrase, call it $m_{i} = (m_{i}^{0}, m_{i}^{1})$. A portion of the harmony phrase possibilites comes from the corresponding harmony phrases for $m_{i}$ in the phrase translation model. The other possibilities are two-note phrases which have the same rhythm as $m_{i}$, but whose pitches are determined by the note translation model. The cross product of the pitches corresponding to $m_{i}^{0}$ with the pitches corresponding to $m_{i}^{1}$ in the note translation model give the pitches for this portion of the possible harmony phrases. There are two important things to note about generating possible harmonies from the phrase translation model. The first is that since the harmony and melody phrase pairs in the phrase translation model are always of the same duration, the harmony phrases can be added to the hypotheses without having to worry about duration mismatches between the hypotheses and the translated melody prefix. Secondly, the possible harmonies generated from the phrase translation model are the main source of rhythmic variation in the harmony generation algorithm. Those phrases are what prevents the output harmonies from being exactly lined up with the melody, leading to more natural-seeming arrangements.
 
@@ -250,169 +250,113 @@ It stands to reason that constraining the next harmony voice with high-quality s
 
 \section{System Performance}
 \label{sec:sys_perform}
-\subsection{Model Evaluation Criteria}
+\subsection{Perplexity}
 In order to evaluate the quality of the trained models, the perplexity metric, a common metric in natural language processing, is employed. This metric captures how well the algorithm scores arrangements in the test set. Perplexity $PP$ \cite{Koehn:2010:SMT:1734086} is defined over all compositions $c$ in a test set as:\\
 
 $log_2 PP = - \sum_{c} log_2 S(H_{c} | M_{c})$\\
 
-This measure provides a real number metric to evaluate different iterations of the system. Evaluations were done over 2 main test sets. One was a set of 28 major Bach chorales, pulled from the same corpus but not overlapping with the training data. The second was a set of 50 randomly generated compositions, referred to as anti-examples. The purpose of training on these two sets was to give evaluation scores similar to precision and recall. A high perplexity on the anti-examples test set implies good precision, whereas a low perplexity on the Bach test set implies good recall. 
+This measure provides a real number metric to evaluate different iterations of the system. Evaluations were done over 2 main test sets. One was a set of 28 major Bach chorales, pulled from the same corpus but not overlapping with the training data. The second was a set of 50 randomly generated compositions, referred to as anti-examples. The purpose of training on these two sets was to give evaluation scores similar to precision and recall. A high perplexity on the anti-examples test set implies good precision, whereas a low perplexity on the Bach test set implies good recall. 	
 
-\subsection{Major and Minor training data}
-Three systems trained on differing subsets of the training set were evaluated with the perplexity method. 
-The first system used models trained entirely on chorales in the major mode, matching the test set of data. 185 different chorales were used for training. The second system used models trained on both major and minor chorales, and therefore had a larger data set of 351 songs to train on. The third systems used models trained entirely on minor chorales, of which there were 166 songs in our set, to act as a `sanity check' for the evaluation algorithm.
+We decided to use this metrix to compare a set of system iterations, including a system in which just the the note translation model and language model are used with equal weights, another system in which all three models are used but are weighted equally, and lastly the final system with weights tuned by our weight trainer. All three systems were trained on the same 185 major Bach chorales. Tables 3 and 4 show the perplexity results over the Bach and anti-example test sets, respectively. 
 
-\begin{table}[h]
-  \begin{center}
-      \begin{tabular}{| l | l | l | l | l | l |}
-      \hline
-     Melody & Harmony & Major & Minor & Both \\ \hline
-     Soprano & Alto & 27057.10 & 30821.11 & 25543.69 \\ \hline
-     Soprano & Tenor & 27929.47 & 32088.44 & 27359.35 \\ \hline
-     Soprano & Bass & 30157.27 & 34182.05 & 29438.73 \\ \hline
-     Alto & Soprano & 25746.65 & 28068.96 & 23830.84 \\ \hline
-     Alto & Tenor & 29965.21 & 32158.57 & 28588.83 \\ \hline
-     Alto & Bass & 33918.48 & 34980.79 & 31759.61 \\ \hline
-     Tenor & Soprano & 26590.96 & 29394.93 & 25802.08 \\ \hline
-     Tenor & Alto & 30489.94 & 31319.76 & 28608.72 \\ \hline
-     Tenor & Bass & 34761.60 & 35816.94 & 33013.67 \\ \hline
-     Bass & Soprano & 32062.73 & 34130.71 & 30866.27 \\ \hline
-     Bass & Alto & 37547.09 & 37652.04 & 35131.01 \\ \hline
-     Bass & Tenor & 38432.44 & 39039.53 & 36573.76 \\ \hline
-      \end{tabular}
-  \end{center}
-  \caption{The perplexity over the Bach test set of translation between each pair of voices for models trained on compositions in the major mode, the minor mode, and both modes.}
-\end{table}
-
-\begin{table}[h]
-  \begin{center}
-      \begin{tabular}{| l | l | l | l | l | l |}
-      \hline
-     Melody & Harmony & Major & Minor & Both \\ \hline
-     Soprano & Alto & 27057.10 & 30821.11 & 25543.69 \\ \hline
-     Soprano & Tenor & 27929.47 & 32088.44 & 27359.35 \\ \hline
-     Soprano & Bass & 30157.27 & 34182.05 & 29438.73 \\ \hline
-     Alto & Soprano & 25746.65 & 28068.96 & 23830.84 \\ \hline
-     Alto & Tenor & 29965.21 & 32158.57 & 28588.83 \\ \hline
-     Alto & Bass & 33918.48 & 34980.79 & 31759.61 \\ \hline
-     Tenor & Soprano & 26590.96 & 29394.93 & 25802.08 \\ \hline
-     Tenor & Alto & 30489.94 & 31319.76 & 28608.72 \\ \hline
-     Tenor & Bass & 34761.60 & 35816.94 & 33013.67 \\ \hline
-     Bass & Soprano & 32062.73 & 34130.71 & 30866.27 \\ \hline
-     Bass & Alto & 37547.09 & 37652.04 & 35131.01 \\ \hline
-     Bass & Tenor & 38432.44 & 39039.53 & 36573.76 \\ \hline
-      \end{tabular}
-  \end{center}
-  \caption{The perplexity over the anti-examples test set of translation between each pair of voices for models trained on compositions in the major mode, the minor mode, and both modes.}
-\end{table}
-
-**** PRECISION RECALL GRAPH FOR FULL COMPOSITION ****
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-
-\subsection{Using Phrase Model and Tuned Weights}
-Another set of system iterations that were evaluated consisted of a system in which just the the note translation model and language model are used with equal weights, another system in which all three models are used but are weighted equally, and lastly the final system described above. All three systems were trained on the same 185 major Bach chorales. Tables 5 and 6 show the perplexity results over the Bach and anti-example test sets, respectively.  
-
-\begin{table}[h]
-  \begin{center}
-      \begin{tabular}{| l | l | l | l | l | l |}
-      \hline
-     Melody & Harmony & No Phrase Model & Phrase Model, Equal Weights & Phrase Model, Tuned Weights \\ \hline
-     Soprano & Alto & 27057.10 & 30821.11 & 25543.69 \\ \hline
-     Soprano & Tenor & 27929.47 & 32088.44 & 27359.35 \\ \hline
-     Soprano & Bass & 30157.27 & 34182.05 & 29438.73 \\ \hline
-     Alto & Soprano & 25746.65 & 28068.96 & 23830.84 \\ \hline
-     Alto & Tenor & 29965.21 & 32158.57 & 28588.83 \\ \hline
-     Alto & Bass & 33918.48 & 34980.79 & 31759.61 \\ \hline
-     Tenor & Soprano & 26590.96 & 29394.93 & 25802.08 \\ \hline
-     Tenor & Alto & 30489.94 & 31319.76 & 28608.72 \\ \hline
-     Tenor & Bass & 34761.60 & 35816.94 & 33013.67 \\ \hline
-     Bass & Soprano & 32062.73 & 34130.71 & 30866.27 \\ \hline
-     Bass & Alto & 37547.09 & 37652.04 & 35131.01 \\ \hline
-     Bass & Tenor & 38432.44 & 39039.53 & 36573.76 \\ \hline
-      \end{tabular}
-  \end{center}
-  \caption{The perplexity over the Bach test set of translation between each pair of voices for three different iterations of the system.}
-\end{table}
-
-\begin{table}[h]
-  \begin{center}
-      \begin{tabular}{| l | l | l | l | l | l |}
-      \hline
-     Melody & Harmony & No Phrase Model & Phrase Model\\Equal Weights & Phrase Model\\Tuned Weights \\ \hline
-     Soprano & Alto & 27057.10 & 30821.11 & 25543.69 \\ \hline
-     Soprano & Tenor & 27929.47 & 32088.44 & 27359.35 \\ \hline
-     Soprano & Bass & 30157.27 & 34182.05 & 29438.73 \\ \hline
-     Alto & Soprano & 25746.65 & 28068.96 & 23830.84 \\ \hline
-     Alto & Tenor & 29965.21 & 32158.57 & 28588.83 \\ \hline
-     Alto & Bass & 33918.48 & 34980.79 & 31759.61 \\ \hline
-     Tenor & Soprano & 26590.96 & 29394.93 & 25802.08 \\ \hline
-     Tenor & Alto & 30489.94 & 31319.76 & 28608.72 \\ \hline
-     Tenor & Bass & 34761.60 & 35816.94 & 33013.67 \\ \hline
-     Bass & Soprano & 32062.73 & 34130.71 & 30866.27 \\ \hline
-     Bass & Alto & 37547.09 & 37652.04 & 35131.01 \\ \hline
-     Bass & Tenor & 38432.44 & 39039.53 & 36573.76 \\ \hline
-      \end{tabular}
-  \end{center}
-  \caption{The perplexity over the anti-examples training set of translation between each pair of voices for three different iterations of the system.}
-\end{table}
-
-****PRECISION RECALL GRAPH FOR FULL COMPOSITION****
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-\\
-
-\subsection{Qualitative evaluation}
-In Figure 1, we have the last two measures of one of the generated compositions from the most recent iteration of our algorithm. The Soprano part was given, and the rest of the voices were generated, with the Bass generated first, then Alto, then Tenor, as this seemed subjectively to produce the best result. The major language and translation models were used for the same reason. Each note will be referred to by the first letter of its voice, followed by the index of the note in the voice (e.g. S3, T5). As is conventional, the Soprano and Alto parts are written in treble clef, while the Tenor and Bass parts are written in bass clef.
-
-\subsubsection{Motion}
-
-In this example, we have several instances of contrary motion. Contrary motion occurs when the notes in two voices move in opposite directions, and is generally regarded as ideal in counterpoint. In our example, we can see this occuring in S1-S2 and T1-T2, in A2-A3 and B2-B3, and in several other places.
-
-We can also see examples of oblique motion, in which one voice moves while the other stays the same. This is regarded as good, although not as good as contrary motion. We see examples of this in S2-S3 and A2-A3, in A4-A5 and T4-T5, and in a few other places.\\
-Finally, we have some examples of similar motion, which is when notes move in the same direction, and parallel motion, which is similar motion where the notes move exactly the same distance. Parallel motion is considered the worst kind of motion, with similar motion being slightly better. Some amount of similar motion cannot be avoided in compositions with more than three parts. However, we have examples of parallel motion betwween S3-S4 and A3-A4 and T3-T4, which is not ideal. This suggests that improvements could be made to our algorithm to pay closer attention to motion in order to avoid these outputs.
-
-\subsubsection{Harmonies}
-The chords comprised of each of the voices in this example actually make the chords C (1), G (2), Dm7 (3), G (4), and C (5). This is interesting because there was no part of the algorithm deciding what chord to generate at each step, only the individual notes in relation to each other. Regardless, it created this set of chords, which is a reasonable chord progression to find in a piece of music similar to the data we trained on. Additionally, the last three chords comprise a ii-V-I (two-five-one) cadence, which is a very common way to end compositions.
-
-
+As shown in Table 3, each of our successive iterations of MelTS received better perplexity scores. The largest jump occured between the system with tuned
+weights versus the system without tuned weights, where most part combinations saw a jump of about a factor of a little over 4. We also see between Table 3 and Table 4 that the perplexity on the anti-examples is consistently much worse than the perplexity over the Bach chorales. Additionally, the new iterations of MelTS do not have as significant of an improvement in perplexity on the anti-examples as they do on our gold standard, with the greatest difference being approximately a factor of 2 between the equal and tuned weight systems. This difference is shown for the example of Soprano Alto perplexity (which is similar to other parts) in Figure 3, where the perplexity for Bach drops faster than the perplexity for the anti-examples.
 
 \begin{figure}
-  \includegraphics[scale=0.8]{measures}
-  \caption{The last 2 measures of a generated composition.}
+  \includegraphics[scale=0.5]{soprano_alto_perplexity}
+  \caption{Soprano Alto perplexity on all iterations of MelTS on a log scale.}
 \end{figure}
 
 
+\begin{table*}[t]
+      \begin{tabular}{| l | l | l | l | l | l |}
+      \hline
+     Melody & Harmony & No Phrase Model & Equal Weights & Tuned Weights \\ \hline
+     Soprano & Alto & 16712.74 & 12354.59 & 3089.53 \\ 
+     Soprano & Tenor & 17104.18 & 12606.58 & 3201.42 \\ 
+     Soprano & Bass & 17687.95 & 13040.16 & 3278.90 \\ 
+     Alto & Soprano & 14721.54 & 11191.03 & 3460.65 \\ 
+     Alto & Tenor & 16959.99 & 12656.07 & 3611.73 \\ 
+     Alto & Bass & 17671.52 & 13184.49 & 3726.39 \\ 
+     Tenor & Soprano & 14839.30 & 11330.14 & 3566.44 \\ 
+     Tenor & Alto & 16695.40 & 12548.50 & 3685.59 \\ 
+     Tenor & Bass & 17625.60 & 13213.62 & 3784.02 \\ 
+     Bass & Soprano & 14952.31 & 11431.83 & 3690.14 \\ 
+     Bass & Alto & 16908.14 & 12741.94 & 3882.94 \\ 
+     Bass & Tenor & 17171.15 & 12911.45 & 3818.40 \\ \hline
+      \end{tabular}
+  \caption{The perplexity over the Bach test set of translation between each pair of voices for three different iterations of the system.}
+\end{table*}
+
+\begin{table*}[t]
+      \begin{tabular}{| l | l | l | l | l | l |}
+      \hline
+     Melody & Harmony & No Phrase Model & Equal Weights & Tuned Weights \\ \hline
+     Soprano & Alto & 61101.80 & 44923.42 & 19134.74 \\ 
+     Soprano & Tenor & 61703.21 & 45324.36 & 19080.18 \\ 
+     Soprano & Bass & 62057.16 & 45560.33 & 18891.65 \\ 
+     Alto & Soprano & 60914.25 & 44826.01 & 19256.47 \\ 
+     Alto & Tenor & 61776.83 & 45401.07 & 19177.60 \\ 
+     Alto & Bass & 61968.08 & 45528.57 & 18906.19 \\ 
+     Tenor & Soprano & 60781.91 & 44795.90 & 19315.09 \\ 
+     Tenor & Alto & 61047.42 & 44972.91 & 19292.98 \\ 
+     Tenor & Bass & 62122.35 & 45689.53 & 19110.80 \\ 
+     Bass & Soprano & 60332.09 & 44587.48 & 19284.29 \\ 
+     Bass & Alto & 60478.43 & 44685.04 & 19201.49 \\ 
+     Bass & Tenor & 61294.38 & 45229.00 & 19256.21 \\ \hline
+        \end{tabular}
+  \caption{The perplexity over the anti-examples training set of translation between each pair of voices for three different iterations of the system.}
+\end{table*}
+
+
+\subsection{Music Theory Evaluation}
+
+In addition to evaluating the model, it is desirable to directly evaluate the output of the system, as this allows us to compare our compositions directly to other compositions. This opens us up to compare ourselves to other systems as well as human compositions. Automatic music evaluation in general is a difficult task, however, so we decided to restrict our problem to the system trained on Bach. Within this genre, we can use the assumption that our compositions should follow a set of music theory rules, as these were the rules Bach adhered to when composing. We can evaluate the output of our system based on how many times they broke these rules.
+\subsubsection{Events Captured}
+In order to evaluate our system, we relied on Music21's Theory Analyzer module \cite{Cuthbert_music21:a}, which was designed to assist music educators in grading compositions similar to ours. We used this module to find instances of three different kinds of events in each composition. The first is a parallel fifth, which is defined by two parts moving from an interval of a perfect fifth (seven half-steps away) to another interval of a perfect fifth. The next event is an improper dissonant interval, which is defined in the documentation as ``dissonant intervals that are not passing tones or don't resolve correctly.'' The last event we capture is an improper resolution, which ``checks whether the voice-leading quartet resolves correctly according to standard counterpoint rules.'' We count up each time these events occur and give an average number of events per measure for a given composition. 
+
+\subsubsection{RESULTS}
+
+results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results results 
+
+\subsection{Human Evaluation}
+In Machine Translation domains, human evaluation is seen as the ideal metric, and other metrics are designed in order to correlate well with human judgement. Therefore, we wanted incorporate human evaluation in order to ensure that the iterations of MelTS were making an improvement, and that the output of MelTS was improving on other systems.
+\subsubsection{Experimental Setup}
+In order to evaluate MelTS, we created a task on Amazon Mechanical Turk, an online portal where researchers can submit tasks for humans and workers can complete them in exchange for small amounts of money. We took the output of four systems --- our note based, equally weighted, and optimally weighted systems described before, and UAMP \cite{UAMP} --- and asked workers to rate by how similar they sounded to a Bach gold standard, allowing for ties. The output of each system harmonized the same melody as that of the Bach reference. We did this for 17 small Bach chorale excerpts, each about 10 seconds in length. We also included attention checks, in which we asked workers to rate certain entries as ``Best'' or ``Worst,'' and used the results of these attention checks to weed out workers who were clicking randomly. Each individual chunk was rated multiple times in order to ensure consistency, giving a total of 410 tasks. Figure 4 shows the question portion of one of our tasks - each task included two questions and a description.
+
+\begin{figure}
+\includegraphics[scale=0.3]{mturk_task}
+\caption{Question portion of an example Mechanical Turk task. Each task had two questions like these as well as a description of how to answer the questions.}
+\end{figure}
+
+\subsubsection{Results}
+We took all of the rankings provided by workers and interpreted them as pairwise rankings. For example, if a worker rated systems $A$, $B$, and $C$ in that order, then that would be interpreted as $A>B, A>C,$ and $B>C$. Since we allowed for ties, it could also look like $A>B, A>C$ and $B=C$. 
+
+Figure 5 shows the results of the Mechanical Turk task. Specifically, it gives the percentage of workers that voted our latest model with optimized weights as better, equal to, and worse than the other three systems (as compared to the Bach reference). The latest version of MelTS was rated better than U-AMP\cite{UAMP} on approximately 55\% of tasks that compared the two, the largest difference in votes by a large margin. It was rated as equal in about 23\% of these tasks, and worse by the remaining 22\%. In fact, even the other two iterations of MelTS, one with unweighted features and the other with no phrase based model, were both rated better than U-AMP by a significant amount.
+
+In addition, the different iterations of MelTS were evaluated to be an increase in quality over the last, although not by as wide of a margin as the one between U-AMP and the final iteration of MelTS. As is shown in Figure 5, the current version of MelTS was rated as better than the previous versions more often than it was rated worse or equal. Additionally, when comparing the the second iteration of MelTS to the first, humans rated the second version better than the first more often than it was rated equal or worse. Therefore, all successive iterations of MelTS were justified by human evaluation.
+
+\begin{figure}
+\includegraphics[scale=0.4]{mturk_results}
+\caption{Results of our Mechincal Turk Task - last iteration of MelTS versus all other systems.}
+\end{figure}
+\label{sec:system_performance}
+
+
+\section{Ethics}
+As with most artificial intelligence applications, an obvious ethical concern with this system is its potential impact on people whose activities it attempts to mimic. If MelTS produced compositions with such high quality that they were competitive with the compositions of modern professional composers, the system may threaten the livelihoods of composers and musicians. However, the authors believe that such a high level of output quality is so far in the future that this hypothetical situation could not be considered a legitimate concern.
+
+If MelTS were to be widely used as an aid to musicians, there would be some foreseeable legal issues regarding ownership of the compositions. For example, would the composers of the training data have a right to the output? Would the output belong to the composer of the input harmony? To the creators of MelTS? Since music is generally considered intellectual property, it is clear that ownership of the output would need to be delineated to all users and composers of training data, but what the delineation might be is not immediately obvious.
+\label{sec:ethics}
 
 \section{Remaining Work}
-\subsection{Improvements to evaluation}
-In addition to implementing the precision metric as described in the section before, some evaluation of the final product should be implemented, instead of just measuring the models in isolation. There are several ways which this could to be done. First, it may be beneficial to implement a type of theory based metric. The outputted composition could be automatically checked for parallel fifths, dissonant intervals, and other objective measures, and have a score returned based on the number of such mistakes it finds. Additionally, positive elements could be incorporated, where the composition would be checked for contrasting motion, consonant intervals, and either output a separate score or combine it with the negative score. Additionally, some sort of human evaluation could be incorporated, perhaps with experts ranking outputs from different iterations of the algorithm.
-\subsection{Improvements to the models}
-There are several ways in which our models could be altered or improved in the future. First, the training set could be altered. One interesting way in which the training set could be altered would be to try training on different genres of music, instead of just chorales by Bach. For example, there is no obvious reason why this algorithm would not generalize to other forms of music, including not only classical but even other genres with multiple harmonizing parts, such as barbershop and even pop and rock vocals. Secondly, we could create much more general models by training on a wider array of samples, perhaps from a variety of different genres. This more general model could then be used in conjunction with the more specific models, so that when the context is not found in the more specific model, the algorithm can fall back on the general model.
+A natural next step for MelTS would be to release the system to the public, preferably as a web application that would allow users to generate harmonies based on pre-computed models. Musicians could use the tool to experiment with harmonization ideas by exploring the way different genres of music would harmonize their melodies. Additionally, feedback from real users of the application would allow for further improvements to the system. 
 
-One other alteration that could be made would be to make a phrase-based translation model, instead of a translation model between single notes. This technique is used frequently in machine translation in order to ensure that the meaning of phrases within a sentence are not lost. For example, instead of translating each word of ``s'il vous pla\^{i}t'' independently, a phrase-based model would translate the whole phrase into the corresponding English phrase ``please''. This idea generalizes well to harmonizing a melody, as there are often sequences of notes that harmonize well into other sequences of notes, which might not be captured by just the single note translation model with the language model. However, this would introduce more sparsity into our data, as there would be more contexts to learn probabilities for, and so a meaningful phrased based model might be difficult to achieve without more data.
+In order to publish a viable a web app, the generation algorithm would need to be optimized for time efficiency. Minimal work has been done to systematically identify bottlenecks in the algorithm, although parallelization appears to be a clear way of speeding up. For example, generating all remaining parts based on the previously generated parts and extending harmony hypotheses during decoding can all be done in parallel.
 
-In addition to these alterations, more information could be added to each model. A clear example of this would be rhythm information. So far, our algorithm does not take rhythmic variation into account at all. Rhythmic information could be added to the translation model in order to decide what rhythms to generate for the harmony based on the rhythms in the melody. This would probably be fairly difficult to train and decode, as the rhythms have to line up exactly or invalid measures with too many or too few beats may be produced. However, this should still be possible, and would add significantly to the quality of the output if done correctly.
+Another future goal is to train more models in different styles of music. Potential styles would be marching band arrangements, orchestral scores, and gospel music. With some creativity in building the models, MelTS could even be used to generate chord accompaniment for pop songs.
+
+As for improvements to the system itself, it would be interesting to investigate adding more features to the weighted log-linear score. For example, the chords for a beat could be predicted and incorporated into the score through a feature that captures whether or not the harmonized notes occur in one of the top predicted chords. To maintain a legal range of pitches within parts, a feature representing a note's distance from the center of the pitch range for a given part could also be incorporated.
 \label{sec:remaining_work}
 
 
