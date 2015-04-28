@@ -1,13 +1,13 @@
 # Fdb version 3
-["bibtex progress_report"] 1428814984 "progress_report.aux" "progress_report.bbl" "progress_report" 1428815441
+["bibtex progress_report"] 1430197689 "progress_report.aux" "progress_report.bbl" "progress_report" 1430197736
   "/usr/local/texlive/2013/texmf-dist/bibtex/bst/base/plain.bst" 1292289607 20613 bd3fbfa9f64872b81ac57a0dd2ed855f ""
-  "progress_report.aux" 1428815440 5313 11629a48421919ed8e41a0e5e90f4ba5 ""
+  "progress_report.aux" 1430197735 5221 c965ae40d840749daf8c616b5220e211 ""
   "progress_report.bcf" 0 -1 0 ""
   "progress_report.bib" 1416852909 4451 43ffe621c4058e2e8afdb2149c966bf4 ""
   (generated)
   "progress_report.blg"
   "progress_report.bbl"
-["pdflatex"] 1428815438 "progress_report.tex" "progress_report.pdf" "progress_report" 1428815441
+["pdflatex"] 1430197733 "progress_report.tex" "progress_report.pdf" "progress_report" 1430197736
   "/usr/local/texlive/2013/texmf-dist/tex/context/base/supp-pdf.mkii" 1337017135 71627 94eb9990bed73c364d7f53f960cc8c5b ""
   "/usr/local/texlive/2013/texmf-dist/tex/generic/oberdiek/etexcmds.sty" 1335995445 7612 c47308d923ec19888707b0f1792b326a ""
   "/usr/local/texlive/2013/texmf-dist/tex/generic/oberdiek/ifluatex.sty" 1303254447 7324 11d14f318d865f420e692d4e6c9c18c3 ""
@@ -46,12 +46,12 @@
   "/usr/local/texlive/2013/texmf-dist/tex/latex/pdftex-def/pdftex.def" 1306616590 55368 3c8a0d99822330f2dfabc0dfb09ce897 ""
   "/usr/local/texlive/2013/texmf-dist/tex/latex/url/url.sty" 1264379145 21932 e3a9cf32ee9b853b42be14c2f25b873c ""
   "measures.png" 1418314051 45425 56bec4b5771c36fc2a7df9176158783c ""
-  "phrase_examples.png" 1428790652 450850 dbdb87dcb002b65d30a8a737bfa240eb ""
-  "progress_report.aux" 1428815440 5313 11629a48421919ed8e41a0e5e90f4ba5 ""
-  "progress_report.bbl" 1428814985 2760 6d6e947614df1cd740ec516293492029 "bibtex progress_report"
-  "progress_report.tex" 1428815438 45080 9ec3b6a96442a7c8461d1b9a31aee4f9 ""
+  "phrase_examples.png" 1428815602 450850 dbdb87dcb002b65d30a8a737bfa240eb ""
+  "progress_report.aux" 1430197735 5221 c965ae40d840749daf8c616b5220e211 ""
+  "progress_report.bbl" 1430197689 2760 6d6e947614df1cd740ec516293492029 "bibtex progress_report"
+  "progress_report.tex" 1430197733 44474 e8d3445c1a1e04a0c043c2f7dc502fb9 ""
   "sig-alternate.cls" 1376969011 58016 671190e929fd2b32b46dd0fe92041a8b ""
-  "system_design.png" 1428702973 40095 57137970051505735a8bc45d029d58b3 ""
+  "system_design.png" 1428815602 40095 57137970051505735a8bc45d029d58b3 ""
   (generated)
   "progress_report.log"
   "progress_report.pdf"
