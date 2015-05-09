@@ -112,7 +112,7 @@ def transpose(stream, newKey):
             transpose_helper(stream, currKeySignature, start, i - 1)
             start = i
             currKeySignature = t.keySignature
-    transpose_helper(stream, currKeySignature, start, len(stream.parts[0].getElementsByClass(['Measure'])))
+    transpose_helper(stream, newKey, currKeySignature, start, len(stream.parts[0].getElementsByClass(['Measure'])))
 
 def get_harmony_notes(melodyNote, harmonyStream):
     melody_offset = melodyNote.offset
