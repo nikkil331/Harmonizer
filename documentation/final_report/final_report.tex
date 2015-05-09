@@ -126,7 +126,7 @@ A learning algorithm is used to determine the values of $L(H)$, $N(M | H)$, and 
 Given a melody part $M$, the goal is to find some harmony part $H$ that maximizes the score $S(H | M)$.
 A decoder utilizing  the language and tranlsation models is employed to find the harmony part in the search space that maximizes the weighted log-linear score for the given melody part. Figure 1 shows a graphical overview of the model just described.
 \begin{figure}
-\includegraphics[scale=0.3]{system_design.png}
+\includegraphics[scale=0.3]{images/system_design.png}
 \caption{Overview of System Design}
 \end{figure}
 
@@ -197,7 +197,7 @@ The counts for the events $(m_{i} \wedge m_{i+1}) \wedge (h_{j} \wedge \ldots \w
 and determing, for each 2-note melody phrase, the phrase of notes $(h_{j} \ldots h_{j + k})$ that are playing simultaneously in the harmony part. Since the phrase translation model takes timing information into account, the training algorithm insures that the melody and harmony phrases have the same duration. If the first note in the harmony phrase begins sounding before the first note in the melody phrase, its duration in the model is shortened so that it only sounds when the first melody phrase note sounds. Similarly, if the last note in the harmony phrase finishes after the last note in the melody phrase, its duration in the model is shortened so that if finishes at the same time as last note in the melody phrase. For example, take the melody phrase \texttt{[C4:1.0 E4:1.0]} and the harmony phrase \texttt{[E4:1.0 C4:0.5 C4:0.25 G4:1.0]} which starts 0.5 of a quarter-length before the melody phrase. The corresponding harmony phrase event will be \texttt{[E4:0.5 C4:0.5 C4:0.25 G4:0.75]}. See Figure 1 for a pictoral explanation of phrase alignment.
 
 \begin{figure}
-	\includegraphics[scale=0.08]{./phrase_examples.png}
+	\includegraphics[scale=0.08]{images/phrase_examples.png}
 	\caption{Two phrase events are boxed. The original harmony part is displayed along with edited notes that line up with their corresponding melody phrase.}
 \end{figure} 
 
@@ -266,7 +266,7 @@ This metric is used to compare a set of system iterations, including a system in
 As shown in Table 3, each of the successive iterations of MelTS received better perplexity scores. The largest jump occured between the system with tuned weights versus the system without tuned weights, where most part combinations saw a jump of about a factor of a little over 4. In Table 3 and Table 4, it can also be seen that the perplexity of the anti-examples is consistently worse than the perplexity over the Bach chorales, although not by a significant amount until the final iteration. As seen in Figure 3 for the Soprano-Alto perplexity, the perplexity drops much faster for the gold standard Bach chorales than it does for the random harmonizations as a result of the last iteration.  
 
 \begin{figure}
-  \includegraphics[scale=0.5]{soprano_alto_perplexity}
+  \includegraphics[scale=0.5]{images/soprano_alto_perplexity}
   \caption{Soprano Alto perplexity on all iterations of MelTS on a log scale.}
 \end{figure}
 
@@ -338,7 +338,7 @@ In Machine Translation domains, human evaluation is seen as the ideal metric, an
 In order to collect human evaluations of MelTS, Amazon Mechanical Turk, sometimes refered to as MTurk, was used. MTurk is an online portal where researchers can submit tasks for humans, and workers can complete the tasks in exchange for small amounts of money. Workers were asked to rate the outputs of four systems --- the note based, equally weighted, and optimally weighted systems described before, and U-AMP \cite{UAMP} --- by how similar they sounded to a Bach gold standard, allowing for ties. The output of each system harmonized the same melody as that of the Bach reference. Seventeen small Bach chorale excerpts were used in total, each about 10 seconds in length. Attention checks were also included in which the workers were asked to rate certain entries as ``Best'' or ``Worst.'' The results of these attention checks identified workers who were clicking more or less randomly. Each individual chunk was rated multiple times in order to ensure consistency, giving a total of 410 tasks. Figure 4 shows the question portion of one of the tasks - each task included two questions and a description.
 
 \begin{figure}
-\includegraphics[scale=0.3]{mturk_task}
+\includegraphics[scale=0.3]{images/mturk_task}
 \caption{Question portion of an example Mechanical Turk task. Each task had two questions like these as well as a description of how to answer the questions.}
 \end{figure}
 
@@ -350,7 +350,7 @@ Figure 5 shows the results of the Mechanical Turk tasks. Specifically, it gives 
 In addition, the different iterations of MelTS were evaluated to be an increase in quality over the last, although not by as wide of a margin as the one between U-AMP and the final iteration of MelTS. As is shown in Figure 5, the current version of MelTS was rated as better than the previous versions more often than it was rated worse or equal. The second iteration of MelTS was also rated better than the first iteration more often than it was rated equal or worse. Therefore, all successive iterations of MelTS were justified by human evaluation.
 
 \begin{figure}
-\includegraphics[scale=0.4]{mturk_results}
+\includegraphics[scale=0.4]{images/mturk_results.png}
 \caption{Results of Mechincal Turk Tasks - last iteration of MelTS versus all other systems.}
 \end{figure}
 \label{sec:system_performance}
