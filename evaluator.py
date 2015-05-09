@@ -99,7 +99,9 @@ class Evaluator(object):
     def evaluate_combined(self, tm, lm, phrase_weight, note_weight, lm_weight):
         phrase_score, notes_score = self.evaluate_translation_model(tm)
         lm_score = self.evaluate_language_model(lm)
-        return phrase_weight * phrase_score + note_weight * notes_score + lm_weight * lm_score
+        total_score = phrase_weight * phrase_score + note_weight * notes_score + lm_weight * lm_score
+        normalized_score = total_score/sum([len(s.parts[0].getElementsByClass("Measure")) for s in self.testSongs])
+        return normalized_score
 
 
 def get_bach_test_songs():
