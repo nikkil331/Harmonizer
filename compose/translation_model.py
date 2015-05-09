@@ -1,5 +1,5 @@
 from itertools import *
-
+import math
 from music_utils import *
 
 
@@ -168,12 +168,3 @@ class TranslationModel(object):
                     output_line = ''.join([str(melody_phrase), ' ||| ', str(harmony_phrase), ' ||| ', \
                                            str(model[melody_phrase][harmony_phrase]), '\n'])
                 f.write(output_line)
-
-
-def main():
-    tm = TranslationModel("Bass", "Soprano", note_path="data/bass_translation_model_major.txt")
-    print tm.get_harmonies("C5")
-
-
-if __name__ == "__main__":
-    main()

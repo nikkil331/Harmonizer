@@ -1,5 +1,5 @@
 from music_utils import *
-
+import math
 
 class LanguageModel(object):
     def __init__(self, part, path=None):
@@ -67,12 +67,3 @@ class LanguageModel(object):
                 output_line = ''.join([str(context_str), ' ||| ', str(note), ' ||| ', \
                                        str(self._lm[context][note]), '\n'])
                 f.write(output_line)
-
-
-def main():
-    lm = LanguageModel("Bass", path="data/bass_language_model_major.txt")
-    print lm.get_notes_for_context(('G3', 'C4', 'R'))
-
-
-if __name__ == "__main__":
-    main()

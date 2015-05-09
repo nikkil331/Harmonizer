@@ -66,8 +66,9 @@ class Decoder(object):
             if phrase:
                 (phrase_prob_1, note_prob_1) = self._tms[part_idx].get_probability(phrase, h_phrase)
                 if prev_note:
-                    (phrase_prob_2, _) = self._tms[part_idx].get_probability((prev_note, phrase[0]),
-                                                                                   (curr_hyp.notes[-1], h_phrase[0]))
+                    (phrase_prob_2, _) = self._tms[part_idx].get_probability((get_note_rep(prev_note),
+                                                                             phrase[0]),
+                                                                             (curr_hyp.notes[-1], h_phrase[0]))
                 else:
                     phrase_prob_2 = 0
                 new_tm_phrase_logprob += phrase_prob_1 + phrase_prob_2
@@ -180,9 +181,9 @@ class Decoder(object):
             yield [m[i:i + end_idx] for m in measures]
 
     def decode(self, n_best_hyps):
-        # bar = progressbar.ProgressBar(maxval=self._parts[0][1].duration.quarterLength, \
-        #                              widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
-        # bar.update(0)
+        bar = progressbar.ProgressBar(maxval=self._parts[0][1].duration.quarterLength, \
+                                      widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
+        bar.update(0)
         best_hyps_so_far = [hypothesis((), 0.0, (), 0, 0.0, 0.0, 0.0)]
         for (mid, measure_pairs) in enumerate(self._get_measure_pairs()):
             best_hyps_continuation = self._decodeMeasurePair(measure_pairs, n_best_hyps)
@@ -202,7 +203,7 @@ class Decoder(object):
                                                                 self._tm_notes_weight,
                                                                 self._lm_weight),
                                       reverse=True)
-        #    bar.update(best_hyps_so_far[0].duration)
+            bar.update(best_hyps_so_far[0].duration)
 
         final_hyps = []
         for hyp in best_hyps_so_far:
@@ -221,7 +222,7 @@ class Decoder(object):
                                                       self._tm_notes_weight,
                                                       self._lm_weight),
                             reverse=True)[:n_best_hyps]
-        #bar.finish()
+        bar.finish()
         return best_hyps_so_far[:n_best_hyps]
 
     def hyp_to_stream(self, hyp):
