@@ -1,5 +1,5 @@
 import multiprocessing
-import optparse
+import argparse
 import itertools
 import re
 import sys
@@ -11,14 +11,18 @@ from music_utils import *
 
 
 class TranslationModelGenerator(object):
-    def __init__(self, mode='major', melody_part=0, harmony_part=1, phrase_based=True):
-        self._mode = 'major' if mode == 'major' else 'minor'
+    def __init__(self, training_paths, melody_part=0, harmony_part=1, phrase_based=True):
+        if type(melody_part) == str and melody_part.isdigit():
+            melody_part = int(melody_part)
+        if type(harmony_part) == str and harmony_part.isdigit():
+            melody_part = int(harmony_part)
         self._melody_part = melody_part
         self._harmony_part = harmony_part
-        self._training_paths = []
         self._phrase_based_mode = phrase_based
-        self._training_paths = get_barbershop_data()
         self._tm_counts = None
+
+        f = open(training_paths, "r")
+        self._training_paths = [p.strip() for p in f]
 
     def _update_counts(self, melody, harmony, limits):
         melody_phrase = []
@@ -75,63 +79,77 @@ class TranslationModelGenerator(object):
     def generate_tm(self):
         self._tm_counts = {}
         num_songs = 0
-        num_songs_without_part = 0
+        num_songs_without_harmony_part = 0
+        num_songs_without_melody_part = 0
+        num_songs_without_either_part = 0
         for path in self._training_paths:
             composition = converter.parse(path)
-            limits = {self._melody_part:
-                      (get_min_pitch(composition, int(self._melody_part)),
-                       get_max_pitch(composition, int(self._melody_part))),
-                      self._harmony_part:
-                      (get_min_pitch(composition, int(self._harmony_part)),
-                       get_max_pitch(composition, int(self._harmony_part)))}
-            sys.stderr.write('.')
+            missing_parts = 0
+            
             try:
-                keySig = composition.analyze('key')
-                if keySig.pitchAndMode[1] != self._mode:
-                    sys.stderr.write(str(composition) + '\n')
-                    continue
-                num_songs += 1
-                transpose(composition)
-                melody = composition.parts[int(self._melody_part)]
-                harmony = composition.parts[int(self._harmony_part)]
-                self._update_counts(melody, harmony, limits)
+                melody = composition.parts[self._melody_part]
+            except:
+                num_songs_without_melody_part += 1
+                missing_parts += 1
+            try:
+                harmony = composition.parts[self._harmony_part]
+            except:
+                num_songs_without_harmony_part += 1
+                missing_parts += 1
 
+            if missing_parts == 2:
+                num_songs_without_either_part += 1
 
-            except KeyError, e:
-                num_songs_without_part += 1
-            except ValueError:
-                sys.stderr.write(str(get_barbershop_data()[training_songs.index(composition)]) + "\n")
+            if missing_parts > 0:
+                continue
+
+            limits = {self._melody_part:
+                      (get_min_pitch(composition, self._melody_part),
+                       get_max_pitch(composition, self._melody_part)),
+                      self._harmony_part:
+                      (get_min_pitch(composition, self._harmony_part),
+                       get_max_pitch(composition, self._harmony_part))}
+            sys.stderr.write('.')
+            num_songs += 1
+            transpose(composition, "C")
+            self._update_counts(melody, harmony, limits)
 
         print "Number of songs: {0}".format(num_songs)
-        print "Number of songs without {0} : {1}".format(self._harmony_part, num_songs_without_part)
+        print "Number of songs without {0} : {1}".format(self._harmony_part, num_songs_without_harmony_part)
+        print "Number of songs without {0} : {1}".format(self._melody_part, num_songs_without_melody_part)
+        print "Number of songs without either part: {0}".format(num_songs_without_either_part)
 
         return self._create_tm_from_counts()
 
-print "reading in..."
-training_songs = [converter.parse(path) for path in get_barbershop_data() if "classic_tags" in path]
 
-
-def main():
-    generate_generator(sys.argv[1], sys.argv[2], sys.argv[3])
-
-
-def generate_generator_helper(t):
-    generate_generator(*t)
-
-
-def generate_generator(melody, harmony, mode):
-    print melody, harmony
-    print mode
-    phrase_mode = False
-    if mode == "phrase":
-        phrase_mode = True
-    tm_generator = TranslationModelGenerator(melody_part=melody, harmony_part=harmony, phrase_based=phrase_mode)
+def generate_generator(args):
+    phrase_mode = not args.note_only
+    tm_generator = TranslationModelGenerator(args.training_paths,
+                                            melody_part=args.melody, 
+                                            harmony_part=args.harmony, 
+                                            phrase_based=phrase_mode)
     tm = tm_generator.generate_tm()
     suffix = "rhythm_" if phrase_mode else ""
     tm.write_to_file(tm._tm_phrases,
-                     'Harmonizer/data/barbershop/models/{0}_{1}_translation_model_major_{2}threshold_2_tag.txt'.format(
-                         melody, harmony, suffix), phrase=phrase_mode)
+                     '{0}/{1}_{2}_translation_model_{3}.txt'.format(
+                         args.output_dir, args.melody, args.harmony, suffix), phrase=phrase_mode)
 
+def main():
+    argparser = argparse.ArgumentParser()
+    requiredNamed = argparser.add_argument_group('required named arguments')
+    requiredNamed.add_argument("--melody", dest="melody",
+                                help="Name of the melody part")
+    requiredNamed.add_argument("--harmony", dest="harmony",
+                                help="Name of the harmony part")
+    requiredNamed.add_argument("--training_paths", dest="training_paths",
+                                help="Path to file containing list of songs to train on")
+    requiredNamed.add_argument("--output_dir", dest="output_dir",
+                                help="Directory in which to write the model")
+    argparser.add_argument("--note_only", action='store_true',
+                                help="Don't create the phrase translation model")
+    args = argparser.parse_args()
+
+    generate_generator(args)
 
 if __name__ == "__main__":
     main()

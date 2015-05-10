@@ -3,7 +3,7 @@ import os
 import re
 import sys
 import itertools
-
+import argparse
 from music21 import *
 
 from language_model import LanguageModel
@@ -11,14 +11,17 @@ from music_utils import *
 
 
 class LanguageModelGenerator(object):
-    def __init__(self, ngram_size=4, window_size=4, mode='major', part=1, training_composers=['bach', 'handel']):
+    def __init__(self, ngram_size=3, window_size=3, part=1, training_paths=None):
         self._ngram_size = ngram_size
         self._window_size = window_size
-        self._mode = 'major' if mode == 'major' else 'minor'
+        if type(part) == str and part.isdigit():
+            part = int(part)
         self._part = part
-        # for composer in training_composers:
-        #	self._training_paths += corpus.getComposer(composer)
-        self._training_paths = [p for p in get_barbershop_data() if "classic_tags" in p]
+        if not training_paths:
+            self._training_paths = corpus.getBachChorales()[50:]
+        else:
+            f = open(training_paths, "r")
+            self._training_paths = [p.strip() for p in f]
         self._lm_counts = None
 
     def _update_count(self, sliding_window, note_rep):
@@ -83,17 +86,19 @@ class LanguageModelGenerator(object):
         for path in self._training_paths:
             sys.stderr.write('.')
             composition = converter.parse(path)
-            limits = (get_min_pitch(composition, int(self._part)), get_max_pitch(composition, int(self._part)))
+            
             try:
-                harmony = composition.parts[int(self._part)]
-                keySig = composition.analyze('key')
-                if keySig.pitchAndMode[1] == self._mode:
-                    num_songs += 1
-                    transpose(composition)
-                    self._update_counts(harmony, limits)
-
-            except KeyError, e:
+                harmony = composition.parts[self._part]
+            except:
                 num_songs_without_part += 1
+                continue
+
+            limits = (get_min_pitch(composition, self._part), get_max_pitch(composition, self._part))
+            
+            harmony = composition.parts[self._part]
+            num_songs += 1
+            transpose(composition, "C")
+            self._update_counts(harmony, limits)
 
         print "Number of songs: {0}".format(num_songs)
         print "Number of songs without {0} : {1}".format(self._part, num_songs_without_part)
@@ -119,11 +124,23 @@ class LanguageModelGenerator(object):
 
 
 def main():
-    lm_generator = LanguageModelGenerator(part=sys.argv[1], ngram_size=3, window_size=3)
+    argparser = argparse.ArgumentParser()
+    requiredNamed = argparser.add_argument_group('required named arguments')
+    requiredNamed.add_argument("--part_name", dest="part_name",
+                                help="Name of the part to model")
+    requiredNamed.add_argument("--training_paths", dest="training_paths",
+                                help="Path to file containing list of songs to train on")
+    requiredNamed.add_argument("--output_dir", dest="output_dir",
+                                help="Directory in which to write the model")
+    argparser.add_argument("--ngram_size", dest="ngram_size", default=3,
+                                help="Size of ngrams in the model. Default is 3")
+    args = argparser.parse_args()
+
+    ngram_size = int(args.ngram_size) if type(args.ngram_size) == int or args.ngram_size.isdigit() else 3
+    lm_generator = LanguageModelGenerator(part=args.part_name, ngram_size=ngram_size,
+                                          window_size=ngram_size, training_paths=args.training_paths)
     lm = lm_generator.generate_lm()
-    print lm
-    lm.write_to_file(
-        'Harmonizer/data/barbershop/models/{0}_language_model_major_threshold_2_tag.txt'.format(sys.argv[1]))
+    lm.write_to_file('{0}/{1}_language_model.txt'.format(args.output_dir, args.part_name))
 
 
 if __name__ == "__main__":
