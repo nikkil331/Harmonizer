@@ -254,11 +254,3 @@ def get_min_pitch(song, part):
     p = [min(n) if n.isChord else n for n in p]
     return min(p)
 
-
-def get_barbershop_data():
-    scores = []
-    for filename in os.listdir("data/barbershop_scores/split"):
-        scores.append("data/barbershop_scores/split/{0}".format(filename))
-    return scores
-
-
