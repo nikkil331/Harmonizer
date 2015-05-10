@@ -1,9 +1,14 @@
 import os
-import sys
+import argparse
 from music21 import *
 
-input_directory = sys.argv[1]
-output_directory = sys.argv[2]
+argparser = argparse.ArgumentParser()
+argparser.add_argument("input", help="directory with xml files to be converted")
+argparser.add_argument("output", help="directory to write midi files to")
+args = argparser.parse_args()
+
+input_directory = args.input
+output_directory = args.output
 
 for f in os.listdir(input_directory):
     path = input_directory + "/" + f

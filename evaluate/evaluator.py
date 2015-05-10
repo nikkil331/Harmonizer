@@ -1,5 +1,5 @@
 import os
-import optparse
+import argparse
 from collections import namedtuple
 import sys
 
@@ -28,7 +28,7 @@ class ScoreEvaluator(object):
 
 class PereplexityEvaluator(object):
     def __init__(self, testSongs):
-        self.testSongs = testSongs
+        self.testSongs = [converter.parse(p) for p in testSongs]
         # transpose all songs
         sys.stderr.write('Transposing...')
         for s in self.testSongs:
@@ -84,28 +84,7 @@ class PereplexityEvaluator(object):
         return normalized_score
 
 
-def get_bach_test_songs():
-    test_songs = []
-    for s in corpus.getBachChorales()[:50]:
-        comp = corpus.parse(s)
-        keySig = comp.analyze('key')
-        if keySig.pitchAndMode[1] == 'major':
-            test_songs.append(comp)
-    return test_songs
-
-
-def get_random_test_songs():
-    test_songs = []
-    for f in os.listdir("anti_examples"):
-        song_path = os.path.join("anti_examples", f)
-        if os.path.isfile(song_path):
-            comp = converter.parse(song_path)
-            test_songs.append(comp)
-    return test_songs
-
-
-def getPerplexityScores(directory, lm_suffix, note_suffix, phrase_suffix, weights):
-    test_songs = get_bach_test_songs()
+def getPerplexityScores(directory, test_songs, weights):
     e = PereplexityEvaluator(test_songs)
     existing_parts = ["Soprano", "Alto", "Tenor", "Bass"]
     generated_parts = ["Alto", "Tenor", "Bass"]
@@ -114,11 +93,11 @@ def getPerplexityScores(directory, lm_suffix, note_suffix, phrase_suffix, weight
         for p2 in generated_parts:
             if p1 == p2:
                 continue
-            lm_major = LanguageModel(path="{0}/{1}_{2}".format(directory, p2, lm_suffix), part=p2)
-            tm_major = TranslationModel(phrase_path="{0}/{1}_{2}_{3}".format(directory, p1, p2, 
-                                                                             phrase_suffix),
-                                        note_path="{0}/{1}_{2}_{3}".format(
-                                            directory, p1, p2, note_suffix),
+            lm_major = LanguageModel(path="{0}/{1}_language_model.txt".format(directory, p2), part=p2)
+            tm_major = TranslationModel(phrase_path="{0}/{1}_{2}_translation_model_rhythm.txt"\
+                                        .format(directory, p1, p2),
+                                        note_path="{0}/{1}_{2}_translation_model.txt"\
+                                        .format(directory, p1, p2),
                                         harmony_part=p2, melody_part=p1)
             score = e.evaluate_combined(tm_major, lm_major, weights[0], weights[1], weights[2])
             scores[(p1, p2)] = score
@@ -145,39 +124,35 @@ def getTheoryScores():
     e2.evaluate()
 
 def main():
-    optparser = optparse.OptionParser()
-    optparser.add_option("--mode", dest="mode", default="perplexity", 
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument("test_songs", help="file containing a new-line separated list of song paths")
+    argparser.add_argument("--mode", dest="mode", default="perplexity", 
                     help="Which evaluation type to run: perplexity or theoretical. Default is perplexity")
-    optparser.add_option("--directory", dest="dir", default=".",
+    argparser.add_argument("--directory", dest="dir", default=".",
                     help="Directory where models live. Default is the current directory.")
-    optparser.add_option("--tm_note_suffix", dest="tm_note_suffix", default="translation_model_major.txt",
-                     help="Filename suffix for note translation models")
-    optparser.add_option("--tm_phrase_suffix", dest="tm_phrase_suffix", default="translation_model_major_rhythm.txt",
-                     help="Filename suffix for phrase translation models")
-    optparser.add_option("--lm_suffix", dest="lm_suffix", default="language_model_major.txt",
-                     help="Filename suffix for language models")
-    optparser.add_option("--lm_weight",
+    argparser.add_argument("--lm_weight",
                     dest="lm_weight",
                     default="1", 
                     help="Weight for language model. Default is 1")
-    optparser.add_option("--tm_note_weight", 
+    argparser.add_argument("--tm_note_weight", 
                     dest="tm_note_weight", 
                     default="1", 
                     help="Weight for note translation model model. Default is 1")
-    optparser.add_option("--tm_phrase_weight", 
+    argparser.add_argument("--tm_phrase_weight", 
                     dest="tm_phrase_weight", 
                     default="1", 
                     help="Weight for phrase translation model model. Default is 1")
-    (opts, _) = optparser.parse_args()
+    args = argparser.parse_args()
 
-    if opts.mode != "perplexity":
+    if args.mode != "perplexity":
         scores = getTheoryScores()
     else:
-        scores = getPerplexityScores(opts.dir, 
-                                    opts.lm_suffix, opts.tm_note_suffix, opts.tm_phrase_suffix,
-                                    (float(opts.tm_phrase_weight), 
-                                     float(opts.tm_note_weight),
-                                     float(opts.lm_weight)))
+        f = open(args.test_songs, "r")
+        test_songs = [p.strip() for p in f]
+        scores = getPerplexityScores(args.dir, test_songs,
+                                    (float(args.tm_phrase_weight), 
+                                     float(args.tm_note_weight),
+                                     float(args.lm_weight)))
         for (k, v) in scores.items():
             print "%s : %f" % (k, v)
 

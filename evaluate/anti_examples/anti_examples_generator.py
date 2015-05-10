@@ -1,5 +1,6 @@
 import os
 import random
+import argparse
 import xml.etree.ElementTree as ET
 from music21 import *
 
@@ -77,23 +78,19 @@ def save_song(song, filename):
     tree = ET.ElementTree(root)
     tree.write(filename)
 
-def get_bach_test_songs():
-    test_songs = []
-    for s in corpus.getBachChorales()[:50]:
-        comp = corpus.parse(s)
-        keySig = comp.analyze('key')
-        if keySig.pitchAndMode[1] == 'major':
-            test_songs.append((s, comp))
-    return test_songs
+argparser = argparse.ArgumentParser()
+argparser.add_argument("melody_paths", help="File containing paths to songs from which to get a melody")
+args = argparser.parse_args()
 
-songs_to_harmonize = get_bach_test_songs()
+f = open(args.melody_paths)
+songs_to_harmonize = [p.strip() for p in f.readlines()]
 
 songs_harmonized = 0
 songs_skipped = 0
-for path, comp in songs_to_harmonize:
+for path in songs_to_harmonize:
+    comp = converter.parse(path)
     song = make_harmony(comp)
     if not song:
-        print path
         songs_skipped += 1
     else:
         songs_harmonized += 1

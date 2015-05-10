@@ -3,8 +3,15 @@ import os
 import itertools
 import random
 import math
+import argparse
 
-mturk_base_dir = "/Users/nicolelimtiaco/Documents/Penn/fa14/cis400/evaluate/mturk/clips"
+argparser = argparse.ArgumentParser()
+argparser.add_argument("output_file", help="path to file in which to write the HIT")
+requiredNamed = argparser.add_argument_group('required named arguments')
+requiredNamed.add_argument("--clips", dest="clips", help="Directory containing mturkclips")
+args = argparser.parse_args()
+
+mturk_base_dir = args.clips
 audio_chunks = [f for f in os.listdir(mturk_base_dir + "/bach/mp3_chunks")]
 systems = [f for f in os.listdir(mturk_base_dir) if os.path.isdir(mturk_base_dir + "/" + f)]
 controls = ["best.mp3", "worst.mp3"]
@@ -15,7 +22,7 @@ def system_and_song_toString(system, song):
 	else:
 		return system + "/" + song
 
-with open(sys.argv[1], "w") as f:
+with open(args.output_file, "w") as f:
 	for j in range(2):
 		for i in range(4):
 			f.write("clip_" +str(j) + "_" + str(i))
@@ -35,8 +42,6 @@ with open(sys.argv[1], "w") as f:
 					others.append("control/" + c)
 					edited_systems_per_hit.append(tuple(others))
 					others.pop(-1)
-			else:
-				print "skipping control"
 		else:
 			edited_systems_per_hit.append(system_set)
 	systems_per_hit = edited_systems_per_hit

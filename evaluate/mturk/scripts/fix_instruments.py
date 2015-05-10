@@ -1,7 +1,12 @@
 from music21 import converter,instrument
 import os
+import argparse
 
-directory = "/Users/nicolelimtiaco/Documents/Penn/fa14/cis400/evaluation/mturk/clips/uamp/harmonized_chunks"
+argparser = argparse.ArgumentParser()
+argparser.add_argument("input", help="directory with midi files whose instruments need to be fixed")
+args = argparser.parse_args()
+
+directory = args.input
 
 for f in os.listdir(directory):
 	s = converter.parse(directory + "/" + f)
