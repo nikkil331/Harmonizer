@@ -1,0 +1,11 @@
+/Library/Python/2.7/site-packages/music21-1.7.1-py2.7.egg/music21/corpus/bach/bwv1.6.mxl
+/Library/Python/2.7/site-packages/music21-1.7.1-py2.7.egg/music21/corpus/bach/bwv104.6.mxl
+/Library/Python/2.7/site-packages/music21-1.7.1-py2.7.egg/music21/corpus/bach/bwv11.6.mxl
+/Library/Python/2.7/site-packages/music21-1.7.1-py2.7.egg/music21/corpus/bach/bwv112.5-sc.mxl
+/Library/Python/2.7/site-packages/music21-1.7.1-py2.7.egg/music21/corpus/bach/bwv112.5.mxl
+/Library/Python/2.7/site-packages/music21-1.7.1-py2.7.egg/music21/corpus/bach/bwv115.6.mxl
+/Library/Python/2.7/site-packages/music21-1.7.1-py2.7.egg/music21/corpus/bach/bwv116.6.mxl
+/Library/Python/2.7/site-packages/music21-1.7.1-py2.7.egg/music21/corpus/bach/bwv117.4.mxl
+/Library/Python/2.7/site-packages/music21-1.7.1-py2.7.egg/music21/corpus/bach/bwv119.9.mxl
+/Library/Python/2.7/site-packages/music21-1.7.1-py2.7.egg/music21/corpus/bach/bwv12.7.mxl
+/Library/Python/2.7/site-packages/music21-1.7.1-py2.7.egg/music21/corpus/bach/bwv120.6.mxl
