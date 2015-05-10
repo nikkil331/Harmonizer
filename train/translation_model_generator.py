@@ -129,9 +129,9 @@ def generate_generator(args):
                                             harmony_part=args.harmony, 
                                             phrase_based=phrase_mode)
     tm = tm_generator.generate_tm()
-    suffix = "rhythm_" if phrase_mode else ""
+    suffix = "_rhythm" if phrase_mode else ""
     tm.write_to_file(tm._tm_phrases,
-                     '{0}/{1}_{2}_translation_model_{3}.txt'.format(
+                     '{0}/{1}_{2}_translation_model{3}.txt'.format(
                          args.output_dir, args.melody, args.harmony, suffix), phrase=phrase_mode)
 
 def main():
