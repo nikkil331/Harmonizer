@@ -16,9 +16,8 @@ class RhythmModelGenerator(object):
         self._window_size = window_size
         self._mode = 'major' if mode == 'major' else 'minor'
         self._part = part
-        # for composer in training_composers:
-        #	self._training_paths += corpus.getComposer(composer)
-        self._training_paths = [p for p in get_barbershop_data() if "classic_tags" in p]
+         for composer in training_composers:
+        	self._training_paths += corpus.getComposer(composer)
         self._lm_counts = None
 
     def _update_count(self, sliding_window, note_rep):
