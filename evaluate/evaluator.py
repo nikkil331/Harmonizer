@@ -79,15 +79,15 @@ class PereplexityEvaluator(object):
     def evaluate_combined(self, tm, lm, phrase_weight, note_weight, lm_weight):
         phrase_score, notes_score = self.evaluate_translation_model(tm)
         lm_score = self.evaluate_language_model(lm)
-        total_score = (phrase_weight*phrase_score) + (note_weight*notes_score) + (lm_weight*lm_score)
-        normalized_score = total_score/sum([len(s.parts[0].getElementsByClass("Measure")) for s in self.testSongs])
-        return normalized_score
+        return (phrase_weight*phrase_score) + (note_weight*notes_score) + (lm_weight*lm_score)
 
 
-def getPerplexityScores(directory, test_songs, weights):
+def getPerplexityScores(directory, test_songs, weights, melody, harmonies):
     e = PereplexityEvaluator(test_songs)
-    existing_parts = ["Soprano", "Alto", "Tenor", "Bass"]
-    generated_parts = ["Alto", "Tenor", "Bass"]
+    existing_parts = [melody] + harmonies
+    generated_parts = harmonies
+    print existing_parts
+    print generated_parts
     scores = {}
     for p1 in existing_parts:
         for p2 in generated_parts:
@@ -130,6 +130,10 @@ def main():
                     help="Which evaluation type to run: perplexity or theoretical. Default is perplexity")
     argparser.add_argument("--directory", dest="dir", default=".",
                     help="Directory where models live. Default is the current directory.")
+    argparser.add_argument("--harmonies", dest="harmonies", default="Alto,Tenor,Bass",
+                            help="Name of harmony parts the system should generate")
+    argparser.add_argument("--melody", dest="melody", default="Soprano",
+                            help="Name of melody part")
     argparser.add_argument("--lm_weight",
                     dest="lm_weight",
                     default="1", 
@@ -152,7 +156,8 @@ def main():
         scores = getPerplexityScores(args.dir, test_songs,
                                     (float(args.tm_phrase_weight), 
                                      float(args.tm_note_weight),
-                                     float(args.lm_weight)))
+                                     float(args.lm_weight)),
+                                     args.melody, args.harmonies.split(","))
         for (k, v) in scores.items():
             print "%s : %f" % (k, v)
 
