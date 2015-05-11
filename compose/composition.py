@@ -66,7 +66,7 @@ def main():
     argparser.add_argument("melody", help="Path to the composition from which to pull the melody line")
     argparser.add_argument("--melody_name", dest="melody_name", default="Soprano",
                     help="Name of melody part")
-    argparser.add_argument("--part_names", dest="part_names", default="Alto,Tenor,Bass", 
+    argparser.add_argument("--harmony_names", dest="harmony_names", default="Alto,Tenor,Bass", 
                     help="Names of parts to generate.")
     argparser.add_argument("--output_file", dest="output", default="output.xml",
                     help="Path to write the composition to")
@@ -77,7 +77,7 @@ def main():
 
     test_song = corpus.parse(args.melody)
     transpose(test_song, "C")
-    parts = args.part_names.split(",")
+    parts = args.harmony_names.split(",")
     c = Composition()
     c.add_part(args.melody_name, test_song.parts[args.melody_name])
     while parts:
