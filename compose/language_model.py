@@ -1,4 +1,3 @@
-from music_utils import *
 import math
 
 class LanguageModel(object):
