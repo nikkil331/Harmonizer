@@ -108,7 +108,7 @@ def main():
   argparser = argparse.ArgumentParser()
   argparser.add_argument("--part_name", required=True, type=str, help="Name of the part to model")
   argparser.add_argument("--training_dir", required=True, type=str,
-                         help="Path to file containing list of songs to train on")
+                         help="Path to directory of songs to train on")
   argparser.add_argument("--output_dir", required=True, type=str, help="Directory in which to write the model")
   argparser.add_argument("--ngram_size", default=3, help="Size of ngrams in the model. Default is 3")
   args = argparser.parse_args()

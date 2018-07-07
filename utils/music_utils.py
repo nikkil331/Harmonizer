@@ -76,14 +76,14 @@ def get_note_rep(note):
   if type(note) == bar.Barline and note.style == 'final':
     return "END"
   elif note.isChord:
-    return (','.join([get_pitch_rep(n) for n in note]) + ':' + str(note.quarterLength)).encode('ascii')
+    return ','.join([get_pitch_rep(n) for n in note]) + ':{0}'.format(float(note.quarterLength))
   elif note.isNote:
-    if note.accidental and (note.accidental.fullName == 'double-flat' or \
-                                  note.accidental.fullName == 'double-sharp'):
+    if note.pitch.accidental and (note.pitch.accidental.fullName == 'double-flat' or
+                                  note.pitch.accidental.fullName == 'double-sharp'):
       note.pitch.getEnharmonic(inPlace=True)
-    return (note.nameWithOctave + ":" + str(note.quarterLength)).encode('ascii')
+    return note.nameWithOctave + ':{0}'.format(float(note.quarterLength))
   else:
-    return ("R:" + str(note.quarterLength)).encode('ascii')
+    return 'R:{0}'.format(float(note.quarterLength))
 
 
 def get_phrase_rep(phrase):
@@ -150,11 +150,11 @@ def get_duration_of_stream(s):
 
 
 def trim_stream(s, begin_offset, end_offset):
+  acceptable_classes = {note.Note, chord.Chord, note.Rest, stream.Measure}
   section = s.getElementsByOffset(begin_offset, offsetEnd=end_offset, \
                                   mustBeginInSpan=False, includeEndBoundary=False, \
-                                  includeElementsThatEndAtStart=False, \
-                                  classList=[note.Note, chord.Chord, note.Rest, stream.Measure])
-  section = copy.deepcopy(section)
+                                  includeElementsThatEndAtStart=False)
+  section = [elem for elem in section if type(elem)in acceptable_classes]
   if len(section) > 0:
     # trim beginning
     if type(section[0]) == stream.Measure and section[0].offset != section[1].offset:
@@ -177,15 +177,13 @@ def trim_stream(s, begin_offset, end_offset):
 
 
 def get_note_pitch_from_rep(n_rep):
+  n_rep = n_rep.decode('utf8') if type(n_rep) == bytes else n_rep
   return n_rep.split(":")[0]
 
 
 def get_note_length_from_rep(n_rep):
-  try:
-    return float(Fraction(n_rep.split(":")[1])) if n_rep != "BAR" and n_rep != "END" else 0
-  except:
-    print(n_rep)
-    exit()
+  n_rep = n_rep.decode('utf8') if type(n_rep) == bytes else n_rep
+  return float(Fraction(n_rep.split(":")[1])) if n_rep != "BAR" and n_rep != "END" else 0
 
 
 def get_phrase_length_from_rep(p_rep):
