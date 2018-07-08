@@ -120,7 +120,7 @@ class TranslationModelGenerator(object):
 
 def generate_generator(args):
   phrase_mode = not args.note_only
-  for melody, harmony in it.combinations(args.part_name, 2):
+  for melody, harmony in it.permutations(args.part_name, 2):
     print("Creating translation model for {0} -> {1}".format(melody, harmony))
     tm_generator = TranslationModelGenerator(args.training_dir,
                                              melody_part=melody,
