@@ -7,10 +7,8 @@ from collections import namedtuple
 
 from music21 import *
 
-from translation_model import TranslationModel
-from language_model import LanguageModel
-from music_utils import *
-import progressbar
+from utils.music_utils import *
+from tqdm import tqdm
 
 
 hypothesis = namedtuple("hypothesis",
@@ -176,59 +174,56 @@ class Decoder(object):
     def _get_measure_pairs(self):
         measures = [part.measures(0, len(self._parts[0][1].getElementsByClass('Measure')), collect=())
                     for (name, part) in self._parts]
-        for i in xrange(0, len(measures[0]), 4):
+        for i in range(0, len(measures[0]), 4):
             end_idx = min(4, len(measures[0]) - i)
             yield [m[i:i + end_idx] for m in measures]
 
     def decode(self, n_best_hyps):
-        bar = progressbar.ProgressBar(maxval=self._parts[0][1].duration.quarterLength, \
-                                      widgets=[progressbar.Bar('=', '[', ']'), ' ', progressbar.Percentage()])
-        bar.update(0)
-        best_hyps_so_far = [hypothesis((), 0.0, (), 0, 0.0, 0.0, 0.0)]
-        for (mid, measure_pairs) in enumerate(self._get_measure_pairs()):
-            best_hyps_continuation = self._decodeMeasurePair(measure_pairs, n_best_hyps)
-            new_best_hyps = []
-            for prefix_hyp in best_hyps_so_far[:n_best_hyps]:
-                for suffix_hyp in best_hyps_continuation:
-                    new_notes = prefix_hyp.notes + suffix_hyp.notes
-                    new_tm_phrase_logprob = prefix_hyp.tm_phrase_logprob + suffix_hyp.tm_phrase_logprob
-                    new_tm_notes_logprob = prefix_hyp.tm_notes_logprob + suffix_hyp.tm_notes_logprob
-                    new_lm_logprob = prefix_hyp.lm_logprob + suffix_hyp.lm_logprob
-                    new_duration = prefix_hyp.duration + suffix_hyp.duration
-                    new_best_hyps.append(
-                        hypothesis(new_notes, new_duration, suffix_hyp.context, suffix_hyp.context_size,
-                                   new_tm_phrase_logprob, new_tm_notes_logprob, new_lm_logprob))
-            best_hyps_so_far = sorted(new_best_hyps,
-                                      key=lambda hyp: get_score(hyp, self._tm_phrase_weight,
-                                                                self._tm_notes_weight,
-                                                                self._lm_weight),
-                                      reverse=True)
-            bar.update(best_hyps_so_far[0].duration)
+        with tqdm(desc='decoding ') as bar:
+          best_hyps_so_far = [hypothesis((), 0.0, (), 0, 0.0, 0.0, 0.0)]
+          for (mid, measure_pairs) in enumerate(self._get_measure_pairs()):
+              best_hyps_continuation = self._decodeMeasurePair(measure_pairs, n_best_hyps)
+              new_best_hyps = []
+              for prefix_hyp in best_hyps_so_far[:n_best_hyps]:
+                  for suffix_hyp in best_hyps_continuation:
+                      new_notes = prefix_hyp.notes + suffix_hyp.notes
+                      new_tm_phrase_logprob = prefix_hyp.tm_phrase_logprob + suffix_hyp.tm_phrase_logprob
+                      new_tm_notes_logprob = prefix_hyp.tm_notes_logprob + suffix_hyp.tm_notes_logprob
+                      new_lm_logprob = prefix_hyp.lm_logprob + suffix_hyp.lm_logprob
+                      new_duration = prefix_hyp.duration + suffix_hyp.duration
+                      new_best_hyps.append(
+                          hypothesis(new_notes, new_duration, suffix_hyp.context, suffix_hyp.context_size,
+                                     new_tm_phrase_logprob, new_tm_notes_logprob, new_lm_logprob))
+              best_hyps_so_far = sorted(new_best_hyps,
+                                        key=lambda hyp: get_score(hyp, self._tm_phrase_weight,
+                                                                  self._tm_notes_weight,
+                                                                  self._lm_weight),
+                                        reverse=True)
+              bar.update(best_hyps_so_far[0].duration)
 
-        final_hyps = []
-        for hyp in best_hyps_so_far:
-            new_beams = self._grow_hyps_in_beam({i: ("END",) for i in range(len(self._parts))}, None,  0, hyp)
-            final_hyps.extend(new_beams)
+          final_hyps = []
+          for hyp in best_hyps_so_far:
+              new_beams = self._grow_hyps_in_beam({i: ("END",) for i in range(len(self._parts))}, None,  0, hyp)
+              final_hyps.extend(new_beams)
 
-        consolidated_final_hyps = []
-        notes_set = set()
-        for h in final_hyps:
-            if tuple(h.notes) not in notes_set:
-                consolidated_final_hyps.append(h)
-                notes_set.add(tuple(h.notes))
+          consolidated_final_hyps = []
+          notes_set = set()
+          for h in final_hyps:
+              if tuple(h.notes) not in notes_set:
+                  consolidated_final_hyps.append(h)
+                  notes_set.add(tuple(h.notes))
 
-        final_hyps = sorted(consolidated_final_hyps,
-                            key=lambda hyp: get_score(hyp, self._tm_phrase_weight,
-                                                      self._tm_notes_weight,
-                                                      self._lm_weight),
-                            reverse=True)[:n_best_hyps]
-        bar.finish()
-        return best_hyps_so_far[:n_best_hyps]
+          final_hyps = sorted(consolidated_final_hyps,
+                              key=lambda hyp: get_score(hyp, self._tm_phrase_weight,
+                                                        self._tm_notes_weight,
+                                                        self._lm_weight),
+                              reverse=True)[:n_best_hyps]
+          return best_hyps_so_far[:n_best_hyps]
 
     def hyp_to_stream(self, hyp):
         notes = [n for n in hyp.notes if n != "BAR" and n != "END"]
         # translate note sequence into music21 stream
-        measure_stream = self._parts[0][1].getElementsByClass('Measure')
+        measure_stream = self._parts[0][1].getElementsByClass(stream.Measure)
         notes_stream = make_stream_from_strings(notes)
 
         return put_notes_in_measures(measure_stream, notes_stream)

@@ -119,7 +119,7 @@ def make_stream_from_strings(notes):
       n = m21.note.Rest(quarterLength=float(duration))
     else:
       if len(note_pitches) > 1:
-        n = m21.chord.Chord([m21.note.Note(p, duration) for p in note_pitches])
+        n = m21.chord.Chord([m21.note.Note(p, quarterLength=float(duration)) for p in note_pitches])
       else:
         n = m21.note.Note(note_pitches[0], quarterLength=float(duration))
     s.append(n)
@@ -216,7 +216,7 @@ def put_notes_in_measures(measure_stream, note_stream):
         new_measure.append(new_note)
 
       new_stream.append(curr_measure)
-      curr_measure_template = curr_measure_template.next()
+      curr_measure_template = measure_stream.next()
       new_measure.offset = curr_measure_template.offset
       curr_measure = new_measure
 

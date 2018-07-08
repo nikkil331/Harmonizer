@@ -156,7 +156,7 @@ class TranslationModel(object):
     if melody_no_bars not in self._tm_phrases:
       translations = single_note_harmonies
     else:
-      translations = self._tm_phrases[melody_no_bars].keys() + single_note_harmonies
+      translations = list(self._tm_phrases[melody_no_bars].keys()) + single_note_harmonies
 
     translations = [self.insert_bars(melody, t) for t in translations if t]
     return translations
