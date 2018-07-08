@@ -151,6 +151,7 @@ def get_duration_of_stream(s):
 
 def trim_stream(s, begin_offset, end_offset):
   acceptable_classes = {note.Note, chord.Chord, note.Rest, stream.Measure}
+
   section = s.getElementsByOffset(begin_offset, offsetEnd=end_offset, \
                                   mustBeginInSpan=False, includeEndBoundary=False, \
                                   includeElementsThatEndAtStart=False)

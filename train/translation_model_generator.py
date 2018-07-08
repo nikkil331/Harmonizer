@@ -23,6 +23,7 @@ class TranslationModelGenerator(object):
   def _update_counts(self, melody, harmony, limits):
     melody_phrase = []
     begin_offset = 0.0
+    flat_harmony = harmony.flat.notesAndRests.stream()
 
     for melody_note in melody.flat.notesAndRests:
       if melody_note.isNote and (melody_note < limits[self._melody_part][0] or
@@ -34,7 +35,7 @@ class TranslationModelGenerator(object):
           # get harmony phrase playing while melody phrase is sounding
           melody_tuple = tuple(melody_phrase)
           end_offset = begin_offset + get_phrase_length_from_rep(melody_tuple)
-          harmony_tuple = get_phrase_rep(trim_stream(harmony.flat.notesAndRests, begin_offset, end_offset))
+          harmony_tuple = get_phrase_rep(trim_stream(flat_harmony, begin_offset, end_offset))
 
           # update counts for this pair of melody and harmony phrases
           if harmony_tuple not in self._tm_counts:
@@ -49,7 +50,7 @@ class TranslationModelGenerator(object):
       else:
         m_rep = get_pitch_rep(melody_note)
         harmony_notes = [(get_pitch_rep(n), n) for n in
-                         harmony.flat.notesAndRests.allPlayingWhileSounding(melody_note)]
+                         flat_harmony.allPlayingWhileSounding(melody_note)]
         for (h_rep, h_note) in harmony_notes:
           if h_note.isNote and (h_note.pitch < limits[self._harmony_part][0] or
                                     h_note.pitch > limits[self._harmony_part][1]):
