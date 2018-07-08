@@ -1,11 +1,11 @@
-import sys
 import os
 import argparse
 
+import music21 as m21
 from tqdm import tqdm
 
 from compose.language_model import LanguageModel
-from utils.music_utils import *
+import utils.music_utils as mutil
 
 
 class LanguageModelGenerator(object):
@@ -16,7 +16,7 @@ class LanguageModelGenerator(object):
       part = int(part)
     self._part = part
     if not training_dir:
-      self._training_paths = corpus.getBachChorales()[50:]
+      self._training_paths = m21.corpus.getComposer('bach', 'xml')[50:]
     else:
       self._training_paths = [os.path.join(training_dir, p) for p in os.listdir(training_dir)]
     self._lm_counts = None
@@ -32,7 +32,7 @@ class LanguageModelGenerator(object):
 
   # doesn't actually skip for now
   def _skip_and_update(self, ngram, note_rep, limits):
-    note_ngram = [note.Note(n) for n in ngram if n != "BAR" and n != "END" and n != "R"]
+    note_ngram = [m21.note.Note(n) for n in ngram if n != "BAR" and n != "END" and n != "R"]
     if note_ngram and min(note_ngram) > limits[0] and max(note_ngram) < limits[1]:
       self._update_count(ngram, note_rep)
 
@@ -40,7 +40,7 @@ class LanguageModelGenerator(object):
     sliding_window = []
     sliding_window_size = 0
     for measure in harmony[1:]:
-      if type(measure) == stream.Measure:
+      if type(measure) == m21.stream.Measure:
         sliding_window.append("BAR")
         while sliding_window_size > self._window_size:
           if sliding_window.pop(0) != "BAR":
@@ -49,7 +49,7 @@ class LanguageModelGenerator(object):
           if not note.isNote:
             note_rep = 'R'
           else:
-            note_rep = get_pitch_rep(note)
+            note_rep = mutil.get_pitch_rep(note)
           self._skip_and_update(tuple(sliding_window), note_rep, limits)
           if not (sliding_window[-1] is 'R' and note_rep is 'R'):
             sliding_window.append(note_rep)
@@ -80,16 +80,16 @@ class LanguageModelGenerator(object):
     num_transpose_fails = 0
 
     for path in tqdm(self._training_paths):
-      composition = converter.parse(path)
+      composition = m21.converter.parse(path)
       part_names = [p.partName for p in composition.parts]
 
       if self._part in part_names:
-        limits = (get_min_pitch(composition, self._part), get_max_pitch(composition, self._part))
+        limits = (mutil.get_min_pitch(composition, self._part), mutil.get_max_pitch(composition, self._part))
         harmony = composition.parts[self._part]
         try:
-          transpose(composition, "C")
+          mutil.transpose(composition, "C")
           self._update_counts(harmony, limits)
-        except analysis.discrete.DiscreteAnalysisException:
+        except m21.analysis.discrete.DiscreteAnalysisException:
           num_transpose_fails += 1
 
       else:

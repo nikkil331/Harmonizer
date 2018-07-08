@@ -1,7 +1,7 @@
 import argparse
 import os
 
-from music21 import converter, analysis
+import music21 as m21
 from tqdm import tqdm
 import itertools as it
 
@@ -81,7 +81,7 @@ class TranslationModelGenerator(object):
     num_songs_without_melody_part = 0
     num_songs_without_either_part = 0
     for path in tqdm(self._training_paths):
-      composition = converter.parse(path)
+      composition = m21.converter.parse(path)
       part_names = [p.partName for p in composition.parts]
       missing_parts = 0
       if self._melody_part not in part_names:
@@ -106,7 +106,7 @@ class TranslationModelGenerator(object):
           melody = composition.parts[self._melody_part]
           harmony = composition.parts[self._harmony_part]
           self._update_counts(melody, harmony, limits)
-        except analysis.discrete.DiscreteAnalysisException:
+        except m21.analysis.discrete.DiscreteAnalysisException:
           num_transpose_fails += 1
 
 
