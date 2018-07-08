@@ -10,7 +10,7 @@ import utils.music_utils as mutil
 
 
 def _is_outside_limits(note, limits):
-  return note.pitch < limits[0].pitch or note.pitch > limits[1].pitch
+  return note.pitch < limits[0] or note.pitch > limits[1]
 
 
 class TranslationModelGenerator(object):
@@ -37,11 +37,11 @@ class TranslationModelGenerator(object):
       for (h_rep, h_note) in harmony_notes:
         if h_note.isNote and _is_outside_limits(h_note, limits[self._harmony_part]):
           continue
-        if h_rep not in self._tm_phrase_counts:
-          self._tm_phrase_counts[h_rep] = {}
-        if m_rep not in self._tm_phrase_counts[h_rep]:
-          self._tm_phrase_counts[h_rep][m_rep] = 0
-        self._tm_phrase_counts[h_rep][m_rep] += 1
+        if h_rep not in self._tm_note_counts:
+          self._tm_note_counts[h_rep] = {}
+        if m_rep not in self._tm_note_counts[h_rep]:
+          self._tm_note_counts[h_rep][m_rep] = 0
+        self._tm_note_counts[h_rep][m_rep] += 1
 
   def _update_phrase_counts(self, melody, harmony, limits):
     melody_phrase = []
@@ -50,23 +50,24 @@ class TranslationModelGenerator(object):
 
     for melody_note in melody.flat.notesAndRests:
       if melody_note.isNote and _is_outside_limits(melody_note, limits[self._melody_part]):
-        melody_phrase.append(mutil.get_note_rep(melody_note))
-        if len(melody_phrase) == 2:
-          # get harmony phrase playing while melody phrase is sounding
-          melody_tuple = tuple(melody_phrase)
-          end_offset = begin_offset + mutil.get_phrase_length_from_rep(melody_tuple)
-          harmony_tuple = mutil.get_phrase_rep(mutil.trim_stream(flat_harmony, begin_offset, end_offset))
+        continue
+      melody_phrase.append(mutil.get_note_rep(melody_note))
+      if len(melody_phrase) == 2:
+        # get harmony phrase playing while melody phrase is sounding
+        melody_tuple = tuple(melody_phrase)
+        end_offset = begin_offset + mutil.get_phrase_length_from_rep(melody_tuple)
+        harmony_tuple = mutil.get_phrase_rep(mutil.trim_stream(flat_harmony, begin_offset, end_offset))
 
-          # update counts for this pair of melody and harmony phrases
-          if harmony_tuple not in self._tm_phrase_counts:
-            self._tm_phrase_counts[harmony_tuple] = {}
-          if melody_tuple not in self._tm_phrase_counts[harmony_tuple]:
-            self._tm_phrase_counts[harmony_tuple][melody_tuple] = 0
-          self._tm_phrase_counts[harmony_tuple][melody_tuple] += 1
+        # update counts for this pair of melody and harmony phrases
+        if harmony_tuple not in self._tm_phrase_counts:
+          self._tm_phrase_counts[harmony_tuple] = {}
+        if melody_tuple not in self._tm_phrase_counts[harmony_tuple]:
+          self._tm_phrase_counts[harmony_tuple][melody_tuple] = 0
+        self._tm_phrase_counts[harmony_tuple][melody_tuple] += 1
 
-          # update melody phrase sliding window
-          melody_phrase = []
-          begin_offset = end_offset
+        # update melody phrase sliding window
+        melody_phrase = []
+        begin_offset = end_offset
 
   def _normalized_counts(self, counts):
     for harmony in counts:
@@ -96,6 +97,7 @@ class TranslationModelGenerator(object):
       missing_parts = 0
       if self._melody_part not in part_names:
         missing_parts += 1
+        num_songs_without_melody_part += 1
       if self._harmony_part not in part_names:
         num_songs_without_harmony_part += 1
         missing_parts += 1
@@ -115,8 +117,8 @@ class TranslationModelGenerator(object):
           mutil.transpose(composition, "C")
           melody = composition.parts[self._melody_part]
           harmony = composition.parts[self._harmony_part]
-          self._update_note_counts(melody, harmony, limits)
           self._update_phrase_counts(melody, harmony, limits)
+          self._update_note_counts(melody, harmony, limits)
         except m21.analysis.discrete.DiscreteAnalysisException:
           num_transpose_fails += 1
 
