@@ -165,7 +165,7 @@ class TranslationModel(object):
     os.makedirs(os.path.dirname(phrase_path), exist_ok=True)
     with open(phrase_path, 'w') as f:
       for melody_phrase in self._tm_phrases:
-        for harmony_phrase, prob in self._tm_phrases[melody_phrase].iteritems():
+        for harmony_phrase, prob in self._tm_phrases[melody_phrase].items():
           melody_string = ' '.join(melody_phrase)
           harmony_string = ' '.join(harmony_phrase)
           output_line = '{0} ||| {1} ||| {2}\n'.format(melody_string, harmony_string, prob)
@@ -173,6 +173,6 @@ class TranslationModel(object):
     os.makedirs(os.path.dirname(note_path), exist_ok=True)
     with open(note_path, 'w') as f:
       for melody_note in self._tm_notes:
-        for harmony_note, prob in self._tm_notes[melody_note].iteritems():
+        for harmony_note, prob in self._tm_notes[melody_note].items():
           output_line = '{0} ||| {1} ||| {2}\n'.format(melody_note, harmony_note, prob)
           f.write(output_line)
