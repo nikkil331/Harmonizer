@@ -116,8 +116,7 @@ def main():
   lm_generator = LanguageModelGenerator(part=args.part_name, ngram_size=args.ngram_size,
                                         window_size=args.ngram_size, training_dir=args.training_dir)
   lm = lm_generator.generate_lm()
-  os.makedirs(args.output_dir, exist_ok=True)
-  lm.write_to_file('{0}/{1}_language_model.txt'.format(args.output_dir, args.part_name))
+  lm.save('{0}/{1}_language_model.txt'.format(args.output_dir, args.part_name))
 
 
 if __name__ == "__main__":

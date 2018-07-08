@@ -1,5 +1,8 @@
 from itertools import *
 import math
+
+import os
+
 from utils.music_utils import *
 
 
@@ -152,16 +155,17 @@ class TranslationModel(object):
     translations = [self.insert_bars(melody, t) for t in translations if t]
     return translations
 
-  def write_to_file(self, model, path, phrase=True):
+  def save(self, path, phrase=True):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, 'w') as f:
-      for melody_phrase in model:
-        for harmony_phrase in model[melody_phrase]:
+      for melody_phrase in self._tm_phrases:
+        for harmony_phrase in self._tm_phrases[melody_phrase]:
           if phrase:
             melody_string = ' '.join(melody_phrase)
             harmony_string = ' '.join(harmony_phrase)
-            output_line = ''.join([str(melody_string), ' ||| ', str(harmony_string), ' ||| ', \
-                                   str(model[melody_phrase][harmony_phrase]), '\n'])
+            output_line = ''.join([str(melody_string), ' ||| ', str(harmony_string), ' ||| ',
+                                   str(self._tm_phrases[melody_phrase][harmony_phrase]), '\n'])
           else:
-            output_line = ''.join([str(melody_phrase), ' ||| ', str(harmony_phrase), ' ||| ', \
-                                   str(model[melody_phrase][harmony_phrase]), '\n'])
+            output_line = ''.join([str(melody_phrase), ' ||| ', str(harmony_phrase), ' ||| ',
+                                   str(self._tm_phrases[melody_phrase][harmony_phrase]), '\n'])
           f.write(output_line)

@@ -109,7 +109,6 @@ class TranslationModelGenerator(object):
         except m21.analysis.discrete.DiscreteAnalysisException:
           num_transpose_fails += 1
 
-
     print("Number of songs without {0} : {1}".format(self._harmony_part, num_songs_without_harmony_part))
     print("Number of songs without {0} : {1}".format(self._melody_part, num_songs_without_melody_part))
     print("Number of songs without either part: {0}".format(num_songs_without_either_part))
@@ -118,7 +117,7 @@ class TranslationModelGenerator(object):
     return self._create_tm_from_counts()
 
 
-def generate_generator(args):
+def run_generator(args):
   phrase_mode = not args.note_only
   for melody, harmony in it.permutations(args.part_name, 2):
     print("Creating translation model for {0} -> {1}".format(melody, harmony))
@@ -128,9 +127,7 @@ def generate_generator(args):
                                              phrase_based=phrase_mode)
     tm = tm_generator.generate_tm()
     suffix = "_rhythm" if phrase_mode else ""
-    tm.write_to_file(tm._tm_phrases,
-                     '{0}/{1}_{2}_translation_model{3}.txt'.format(
-                       args.output_dir, melody, harmony, suffix), phrase=phrase_mode)
+    tm.save('{0}/{1}_{2}_translation_model{3}.txt'.format(args.output_dir, melody, harmony, suffix), phrase=phrase_mode)
 
 
 def main():
@@ -141,7 +138,7 @@ def main():
   argparser.add_argument("--note_only", action='store_true', help="Don't create the phrase translation model")
   args = argparser.parse_args()
 
-  generate_generator(args)
+  run_generator(args)
 
 
 if __name__ == "__main__":
