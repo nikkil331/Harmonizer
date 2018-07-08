@@ -2,7 +2,7 @@ from collections import namedtuple
 from fractions import Fraction
 import copy
 
-from music21 import *
+from music21 import stream, bar, scale, note, chord, tie
 
 lm_hypothesis = namedtuple("lm_hypothesis", "notes, context, lm_logprob")
 

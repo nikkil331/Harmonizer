@@ -1,10 +1,12 @@
 import argparse
 import os
 
+from music21 import converter, analysis
 from tqdm import tqdm
+import itertools as it
 
 from compose.translation_model import TranslationModel
-from utils.music_utils import *
+import utils.music_utils as mutil
 
 
 class TranslationModelGenerator(object):
@@ -30,12 +32,12 @@ class TranslationModelGenerator(object):
                                      melody_note > limits[self._melody_part][1]):
         continue
       if self._phrase_based_mode:
-        melody_phrase.append(get_note_rep(melody_note))
+        melody_phrase.append(mutil.get_note_rep(melody_note))
         if len(melody_phrase) == 2:
           # get harmony phrase playing while melody phrase is sounding
           melody_tuple = tuple(melody_phrase)
-          end_offset = begin_offset + get_phrase_length_from_rep(melody_tuple)
-          harmony_tuple = get_phrase_rep(trim_stream(flat_harmony, begin_offset, end_offset))
+          end_offset = begin_offset + mutil.get_phrase_length_from_rep(melody_tuple)
+          harmony_tuple = mutil.get_phrase_rep(mutil.trim_stream(flat_harmony, begin_offset, end_offset))
 
           # update counts for this pair of melody and harmony phrases
           if harmony_tuple not in self._tm_counts:
@@ -48,8 +50,8 @@ class TranslationModelGenerator(object):
           melody_phrase = []
           begin_offset = end_offset
       else:
-        m_rep = get_pitch_rep(melody_note)
-        harmony_notes = [(get_pitch_rep(n), n) for n in
+        m_rep = mutil.get_pitch_rep(melody_note)
+        harmony_notes = [(mutil.get_pitch_rep(n), n) for n in
                          flat_harmony.allPlayingWhileSounding(melody_note)]
         for (h_rep, h_note) in harmony_notes:
           if h_note.isNote and (h_note.pitch < limits[self._harmony_part][0] or
@@ -94,13 +96,13 @@ class TranslationModelGenerator(object):
       if missing_parts == 0:
 
         limits = {self._melody_part:
-                    (get_min_pitch(composition, self._melody_part),
-                     get_max_pitch(composition, self._melody_part)),
+                    (mutil.get_min_pitch(composition, self._melody_part),
+                     mutil.get_max_pitch(composition, self._melody_part)),
                   self._harmony_part:
-                    (get_min_pitch(composition, self._harmony_part),
-                     get_max_pitch(composition, self._harmony_part))}
+                    (mutil.get_min_pitch(composition, self._harmony_part),
+                     mutil.get_max_pitch(composition, self._harmony_part))}
         try:
-          transpose(composition, "C")
+          mutil.transpose(composition, "C")
           melody = composition.parts[self._melody_part]
           harmony = composition.parts[self._harmony_part]
           self._update_counts(melody, harmony, limits)
@@ -118,21 +120,22 @@ class TranslationModelGenerator(object):
 
 def generate_generator(args):
   phrase_mode = not args.note_only
-  tm_generator = TranslationModelGenerator(args.training_dir,
-                                           melody_part=args.melody,
-                                           harmony_part=args.harmony,
-                                           phrase_based=phrase_mode)
-  tm = tm_generator.generate_tm()
-  suffix = "_rhythm" if phrase_mode else ""
-  tm.write_to_file(tm._tm_phrases,
-                   '{0}/{1}_{2}_translation_model{3}.txt'.format(
-                     args.output_dir, args.melody, args.harmony, suffix), phrase=phrase_mode)
+  for melody, harmony in it.combinations(args.part_name, 2):
+    print("Creating translation model for {0} -> {1}".format(melody, harmony))
+    tm_generator = TranslationModelGenerator(args.training_dir,
+                                             melody_part=melody,
+                                             harmony_part=harmony,
+                                             phrase_based=phrase_mode)
+    tm = tm_generator.generate_tm()
+    suffix = "_rhythm" if phrase_mode else ""
+    tm.write_to_file(tm._tm_phrases,
+                     '{0}/{1}_{2}_translation_model{3}.txt'.format(
+                       args.output_dir, melody, harmony, suffix), phrase=phrase_mode)
 
 
 def main():
   argparser = argparse.ArgumentParser()
-  argparser.add_argument("--melody", required=True, help="Name of the melody part")
-  argparser.add_argument("--harmony", required=True, help="Name of the harmony part")
+  argparser.add_argument("--part_name", required=True, help="Name of the harmony part", action="append")
   argparser.add_argument("--training_dir", required=True, help="Path to directory of songs to train on")
   argparser.add_argument("--output_dir", required=True, help="Directory in which to write the model")
   argparser.add_argument("--note_only", action='store_true', help="Don't create the phrase translation model")
