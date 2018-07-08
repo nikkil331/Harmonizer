@@ -60,12 +60,12 @@ class LanguageModel(object):
     return self._lm[context].items()
 
   def save(self, path):
-    os.makedirs(os.path.dirname(output_dir), exist_ok=True)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     f = open(path, 'w')
     f.write(str(self.ngram_size) + '\n')
     for context in self._lm:
       for note in self._lm[context]:
         context_str = ' '.join(context)
-        output_line = ''.join([str(context_str), ' ||| ', str(note), ' ||| ', \
-                               str(self._lm[context][note]), '\n'])
+        prob = self._lm[context][note]
+        output_line = '{0} ||| {1} ||| {2}\n'.format(context_str, note, prob)
         f.write(output_line)
