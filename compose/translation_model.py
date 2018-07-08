@@ -24,15 +24,21 @@ class TranslationModel(object):
       if phrases:
         melody_phrase = tuple(melody_string.split())
         harmony_phrase = tuple(harmony_string.split())
-        self.add_to_model(melody_phrase, harmony_phrase, float(prob), self._tm_phrases)
+        self.add_phrase(melody_phrase, harmony_phrase, float(prob))
       else:
-        self.add_to_model(melody_string, harmony_string, float(prob), self._tm_notes)
+        self.add_note(melody_string, harmony_string, float(prob))
 
-  def add_to_model(self, melody, harmony, prob, model):
-    if melody not in model:
-      model[melody] = {harmony: prob}
+  def add_phrase(self, melody, harmony, prob):
+    if melody not in self._tm_phrases:
+      self._tm_phrases[melody] = {harmony: prob}
     else:
-      model[melody][harmony] = prob
+      self._tm_phrases[melody][harmony] = prob
+
+  def add_note(self, melody, harmony, prob):
+    if melody not in self._tm_notes:
+      self._tm_notes[melody] = {harmony: prob}
+    else:
+      self._tm_notes[melody][harmony] = prob
 
   def get_probability(self, melody, harmony):
     melody = tuple([m for m in melody if m != "BAR" and m != "END"])
@@ -155,17 +161,18 @@ class TranslationModel(object):
     translations = [self.insert_bars(melody, t) for t in translations if t]
     return translations
 
-  def save(self, path, phrase=True):
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, 'w') as f:
+  def save(self, phrase_path, note_path):
+    os.makedirs(os.path.dirname(phrase_path), exist_ok=True)
+    with open(phrase_path, 'w') as f:
       for melody_phrase in self._tm_phrases:
-        for harmony_phrase in self._tm_phrases[melody_phrase]:
-          if phrase:
-            melody_string = ' '.join(melody_phrase)
-            harmony_string = ' '.join(harmony_phrase)
-            output_line = ''.join([str(melody_string), ' ||| ', str(harmony_string), ' ||| ',
-                                   str(self._tm_phrases[melody_phrase][harmony_phrase]), '\n'])
-          else:
-            output_line = ''.join([str(melody_phrase), ' ||| ', str(harmony_phrase), ' ||| ',
-                                   str(self._tm_phrases[melody_phrase][harmony_phrase]), '\n'])
+        for harmony_phrase, prob in self._tm_phrases[melody_phrase].iteritems():
+          melody_string = ' '.join(melody_phrase)
+          harmony_string = ' '.join(harmony_phrase)
+          output_line = '{0} ||| {1} ||| {2}\n'.format(melody_string, harmony_string, prob)
+          f.write(output_line)
+    os.makedirs(os.path.dirname(note_path), exist_ok=True)
+    with open(note_path, 'w') as f:
+      for melody_note in self._tm_notes:
+        for harmony_note, prob in self._tm_notes[melody_note].iteritems():
+          output_line = '{0} ||| {1} ||| {2}\n'.format(melody_note, harmony_note, prob)
           f.write(output_line)
