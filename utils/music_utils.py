@@ -55,21 +55,31 @@ def get_pitch_rep(note):
 def get_note_rep(note):
   if type(note) == m21.stream.Measure:
     return "BAR"
-  if type(note) == m21.bar.Barline and note.style == 'final':
+  elif type(note) == m21.bar.Barline and note.style == 'final':
     return "END"
-  elif note.isChord:
-    return ','.join([get_pitch_rep(n) for n in note]) + ':{0}'.format(float(note.quarterLength))
-  elif note.isNote:
-    if note.pitch.accidental and (note.pitch.accidental.fullName == 'double-flat' or
-                                  note.pitch.accidental.fullName == 'double-sharp'):
-      note.pitch.getEnharmonic(inPlace=True)
-    return note.nameWithOctave + ':{0}'.format(float(note.quarterLength))
+  elif issubclass(type(note), m21.note.GeneralNote):
+    if note.isChord:
+      return ','.join([get_pitch_rep(n) for n in note]) + ':{0}'.format(float(note.quarterLength))
+    elif note.isNote:
+      if note.pitch.accidental and (note.pitch.accidental.fullName == 'double-flat' or
+                                    note.pitch.accidental.fullName == 'double-sharp'):
+        note.pitch.getEnharmonic(inPlace=True)
+      return note.nameWithOctave + ':{0}'.format(float(note.quarterLength))
+    elif note.isRest:
+      return 'R:{0}'.format(float(note.quarterLength))
+    else:
+      return None
   else:
-    return 'R:{0}'.format(float(note.quarterLength))
+    return None
 
 
 def get_phrase_rep(phrase):
-  return tuple([get_note_rep(note) for note in phrase])
+  final_rep = []
+  for note in phrase:
+    note_rep = get_note_rep(note)
+    if note_rep is not None:
+      final_rep.append(note_rep)
+  return tuple(final_rep)
 
 
 def transpose_helper(stream, new_key, start, i):
@@ -132,31 +142,40 @@ def get_duration_of_stream(s):
 
 
 def trim_stream(s, begin_offset, end_offset):
-  acceptable_classes = {m21.note.Note, m21.chord.Chord, m21.note.Rest, m21.stream.Measure}
+  if begin_offset >= end_offset:
+    raise Exception("Tried to call trim stream with begin_offset == {0} and end_offset == {1}".format(begin_offset, end_offset))
 
-  section = s.getElementsByOffset(begin_offset, offsetEnd=end_offset, \
-                                  mustBeginInSpan=False, includeEndBoundary=False, \
-                                  includeElementsThatEndAtStart=False)
-  section = [elem for elem in section if type(elem)in acceptable_classes]
-  if len(section) > 0:
-    # trim beginning
-    if type(section[0]) == m21.stream.Measure and section[0].offset != section[1].offset:
-      section.pop(0)
+  flat_section = s.flat
 
-    if type(section[0]) == m21.stream.Measure:
-      section[0].offset = begin_offset
+  target_duration = end_offset - begin_offset
+  new_stream = m21.stream.Stream()
+  if len(flat_section) > 0:
+    # find beginning
+    idx = 0
+    total_duration = 0
+    while begin_offset > flat_section[idx].offset:
+      offset_diff = begin_offset - flat_section[idx].offset
+      if offset_diff <= flat_section[idx].offset:
+       curr_note = copy.deepcopy(flat_section[idx])
+       curr_note.duration.quarterLength -= offset_diff
+       if curr_note.duration.quarterLength > 0:
+         new_stream.append(curr_note)
+         curr_note.setOffsetBySite(new_stream, begin_offset)
+         total_duration += curr_note.duration.quarterLength
+      idx += 1
 
-      section[1].quarterLength -= (begin_offset - section[1].offset)
-      section[1].offset = begin_offset
-    else:
-      section[0].quarterLength -= (begin_offset - section[0].offset)
-      section[0].offset = begin_offset
+    # fill in stream
+    while total_duration < target_duration:
+      curr_note = copy.deepcopy(flat_section[idx])
+      if curr_note != m21.stream.Measure:
+        total_duration += curr_note.duration.quarterLength
+        if total_duration > target_duration:
+          # trim end
+          curr_note.duration.quarterLength -= (total_duration - target_duration)
+      new_stream.append(curr_note)
+      idx += 1
 
-    if type(section[-1]) == m21.stream.Measure:
-      section.pop(len(section) - 1)
-    # trim end
-    section[-1].quarterLength = end_offset - section[-1].offset
-  return section
+  return new_stream
 
 
 def get_note_pitch_from_rep(n_rep):
