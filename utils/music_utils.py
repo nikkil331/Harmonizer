@@ -1,5 +1,4 @@
 from collections import namedtuple
-from fractions import Fraction
 import copy
 
 import music21 as m21
@@ -184,8 +183,7 @@ def get_note_pitch_from_rep(n_rep):
 
 
 def get_note_length_from_rep(n_rep):
-  n_rep = n_rep.decode('utf8') if type(n_rep) == bytes else n_rep
-  return float(Fraction(n_rep.split(":")[1])) if n_rep != "BAR" and n_rep != "END" else 0
+  return float(n_rep.split(":")[1]) if n_rep != "BAR" and n_rep != "END" else 0
 
 
 def get_phrase_length_from_rep(p_rep):
