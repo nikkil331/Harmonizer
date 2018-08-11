@@ -67,10 +67,10 @@ def main():
   args = argparser.parse_args()
 
   test_song = m21.converter.parse(args.source_melody)
-  mutil.transpose(test_song, "C")
+  transposed_test_song = mutil.transpose(test_song, "C")
   parts = args.harmony_names.split(",")
   c = Composition()
-  c.add_part(Part(name=args.melody_name, stream=test_song.parts[args.melody_name], score=-1.0))
+  c.add_part(Part(name=args.melody_name, stream=transposed_test_song.parts[args.melody_name], score=-1.0))
   while parts:
     best_new_part = c.best_new_part(parts, args.model_dir)
     c.add_part(best_new_part)

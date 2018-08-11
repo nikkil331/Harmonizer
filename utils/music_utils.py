@@ -93,6 +93,7 @@ def transpose_helper(stream, new_key, start, i):
 
 
 def transpose(stream, new_key):
+  stream = copy.deepcopy(stream)
   new_key = new_key.upper()
   curr_key_signature = stream.parts[0][1].keySignature
   start = 0
@@ -102,7 +103,7 @@ def transpose(stream, new_key):
       start = i
       curr_key_signature = t.keySignature
   transpose_helper(stream, new_key, start, len(stream.parts[0].getElementsByClass(['Measure'])))
-
+  return stream
 
 def get_harmony_notes(melodyNote, harmonyStream):
   melody_offset = melodyNote.offset
@@ -161,6 +162,7 @@ def trim_stream(s, begin_offset, end_offset):
          new_stream.append(curr_note)
          curr_note.setOffsetBySite(new_stream, begin_offset)
          total_duration += curr_note.duration.quarterLength
+         break
       idx += 1
 
     # fill in stream
@@ -192,6 +194,15 @@ def get_phrase_length_from_rep(p_rep):
 
 def notes_and_rests(phrase_rep):
   return [n for n in phrase_rep if n != "BAR" and n != "END"]
+
+def notes_to_chord_rep(note_reps):
+  pitches = []
+  durations = []
+  for note_rep in note_reps:
+    pitches.append(get_note_pitch_from_rep(note_rep))
+    durations.append(get_note_length_from_rep(note_rep))
+  duration = min(durations, key=lambda x: float(x)) # take min duration if they are different
+  return  "{0}:{1}".format(','.join(pitches), durations[0])
 
 
 # assumed that playing_notes and sounding_notes are lined up
@@ -242,11 +253,11 @@ def put_notes_in_measures(measure_stream, note_stream):
 
 def get_max_pitch(song, part):
   p = song[part].flat.notes
-  p = [max(n).pitch if n.isChord else n.pitch for n in p]
-  return max(p)
+  pitches = [min(n, key=lambda x: x.pitch.ps).pitch if n.isChord else n.pitch for n in p]
+  return max(pitches, key=lambda x: x.ps)
 
 
 def get_min_pitch(song, part):
   p = song[part].flat.notes
-  p = [min(n).pitch if n.isChord else n.pitch for n in p]
-  return min(p)
+  pitches = [min(n, key=lambda x: x.pitch.ps).pitch if n.isChord else n.pitch for n in p]
+  return min(pitches, key=lambda x: x.ps)

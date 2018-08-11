@@ -20,7 +20,7 @@ def get_n_best_lists(initial_params, n, args):
             continue
         training_song = converter.parse(path);
         num_songs_translated += 1
-        transpose(training_song, "C")
+        training_song = transpose(training_song, "C")
         sys.stderr.write("transposed " + path + "\n")
         lm = LanguageModel(args.harmony, "%s/%s_language_model.txt" % (args.model_directory, args.harmony))
         tms = []

@@ -33,7 +33,7 @@ class LanguageModelGenerator(object):
   # doesn't actually skip for now
   def _skip_and_update(self, ngram, note_rep, limits):
     note_ngram = [m21.note.Note(n) for n in ngram if n != "BAR" and n != "END" and n != "R"]
-    if note_ngram and min(note_ngram) > limits[0] and max(note_ngram) < limits[1]:
+    if note_ngram and min(note_ngram, key=lambda x: x.pitch).pitch > limits[0] and max(note_ngram, key=lambda x: x.pitch).pitch < limits[1]:
       self._update_count(ngram, note_rep)
 
   def _update_counts(self, harmony, limits):
@@ -85,9 +85,9 @@ class LanguageModelGenerator(object):
 
       if self._part in part_names:
         limits = (mutil.get_min_pitch(composition, self._part), mutil.get_max_pitch(composition, self._part))
-        harmony = composition.parts[self._part]
         try:
-          mutil.transpose(composition, "C")
+          transposed_composition = mutil.transpose(composition, "C")
+          harmony = transposed_composition.parts[self._part]
           self._update_counts(harmony, limits)
         except m21.analysis.discrete.DiscreteAnalysisException:
           num_transpose_fails += 1
