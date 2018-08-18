@@ -21,13 +21,13 @@ class Composition(object):
     score = m21.stream.Score([part[1] for part in self._parts])
     score.show()
 
-  def create_part(self, name, lm, tms):
-    d = decoder.Decoder(self._parts, lm, tms, tm_phrase_weight=1, tm_notes_weight=1, lm_weight=1)
+  def create_part(self, name, lm, tms, beam_size):
+    d = decoder.Decoder(self._parts, lm, tms, tm_phrase_weight=1, tm_notes_weight=1, lm_weight=1, beam_size=beam_size)
     hyp = d.decode(1)[0]
     new_part = d.hyp_to_stream(hyp)
     return Part(name=name, stream=new_part, score=decoder.get_score(hyp))
 
-  def best_new_part(self, parts, directory):
+  def best_new_part(self, parts, directory, beam_size):
     best_part = None
     for part in parts:
       lm = LanguageModel(path=os.path.join(directory, '{0}_language_model.txt'.format(part)), part=part)
@@ -38,7 +38,7 @@ class Composition(object):
                               phrase_path=os.path.join(directory, '{0}_{1}_translation_model_rhythm.txt'.format(existing_part_name, part)),
                               note_path=os.path.join(directory, '{0}_{1}_translation_model.txt'.format(existing_part_name, part)))
         tms[existing_part_name] = tm
-      new_part = self.create_part(part, lm, tms)
+      new_part = self.create_part(part, lm, tms, beam_size)
       if best_part is None:
         best_part = new_part
       elif new_part.score > best_part.score:
@@ -63,6 +63,8 @@ def main():
   argparser.add_argument("--output", dest="output", default="output.xml", help="Path to write the composition to")
   argparser.add_argument("--model_dir", required=True, type=str,
                          help="Directory where models live. Default is the current directory.")
+  argparser.add_argument("--beam_size", required=True, type=int,
+                         help="Beam size for decoder.")
 
   args = argparser.parse_args()
 
@@ -72,7 +74,7 @@ def main():
   c = Composition()
   c.add_part(Part(name=args.melody_name, stream=transposed_test_song.parts[args.melody_name], score=-1.0))
   while parts:
-    best_new_part = c.best_new_part(parts, args.model_dir)
+    best_new_part = c.best_new_part(parts, args.model_dir, args.beam_size)
     c.add_part(best_new_part)
     parts.remove(best_new_part.name)
 

@@ -9,8 +9,7 @@ import utils.music_utils as mutil
 
 
 class LanguageModelGenerator(object):
-  def __init__(self, part, ngram_size=3, window_size=3, training_dir=None):
-    self._ngram_size = ngram_size
+  def __init__(self, part, window_size=3, training_dir=None):
     self._window_size = window_size
     if type(part) == str and part.isdigit():
       part = int(part)
@@ -62,7 +61,7 @@ class LanguageModelGenerator(object):
 
   def _create_lm_from_counts(self, smoothing):
     lm = LanguageModel(part=self._part)
-    lm.set_ngram_size(self._ngram_size)
+    lm.set_ngram_size(self._window_size)
     for context in self._lm_counts:
       total_notes_after_context = sum(self._lm_counts[context].values())
       if len(self._lm_counts[context].keys()) > 2:
@@ -110,11 +109,10 @@ def main():
   argparser.add_argument("--training_dir", required=True, type=str,
                          help="Path to directory of songs to train on")
   argparser.add_argument("--output_dir", required=True, type=str, help="Directory in which to write the model")
-  argparser.add_argument("--ngram_size", default=3, help="Size of ngrams in the model. Default is 3")
+  argparser.add_argument("--ngram_size", default=3, type=int, help="Size of ngrams in the model. Default is 3")
   args = argparser.parse_args()
 
-  lm_generator = LanguageModelGenerator(part=args.part_name, ngram_size=args.ngram_size,
-                                        window_size=args.ngram_size, training_dir=args.training_dir)
+  lm_generator = LanguageModelGenerator(part=args.part_name, window_size=args.ngram_size, training_dir=args.training_dir)
   lm = lm_generator.generate_lm()
   lm.save('{0}/{1}_language_model.txt'.format(args.output_dir, args.part_name))
 

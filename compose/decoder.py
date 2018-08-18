@@ -26,13 +26,14 @@ def get_tm_score(tm, m_phrase, h_phrase):
 
 class Decoder(object):
   def __init__(self, parts, lm, tms, tm_phrase_weight=1,
-               tm_notes_weight=1, lm_weight=1):
+               tm_notes_weight=1, lm_weight=1, beam_size=10):
     self._parts = parts
     self._lm = lm
     self._tms = tms
     self._tm_phrase_weight = tm_phrase_weight
     self._tm_notes_weight = tm_notes_weight
     self._lm_weight = lm_weight
+    self._beam_size = beam_size
 
   # returns (new_context, new_context_size) based on the old
   # context and size and the added phrase
@@ -138,7 +139,7 @@ class Decoder(object):
                               key=lambda hyp: get_score(hyp, self._tm_phrase_weight,
                                                         self._tm_notes_weight,
                                                         self._lm_weight),
-                              reverse=True)[:10]
+                              reverse=True)[:self._beam_size]
         beam = {}
         for hyp in all_new_hyps:
           if hyp.duration not in beam:
@@ -159,7 +160,7 @@ class Decoder(object):
                         key=lambda hyp: get_score(hyp, self._tm_phrase_weight,
                                                   self._tm_notes_weight,
                                                   self._lm_weight),
-                        reverse=True)[:10]
+                        reverse=True)[:self._beam_size]
     return final_hyps[:max(n_best_hyps, 10)]
 
   def _get_measure_slice(self):
