@@ -80,6 +80,22 @@ def get_phrase_rep(phrase):
       final_rep.append(note_rep)
   return tuple(final_rep)
 
+def chunk_by_key(stream):
+  stream = copy.deepcopy(stream)
+  curr_key_sig = None
+  start = 0
+  i = 0
+  for t in stream.parts[0].getElementsByClass(['Measure']):
+    if t.keySignature:
+      if curr_key_sig is None: 
+        curr_key_sig = t.keySignature
+      elif t.keySignature != curr_key_sig:
+        yield stream.measures(start, i)
+        start = i
+        curr_key_sig = t.keySignature
+    i += 1
+  if start != i - 1:
+      yield stream.measures(start, i)
 
 def transpose_helper(stream, new_key, start, i):
   key_sig = stream.measures(start, i).analyze('key')
@@ -95,13 +111,16 @@ def transpose_helper(stream, new_key, start, i):
 def transpose(stream, new_key):
   stream = copy.deepcopy(stream)
   new_key = new_key.upper()
-  curr_key_signature = stream.parts[0][1].keySignature
+  curr_key_signature = None
   start = 0
   for i, t in enumerate(stream.parts[0].getElementsByClass(['Measure'])):
-    if t.keySignature and t.keySignature != curr_key_signature:
-      transpose_helper(stream, new_key, start, i - 1)
-      start = i
-      curr_key_signature = t.keySignature
+    if t.keySignature:
+      if curr_key_signature is None:
+        curr_key_signature = t.keySignature
+      elif t.keySignature != curr_key_signature:
+        transpose_helper(stream, new_key, start, i - 1)
+        start = i
+        curr_key_signature = t.keySignature
   transpose_helper(stream, new_key, start, len(stream.parts[0].getElementsByClass(['Measure'])))
   return stream
 

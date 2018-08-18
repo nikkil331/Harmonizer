@@ -129,23 +129,23 @@ class TranslationModelGenerator(object):
         num_songs_without_either_part += 1
 
       if missing_parts == 0:
-
-        limits = {self._melody_part:
-                    (mutil.get_min_pitch(composition, self._melody_part),
-                     mutil.get_max_pitch(composition, self._melody_part)),
-                  self._harmony_part:
-                    (mutil.get_min_pitch(composition, self._harmony_part),
-                     mutil.get_max_pitch(composition, self._harmony_part))}
-        try:
-          transposed_composition = mutil.transpose(composition, "C")
-          melody = transposed_composition.parts[self._melody_part]
-          harmony = transposed_composition.parts[self._harmony_part]
-          self._update_phrase_counts(melody, harmony, limits)
-          self._update_note_counts(melody, harmony, limits)
-        except m21.analysis.discrete.DiscreteAnalysisException:
-          num_transpose_fails += 1
-        except PartAlignmentError:
-          num_part_alignment_errors += 1
+        for composition_chunk in mutil.chunk_by_key(composition):
+          limits = {self._melody_part:
+                      (mutil.get_min_pitch(composition_chunk, self._melody_part),
+                       mutil.get_max_pitch(composition_chunk, self._melody_part)),
+                    self._harmony_part:
+                      (mutil.get_min_pitch(composition_chunk, self._harmony_part),
+                       mutil.get_max_pitch(composition_chunk, self._harmony_part))}
+          try:
+            transposed_composition = mutil.transpose(composition_chunk, "C")
+            melody = transposed_composition.parts[self._melody_part]
+            harmony = transposed_composition.parts[self._harmony_part]
+            self._update_phrase_counts(melody, harmony, limits)
+            self._update_note_counts(melody, harmony, limits)
+          except m21.analysis.discrete.DiscreteAnalysisException:
+            num_transpose_fails += 1
+          except PartAlignmentError:
+            num_part_alignment_errors += 1
 
     print("Number of songs without {0} : {1}".format(self._harmony_part, num_songs_without_harmony_part))
     print("Number of songs without {0} : {1}".format(self._melody_part, num_songs_without_melody_part))

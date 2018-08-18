@@ -83,13 +83,14 @@ class LanguageModelGenerator(object):
       part_names = [p.partName for p in composition.parts]
 
       if self._part in part_names:
-        limits = (mutil.get_min_pitch(composition, self._part), mutil.get_max_pitch(composition, self._part))
-        try:
-          transposed_composition = mutil.transpose(composition, "C")
-          harmony = transposed_composition.parts[self._part]
-          self._update_counts(harmony, limits)
-        except m21.analysis.discrete.DiscreteAnalysisException:
-          num_transpose_fails += 1
+        for composition_chunk in mutil.chunk_by_key(composition):
+          limits = (mutil.get_min_pitch(composition_chunk, self._part), mutil.get_max_pitch(composition_chunk, self._part))
+          try:
+            transposed_composition = mutil.transpose(composition_chunk, "C")
+            harmony = transposed_composition.parts[self._part]
+            self._update_counts(harmony, limits)
+          except m21.analysis.discrete.DiscreteAnalysisException:
+            num_transpose_fails += 1
 
       else:
         num_songs_without_part += 1
