@@ -45,8 +45,24 @@ class Composition(object):
         best_part = new_part
     return best_part
 
+  def _prepare_for_export(self):
+    for part in self._parts:
+      instrument_indices = []
+      for i, elem in enumerate(part.stream):
+        if issubclass(type(elem), m21.instrument.Instrument):
+          instrument_indices.append(i)
+      for i in instrument_indices:
+        part.stream.pop(i)
+      instrument = m21.instrument.Piano()
+      instrument.instrumentName = part.name
+      part.stream.insert(0, instrument)
 
   def save(self, name):
+    self._prepare_for_export()
+    for part in self._parts:
+      c = m21.clef.bestClef(part.stream, recurse=True)
+      part.stream.insert(0, c)
+      part.stream.name = part.name
     score = m21.stream.Score([part.stream for part in self._parts])
     with open(name ,'w') as f:
       exporter = m21.musicxml.m21ToXml.GeneralObjectExporter(score)
