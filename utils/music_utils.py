@@ -97,9 +97,10 @@ def chunk_by_key(stream):
   if start != i - 1:
       yield stream.measures(start, i)
 
-def transpose_helper(stream, new_key, start, i):
-  key_sig = stream.measures(start, i).analyze('key')
-  curr_pitch = key_sig.tonic.name
+def transpose_helper(stream, orig_key, new_key, start, i):
+  curr_pitch = orig_key.tonic.name
+  if curr_pitch == new_key:
+    return
   sc = m21.scale.ChromaticScale(curr_pitch + '5')
   sc_pitches = [str(p)[:-1] for p in sc.pitches]
   num_halfsteps = sc_pitches.index(new_key)
@@ -118,10 +119,10 @@ def transpose(stream, new_key):
       if curr_key_signature is None:
         curr_key_signature = t.keySignature
       elif t.keySignature != curr_key_signature:
-        transpose_helper(stream, new_key, start, i - 1)
+        transpose_helper(stream, curr_key_signature, new_key, start, i - 1)
         start = i
         curr_key_signature = t.keySignature
-  transpose_helper(stream, new_key, start, len(stream.parts[0].getElementsByClass(['Measure'])))
+  transpose_helper(stream, curr_key_signature, new_key, start, len(stream.parts[0].getElementsByClass(['Measure'])))
   return stream
 
 def get_harmony_notes(melodyNote, harmonyStream):
