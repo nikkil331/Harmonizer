@@ -113,6 +113,8 @@ class Decoder(object):
       for hyp_dur in beam:
         if abs(full_duration - (canonical_part.stream[0].offset + hyp_dur)) < 1e-12:
           new_beam[hyp_dur] = beam[hyp_dur]
+        elif full_duration < canonical_part.stream[0].offset + hyp_dur:
+          continue # ignore hyps that are too long
         else:
           continue_growing_hyps = True
           for part_slice in measure_slice:
