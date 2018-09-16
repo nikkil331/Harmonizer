@@ -114,8 +114,13 @@ class TranslationModelGenerator(object):
     num_songs_without_melody_part = 0
     num_songs_without_either_part = 0
     num_part_alignment_errors = 0
+    num_parse_fails = 0
+    num_limit_fails = 0
     for path in tqdm(self._training_paths):
-      composition = m21.converter.parse(path)
+      try:
+        composition = m21.converter.parse(path)
+      except:
+        num_parse_fails += 1
       part_names = [p.partName for p in composition.parts]
       missing_parts = 0
       if self._melody_part not in part_names:
@@ -130,14 +135,17 @@ class TranslationModelGenerator(object):
 
       if missing_parts == 0:
         for composition_chunk in mutil.chunk_by_key(composition):
-          limits = {self._melody_part:
-                      (mutil.get_min_pitch(composition_chunk, self._melody_part),
-                       mutil.get_max_pitch(composition_chunk, self._melody_part)),
-                    self._harmony_part:
-                      (mutil.get_min_pitch(composition_chunk, self._harmony_part),
-                       mutil.get_max_pitch(composition_chunk, self._harmony_part))}
           try:
-            transposed_composition = mutil.transpose(composition_chunk, "C")
+            limits = {self._melody_part:
+                        (mutil.get_min_pitch(composition_chunk, self._melody_part),
+                         mutil.get_max_pitch(composition_chunk, self._melody_part)),
+                      self._harmony_part:
+                        (mutil.get_min_pitch(composition_chunk, self._harmony_part),
+                         mutil.get_max_pitch(composition_chunk, self._harmony_part))}
+          except:
+            num_limit_fails += 1
+          try:
+            transposed_composition = composition_chunk # mutil.transpose(composition_chunk, "C")
             melody = transposed_composition.parts[self._melody_part]
             harmony = transposed_composition.parts[self._harmony_part]
             self._update_phrase_counts(melody, harmony, limits)
@@ -151,6 +159,8 @@ class TranslationModelGenerator(object):
     print("Number of songs without {0} : {1}".format(self._melody_part, num_songs_without_melody_part))
     print("Number of songs without either part: {0}".format(num_songs_without_either_part))
     print("Number of transpose failures: {0}".format(num_transpose_fails))
+    print("Number of parse failures: {0}".format(num_parse_fails))
+    print("Number of parse failures: {0}".format(num_limit_fails))
     print("Number of part alignment errors: {0}".format(num_part_alignment_errors))
 
     return self._create_tm_from_counts()

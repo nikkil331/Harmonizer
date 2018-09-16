@@ -77,16 +77,25 @@ class LanguageModelGenerator(object):
     self._lm_counts = {}
     num_songs_without_part = 0
     num_transpose_fails = 0
+    num_limit_fails = 0
 
     for path in tqdm(self._training_paths):
-      composition = m21.converter.parse(path)
+      try:
+        composition = m21.converter.parse(path)
+      except:
+        print("Could not parse %s, skipping" % path) 
+        continue
       part_names = [p.partName for p in composition.parts]
 
       if self._part in part_names:
         for composition_chunk in mutil.chunk_by_key(composition):
-          limits = (mutil.get_min_pitch(composition_chunk, self._part), mutil.get_max_pitch(composition_chunk, self._part))
           try:
-            transposed_composition = mutil.transpose(composition_chunk, "C")
+            limits = (mutil.get_min_pitch(composition_chunk, self._part), mutil.get_max_pitch(composition_chunk, self._part))
+          except:
+            num_limit_fails += 1
+            
+          try:
+            transposed_composition = composition_chunk # mutil.transpose(composition_chunk, "C")
             harmony = transposed_composition.parts[self._part]
             self._update_counts(harmony, limits)
           except m21.analysis.discrete.DiscreteAnalysisException:
@@ -95,6 +104,7 @@ class LanguageModelGenerator(object):
       else:
         num_songs_without_part += 1
 
+    print("Number of limit failures: {0}".format(num_limit_fails))
     print("Number of songs without {0}: {1}".format(self._part, num_songs_without_part))
     print("Number of transpose failures: {0}".format(num_transpose_fails))
     return self._create_lm_from_counts(smoothing)
