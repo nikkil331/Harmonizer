@@ -145,7 +145,7 @@ class TranslationModelGenerator(object):
           except:
             num_limit_fails += 1
           try:
-            transposed_composition = composition_chunk # mutil.transpose(composition_chunk, "C")
+            transposed_composition = mutil.transpose(composition_chunk, "C")
             melody = transposed_composition.parts[self._melody_part]
             harmony = transposed_composition.parts[self._harmony_part]
             self._update_phrase_counts(melody, harmony, limits)

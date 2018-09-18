@@ -95,7 +95,7 @@ class LanguageModelGenerator(object):
             num_limit_fails += 1
             
           try:
-            transposed_composition = composition_chunk # mutil.transpose(composition_chunk, "C")
+            transposed_composition = mutil.transpose(composition_chunk, "C")
             harmony = transposed_composition.parts[self._part]
             self._update_counts(harmony, limits)
           except m21.analysis.discrete.DiscreteAnalysisException:
